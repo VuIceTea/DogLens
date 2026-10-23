@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="95dp"
+    android:layout_height="170dp"
+    android:padding="8dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card"
+    android:layout_marginRight="6dp">
+
+    <ImageView
+        android:id="@+id/imgFeature"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null"
+        tools:src="@drawable/identify_dog" />
+
+    <TextView
+        android:id="@+id/txtFeatureTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp"
+        android:textColor="#102344"
+        android:fontFamily="@font/nunitosans_bold"
+        android:gravity="center"
+        android:maxLines="2"
+        tools:text="Nhận diện giống chó" />
+
+    <TextView
+        android:id="@+id/txtFeatureDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="12sp"
+        android:textColor="#8B91AC"
+        android:gravity="center"
+        android:maxLines="2"
+        tools:text="Nhanh và chính xác" />
+</LinearLayout>

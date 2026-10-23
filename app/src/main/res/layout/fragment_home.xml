@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DEF6FD"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    tools:context=".ui.home.HomeFragment">
+    <LinearLayout
+        android:id="@+id/home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#DEF6FD"
+        android:paddingStart="16dp"
+        android:paddingEnd="5dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        tools:context=".MainActivity">
+
+        <LinearLayout
+            android:id="@+id/headerContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_margin="0dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/imgLogo"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/logo"
+                    android:contentDescription="DogLens Logo" />
+
+                <TextView
+                    android:id="@+id/titleMain"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/title_main"
+                    android:textSize="25sp"
+                    android:textColor="#102344"
+                    android:fontFamily="sans-serif-black" />
+
+                <TextView
+                    android:id="@+id/titleSub"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:text="@string/title_sub"
+                    android:textSize="25sp"
+                    android:textColor="#1585FD"
+                    android:fontFamily="sans-serif-black" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btnSetting"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/ic_setting"
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                android:padding="6dp"
+                android:contentDescription="Cài đặt" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/heroBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:orientation="horizontal"
+            android:gravity="top"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:id="@+id/bannerTextContainer"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtBannerTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_banner"
+                    android:textSize="20sp"
+                    android:textColor="#102344"
+                    android:fontFamily="@font/nunitosans_extrabold" />
+
+                <TextView
+                    android:id="@+id/txtBannerSubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/subtitle_banner"
+                    android:textSize="20sp"
+                    android:textColor="#1585FD"
+                    android:fontFamily="@font/nunitosans_extrabold" />
+
+                <TextView
+                    android:id="@+id/txtBannerContent1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/banner_content"
+                    android:textSize="12sp"
+                    android:textColor="#71809B" />
+
+                <TextView
+                    android:id="@+id/txtBannerContent2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/banner_content_2"
+                    android:textSize="12sp"
+                    android:textColor="#71809B" />
+
+                <TextView
+                    android:id="@+id/txtBannerContent3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/banner_content_3"
+                    android:textSize="12sp"
+                    android:textColor="#71809B" />
+
+            </LinearLayout>
+
+            <FrameLayout
+                android:id="@+id/dogBannerContainer"
+                android:layout_width="190dp"
+                android:layout_height="175dp"
+                android:layout_marginTop="-12dp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <TextView
+                    android:id="@+id/txtDogSlogan"
+                    android:layout_width="125dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="top|end"
+                    android:translationY="-12dp"
+                    android:gravity="center"
+                    android:text="Mỗi chú chó&#10;đều đặc biệt!"
+                    android:textSize="14sp"
+                    android:textColor="#102344"
+                    android:fontFamily="@font/kalam_regular"
+                    android:rotation="-9"
+                    android:includeFontPadding="true"
+                    android:maxLines="2" />
+
+                <FrameLayout
+                    android:id="@+id/dogImageContainer"
+                    android:layout_width="190dp"
+                    android:layout_height="165dp"
+                    android:layout_gravity="top"
+                    android:layout_marginTop="15dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <ImageView
+                        android:id="@+id/imgBgPrimary"
+                        android:layout_width="175dp"
+                        android:layout_height="140dp"
+                        android:layout_gravity="bottom|start"
+                        android:src="@drawable/bg_dog_primary"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/imgBgSecondary"
+                        android:layout_width="160dp"
+                        android:layout_height="135dp"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/bg_dog_secondary"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/imgGoldenRetriever"
+                        android:layout_width="145dp"
+                        android:layout_height="160dp"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="7dp"
+                        android:src="@drawable/img_golden_retriever"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="Golden Retriever" />
+
+                    <ImageView
+                        android:id="@+id/imgDecoDogTop"
+                        android:layout_width="30dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="top|start"
+                        android:layout_marginTop="4dp"
+                        android:src="@drawable/deco_dog_top"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/imgDecoDogLeft"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginBottom="20dp"
+                        android:src="@drawable/deco_dog_left"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/imgDecoHeart"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginEnd="4dp"
+                        android:src="@drawable/deco_heart"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/imgDecoPaw"
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="65dp"
+                        android:src="@drawable/deco_paw"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@null" />
+
+                </FrameLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:layout_marginEnd="12dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_upload_outer"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/background"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_gravity="center">
+                <ImageView
+                    android:paddingTop="12dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_upload_image"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chụp ảnh hoặc tải ảnh chó lên"
+                    android:fontFamily="@font/nunitosans_extrabold"
+                    android:textSize="16sp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hỗ trợ định dạng JPG, PNG, HEIC"
+                    android:textSize="12sp"
+                    android:textColor="#8b91ac"/>
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="Chọn ảnh"
+                    android:textAllCaps="false"
+                    android:fontFamily="@font/nunitosans_bold"
+                    android:backgroundTint="#187BFA"
+                    android:drawableLeft="@drawable/ic_camera_white"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHomeFeatures"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="12dp"
+            android:orientation="horizontal"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_home_feature"
+            tools:itemCount="4"
+            tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="10dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Giống chó phổ biến"
+                android:fontFamily="@font/nunitosans_bold"
+                android:textSize="20sp"
+                android:textStyle="bold"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Xem tất cả"
+                    android:textColor="#1585FD"
+                    android:fontFamily="@font/nunitosans_bold"/>
+                <ImageButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_chevron_right"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    android:contentDescription="chevron_right"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvHomePopular"
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:layout_marginRight="12dp"
+            android:layout_marginVertical="10dp"
+            android:overScrollMode="never"
+            android:clipToPadding="false"
+            tools:itemCount="5"
+            tools:listitem="@layout/item_populardog"
+            tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">DogLens</string>
+    <string name="title_main">Dog</string>
+    <string name="title_sub">Lens</string>
+    <string name="title_banner">Nhận diện giống chó</string>
+    <string name="subtitle_banner">qua hình ảnh</string>
+    <string name="banner_content">Chụp hoặc tải ảnh lên, AI sẽ giúp bạn</string>
+    <string name="banner_content_2">nhận biết giống chó một cách nhanh chóng</string>
+    <string name="banner_content_3">và chính xác!</string>
+</resources>

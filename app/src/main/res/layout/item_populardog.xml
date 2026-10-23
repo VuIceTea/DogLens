@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="120dp"
+    android:layout_height="180dp"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_marginRight="10dp"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@drawable/bg_populardog"
+        android:gravity="bottom|center_horizontal"
+        android:layout_gravity="bottom|center_horizontal">
+
+        <ImageView
+            android:id="@+id/imgPopular"
+            android:layout_width="110dp"
+            android:layout_height="95dp"
+            android:scaleType="fitCenter"
+            tools:src="@drawable/golden_retriever"/>
+    </FrameLayout>
+    <TextView
+        android:id="@+id/txtPopularDogName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        tools:text="Golden Retriever"
+        android:maxLines="2"
+        android:textSize="15sp"
+        android:textColor="#102344"
+        android:gravity="center_horizontal"
+        android:fontFamily="@font/nunitosans_bold"
+        android:textStyle="bold"/>
+</LinearLayout>

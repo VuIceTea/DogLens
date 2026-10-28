@@ -35,7 +35,11 @@ class PopularDogAdapter(
         val popular = populars[position]
 
         holder.name.text = popular.name
-        holder.img.setImageResource(popular.image)
+        if(popular.localImageRes != null) {
+            holder.img.setImageResource(popular.localImageRes)
+        } else {
+            holder.img.setImageDrawable(null)
+        }
     }
 
     override fun getItemCount(): Int {

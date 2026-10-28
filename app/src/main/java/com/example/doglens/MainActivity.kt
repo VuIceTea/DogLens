@@ -2,7 +2,9 @@
 package com.example.doglens
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -87,10 +89,10 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
-//                R.id.nav_explore -> {
-//                    showFragment(ExploreFragment())
-//                    true
-//                }
+                R.id.nav_explore -> {
+                    showFragment(ExploreFragment())
+                    true
+                }
 //
 //                R.id.nav_favorite -> {
 //                    showFragment(FavoriteFragment())
@@ -108,6 +110,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showFragment(fragment: Fragment) {
+
+        val backgroundColor = when (fragment) {
+            is HomeFragment -> R.color.home_background
+            is ExploreFragment -> R.color.explore_background
+            else -> R.color.explore_background
+        }
+
+        // Đổi màu nền của Activity
+        findViewById<View>(R.id.main)
+            .setBackgroundColor(ContextCompat.getColor(this, backgroundColor))
+
+        // Đổi màu nền Status Bar
+        window.statusBarColor = ContextCompat.getColor(this, backgroundColor)
+
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragmentContainer, fragment)

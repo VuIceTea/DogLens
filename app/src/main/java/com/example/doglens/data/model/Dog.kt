@@ -1,9 +1,11 @@
 package com.example.doglens.data.model
 
 data class Dog (
-    var id: String,
-    var name: String,
-    var image: Int,
-    var description: String,
-    var backgroundColor: Int
+    val id: String,
+    val name: String,
+    val description: String,
+    val imageUrl: String? = null,
+    val localImageRes: Int? = null,
+    val backgroundColorHex: String = "#E3F0FD",
+    val sortOrder: Int = 0
 )

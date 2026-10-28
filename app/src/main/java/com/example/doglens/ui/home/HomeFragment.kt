@@ -1,6 +1,6 @@
+
 package com.example.doglens.ui.home
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -9,109 +9,141 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
 import com.example.doglens.data.adapter.HomeFeatureAdapter
+import com.example.doglens.data.adapter.PopularDogAdapter
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.HomeFeature
-import androidx.core.graphics.toColorInt
-import com.example.doglens.data.adapter.PopularDogAdapter
 
-// HomeFragment là nơi chuẩn bị dữ liệu và hiển thị danh sách các thẻ đó
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    //onViewCreated được gọi khi View của Fragment đã được tạo xong
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) { // view: View là giao diện của fragment_home.xml đã được tạo, savedInstanceState chứa trạng thái đã lưu trước đó (nếu có)
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
         super.onViewCreated(view, savedInstanceState)
 
-        val recyclerView = view.findViewById<RecyclerView>(R.id.rvHomeFeatures)
+        setupHomeFeatures(view)
+        setupPopularDogs(view)
+    }
 
-        val features = listOf<HomeFeature>(
+    // Hiển thị các tính năng trên trang chủ
+    private fun setupHomeFeatures(view: View) {
+        val recyclerView = view.findViewById<RecyclerView>(
+            R.id.rvHomeFeatures
+        )
+
+        val features = listOf(
             HomeFeature(
                 "identify",
                 "Nhận diện giống chó",
                 "Nhanh & chính xác",
                 R.drawable.identify_dog,
-                Color.parseColor("#E2F1FF")
+                "#E2F1FF".toColorInt()
             ),
             HomeFeature(
                 "information",
                 "Tìm hiểu thông tin",
                 "Đặc điểm, tính cách",
                 R.drawable.learn_about_dogs,
-                Color.parseColor("#F1E5FF")
+                "#F1E5FF".toColorInt()
             ),
             HomeFeature(
                 "favorite",
                 "Lưu giống chó yêu thích",
                 "Bộ sưu tập riêng",
                 R.drawable.favorite_dogs,
-                Color.parseColor("#E3FAED")
+                "#E3FAED".toColorInt()
             ),
             HomeFeature(
                 "community",
                 "Khám phá cộng đồng",
                 "Chia sẻ ảnh thú cưng",
                 R.drawable.dog_community,
-                Color.parseColor("#FFF1DD")
+                "#FFF1DD".toColorInt()
             )
         )
 
-        // Tạo Adapter
         val adapter = HomeFeatureAdapter(features) { feature ->
-            Toast.makeText(requireContext(), "Bạn chọn: ${feature.title}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Bạn chọn: ${feature.title}",
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
-        // Thiết lập hướng hiển thị RecyclerView
-        recyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
-
-        // Gắn Adapter vào RecyclerView để hiển thị dữ liệu
-        recyclerView.adapter = adapter
-
-        // Tìm id RecyclerView Popular Dog
-        val recyclerViewPopularDogs = view.findViewById<RecyclerView>(R.id.rvHomePopular);
-
-        // Khởi tạo dữ liệu popular dog
-        val popularDogs = listOf<Dog>(
-            Dog(
-                "golden_retriever",
-                "Golden Retriever",
-                R.drawable.golden_retriever,
-                "",
-                Color.parseColor("#e3e2e2")
-            ),
-            Dog(
-                "corgi",
-                "Corgi",
-                R.drawable.corgi,
-                "",
-                Color.parseColor("#e3e2e2")
-            ),
-            Dog(
-                "huskt",
-                "Husky",
-                R.drawable.siberian_husky,
-                "",
-                Color.parseColor("#e3e2e2")
-            ),
-            Dog(
-                "poodle",
-                "Poodle",
-                R.drawable.poodle,
-                "",
-                Color.parseColor("#e3e2e2")
-            ),
-            Dog(
-                "french_bulldog",
-                "French Bulldog",
-                R.drawable.french_bulldog,
-                "",
-                Color.parseColor("#e3e2e2")
-            ),
+        recyclerView.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.HORIZONTAL,
+            false
         )
 
-        val popularAdapter = PopularDogAdapter(popularDogs)
+        recyclerView.adapter = adapter
+        recyclerView.isNestedScrollingEnabled = false
+    }
 
-        recyclerViewPopularDogs.layoutManager = LinearLayoutManager(requireContext(),
-            LinearLayoutManager.HORIZONTAL, false)
+    // Hiển thị các giống chó phổ biến
+    private fun setupPopularDogs(view: View) {
+        val recyclerView = view.findViewById<RecyclerView>(
+            R.id.rvHomePopular
+        )
 
-        recyclerViewPopularDogs.adapter = popularAdapter
+        val popularDogs = listOf(
+            Dog(
+                id = "golden_retriever",
+                name = "Golden Retriever",
+                description = "Thân thiện, thông minh",
+                localImageRes = R.drawable.golden_retriever,
+                backgroundColorHex = "#E3E2E2",
+                sortOrder = 1
+            ),
+            Dog(
+                id = "corgi",
+                name = "Corgi",
+                description = "Năng động, đáng yêu",
+                localImageRes = R.drawable.corgi,
+                backgroundColorHex = "#E3E2E2",
+                sortOrder = 2
+            ),
+            Dog(
+                id = "husky",
+                name = "Husky",
+                description = "Mạnh mẽ, năng động",
+                localImageRes = R.drawable.siberian_husky,
+                backgroundColorHex = "#E3E2E2",
+                sortOrder = 3
+            ),
+            Dog(
+                id = "poodle",
+                name = "Poodle",
+                description = "Thông minh, dễ huấn luyện",
+                localImageRes = R.drawable.poodle,
+                backgroundColorHex = "#E3E2E2",
+                sortOrder = 4
+            ),
+            Dog(
+                id = "french_bulldog",
+                name = "French Bulldog",
+                description = "Điềm tĩnh, tình cảm",
+                localImageRes = R.drawable.french_bulldog,
+                backgroundColorHex = "#E3E2E2",
+                sortOrder = 5
+            )
+        )
+
+        val popularAdapter = PopularDogAdapter(
+            popularDogs.sortedBy { it.sortOrder }
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.HORIZONTAL,
+            false
+        )
+
+        recyclerView.adapter = popularAdapter
+        recyclerView.isNestedScrollingEnabled = false
+    }
+
+    private fun String.toColorInt(): Int {
+        return android.graphics.Color.parseColor(this)
     }
 }

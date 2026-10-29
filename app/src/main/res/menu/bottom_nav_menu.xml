@@ -6,7 +6,7 @@
         android:title="Trang chủ"/>
     <item
         android:id="@+id/nav_explore"
-        android:icon="@drawable/ic_nav_search"
+        android:icon="@drawable/ic_explore_compass"
         android:title="Khám phá"/>
     <item
         android:id="@+id/nav_favorite"

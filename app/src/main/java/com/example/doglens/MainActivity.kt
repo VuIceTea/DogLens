@@ -93,11 +93,11 @@ class MainActivity : AppCompatActivity() {
                     showFragment(ExploreFragment())
                     true
                 }
-//
-//                R.id.nav_favorite -> {
-//                    showFragment(FavoriteFragment())
-//                    true
-//                }
+
+                R.id.nav_favorite -> {
+                    showFragment(FavoriteFragment())
+                    true
+                }
 //
 //                R.id.nav_profile -> {
 //                    showFragment(ProfileFragment())

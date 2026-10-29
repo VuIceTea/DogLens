@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="42dp"
+    android:gravity="center_vertical"
+    android:layout_gravity="center"
+    android:orientation="horizontal"
+    android:paddingHorizontal="6dp">
+
+    <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_filter_sort"
+        android:contentDescription="Sắp xếp"/>
+
+    <TextView
+        android:id="@+id/txtSortLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:singleLine="true"
+        android:includeFontPadding="false"
+        android:textColor="#102344"
+        android:textSize="14sp" />
+
+    <ImageView
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/ic_chevron_down"
+        android:contentDescription="Mở danh sách"/>
+</LinearLayout>

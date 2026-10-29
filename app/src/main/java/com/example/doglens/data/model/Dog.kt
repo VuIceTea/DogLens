@@ -7,5 +7,11 @@ data class Dog (
     val imageUrl: String? = null,
     val localImageRes: Int? = null,
     val backgroundColorHex: String = "#E3F0FD",
-    val sortOrder: Int = 0
+    val sortOrder: Int = 0,
+
+    val sizeCategoryId: String = "medium",
+    val minWeightKg: Int? = null,
+    val maxWeightKg: Int? = null,
+    val minHeightCm: Int? = null,
+    val maxHeightCm: Int? = null
 )

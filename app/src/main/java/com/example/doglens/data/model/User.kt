@@ -1,4 +1,9 @@
 package com.example.doglens.data.model
 
-class User {
-}
+data class User(
+    val id: String,
+    val fullName: String,
+    val email: String,
+    val avatarUrl: String?,
+    val membership: String
+)

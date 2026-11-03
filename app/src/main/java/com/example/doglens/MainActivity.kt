@@ -1,4 +1,3 @@
-
 package com.example.doglens
 
 import android.os.Bundle
@@ -98,11 +97,11 @@ class MainActivity : AppCompatActivity() {
                     showFragment(FavoriteFragment())
                     true
                 }
-//
-//                R.id.nav_profile -> {
-//                    showFragment(ProfileFragment())
-//                    true
-//                }
+
+                R.id.nav_profile -> {
+                    showFragment(ProfileFragment())
+                    true
+                }
 
                 else -> false
             }
@@ -114,18 +113,21 @@ class MainActivity : AppCompatActivity() {
         val backgroundColor = when (fragment) {
             is HomeFragment -> R.color.home_background
             is ExploreFragment -> R.color.explore_background
+            is FavoriteFragment -> R.color.explore_background
+            is ProfileFragment -> R.color.explore_background
             else -> R.color.explore_background
         }
 
-        // Đổi màu nền của Activity
+        val color = ContextCompat.getColor(this, backgroundColor)
+
+        // Đổi màu nền vùng phía sau Status Bar
         findViewById<View>(R.id.main)
-            .setBackgroundColor(ContextCompat.getColor(this, backgroundColor))
+            .setBackgroundColor(color)
 
-        // Đổi màu nền Status Bar
-        window.statusBarColor = ContextCompat.getColor(this, backgroundColor)
+        // Đổi màu Status Bar
+        window.statusBarColor = color
 
-        supportFragmentManager
-            .beginTransaction()
+        supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
             .commit()
     }

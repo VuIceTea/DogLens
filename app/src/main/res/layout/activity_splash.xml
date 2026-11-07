@@ -9,71 +9,6 @@
     android:background="@color/home_background"
     tools:context=".ui.splash.SplashActivity">
 
-    <ImageView
-        android:id="@+id/ivPawTopLeft"
-        android:layout_width="54dp"
-        android:layout_height="54dp"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="56dp"
-        android:alpha="0.25"
-        android:rotation="-25"
-        android:src="@drawable/deco_paw"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@null" />
-
-    <ImageView
-        android:id="@+id/ivPawTopRight"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginTop="110dp"
-        android:alpha="0.2"
-        android:rotation="35"
-        android:src="@drawable/deco_paw"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="@null" />
-
-    <ImageView
-        android:id="@+id/ivDecoHeart"
-        android:layout_width="26dp"
-        android:layout_height="26dp"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="32dp"
-        android:alpha="0.35"
-        android:rotation="-15"
-        android:src="@drawable/deco_heart"
-        app:layout_constraintStart_toEndOf="@id/ivPawTopLeft"
-        app:layout_constraintTop_toTopOf="@id/ivPawTopLeft"
-        android:contentDescription="@null" />
-
-    <ImageView
-        android:id="@+id/ivPawBottomLeft"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginBottom="110dp"
-        android:alpha="0.2"
-        android:rotation="15"
-        android:src="@drawable/deco_paw"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="@null" />
-
-    <ImageView
-        android:id="@+id/ivPawBottomRight"
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        android:layout_marginEnd="28dp"
-        android:layout_marginBottom="80dp"
-        android:alpha="0.25"
-        android:rotation="-30"
-        android:src="@drawable/deco_paw"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:contentDescription="@null" />
-
     <LinearLayout
         android:id="@+id/layoutSplashContent"
         android:layout_width="wrap_content"
@@ -86,22 +21,13 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.45">
 
-        <FrameLayout
-            android:id="@+id/cardLogo"
-            android:layout_width="112dp"
-            android:layout_height="112dp"
-            android:background="@drawable/bg_splash_logo"
-            android:elevation="6dp">
-
-            <ImageView
-                android:id="@+id/ivSplashLogo"
-                android:layout_width="74dp"
-                android:layout_height="74dp"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/logo"
-                android:contentDescription="@string/app_name" />
-        </FrameLayout>
+        <ImageView
+            android:id="@+id/ivSplashLogo"
+            android:layout_width="125dp"
+            android:layout_height="125dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/logo"
+            android:contentDescription="@string/app_name" />
 
         <LinearLayout
             android:id="@+id/layoutBrandText"
@@ -120,46 +46,34 @@
                     android:id="@+id/tvTitleMain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/nunitosans_extrabold"
+                    android:fontFamily="sans-serif-black"
                     android:text="@string/title_main"
                     android:textColor="#102344"
-                    android:textSize="36sp" />
+                    android:textSize="38sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tvTitleSub"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:fontFamily="@font/nunitosans_extrabold"
+                    android:fontFamily="sans-serif-black"
                     android:text="@string/title_sub"
                     android:textColor="#1585FD"
-                    android:textSize="36sp" />
+                    android:textSize="38sp"
+                    android:textStyle="bold" />
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/tvSplashBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_splash_badge"
-                android:fontFamily="@font/nunitosans_bold"
-                android:paddingStart="14dp"
-                android:paddingTop="5dp"
-                android:paddingEnd="14dp"
-                android:paddingBottom="5dp"
-                android:text="@string/splash_badge"
-                android:textColor="#1585FD"
-                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvSplashTagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:fontFamily="@font/nunitosans"
+                android:fontFamily="@font/nunitosans_bold"
                 android:text="@string/splash_tagline"
-                android:textColor="#64748B"
-                android:textSize="14sp" />
+                android:textColor="#102344"
+                android:textSize="15sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
@@ -188,9 +102,9 @@
             android:layout_marginTop="10dp"
             android:fontFamily="@font/nunitosans_bold"
             android:text="@string/splash_version"
-            android:textColor="#8C9EAE"
-            android:textSize="12sp" />
+            android:textColor="#334155"
+            android:textSize="12sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

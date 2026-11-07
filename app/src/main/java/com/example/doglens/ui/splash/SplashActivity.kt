@@ -42,58 +42,42 @@ class SplashActivity : AppCompatActivity() {
         startAnimations()
 
         lifecycleScope.launch {
-            delay(2200)
+            delay(2000)
             navigateToMain()
         }
     }
 
     private fun startAnimations() {
-        val cardLogo = findViewById<View>(R.id.cardLogo)
+        val ivSplashLogo = findViewById<View>(R.id.ivSplashLogo)
         val layoutBrandText = findViewById<View>(R.id.layoutBrandText)
         val layoutSplashFooter = findViewById<View>(R.id.layoutSplashFooter)
 
-        val ivPawTopLeft = findViewById<View>(R.id.ivPawTopLeft)
-        val ivPawTopRight = findViewById<View>(R.id.ivPawTopRight)
-        val ivPawBottomLeft = findViewById<View>(R.id.ivPawBottomLeft)
-        val ivPawBottomRight = findViewById<View>(R.id.ivPawBottomRight)
-        val ivDecoHeart = findViewById<View>(R.id.ivDecoHeart)
-
-        listOf(ivPawTopLeft, ivPawTopRight, ivPawBottomLeft, ivPawBottomRight, ivDecoHeart).forEach { view ->
-            val targetAlpha = view.alpha
-            view.alpha = 0f
-            view.animate()
-                .alpha(targetAlpha)
-                .setDuration(800)
-                .setStartDelay(150)
-                .start()
-        }
-
-        cardLogo.scaleX = 0.6f
-        cardLogo.scaleY = 0.6f
-        cardLogo.alpha = 0f
-        cardLogo.animate()
+        ivSplashLogo.scaleX = 0.65f
+        ivSplashLogo.scaleY = 0.65f
+        ivSplashLogo.alpha = 0f
+        ivSplashLogo.animate()
             .scaleX(1f)
             .scaleY(1f)
             .alpha(1f)
-            .setDuration(800)
+            .setDuration(750)
             .setInterpolator(OvershootInterpolator(1.2f))
             .start()
 
         layoutBrandText.alpha = 0f
-        layoutBrandText.translationY = 40f
+        layoutBrandText.translationY = 35f
         layoutBrandText.animate()
             .alpha(1f)
             .translationY(0f)
-            .setDuration(700)
-            .setStartDelay(250)
+            .setDuration(650)
+            .setStartDelay(200)
             .setInterpolator(DecelerateInterpolator())
             .start()
 
         layoutSplashFooter.alpha = 0f
         layoutSplashFooter.animate()
             .alpha(1f)
-            .setDuration(600)
-            .setStartDelay(450)
+            .setDuration(500)
+            .setStartDelay(350)
             .start()
     }
 
@@ -113,4 +97,3 @@ class SplashActivity : AppCompatActivity() {
         finish()
     }
 }
-

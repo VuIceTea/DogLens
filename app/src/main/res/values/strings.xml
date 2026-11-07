@@ -7,4 +7,7 @@
     <string name="banner_content">Chụp hoặc tải ảnh lên, AI sẽ giúp bạn</string>
     <string name="banner_content_2">nhận biết giống chó một cách nhanh chóng</string>
     <string name="banner_content_3">và chính xác!</string>
+    <string name="splash_badge">🐾 Nhận diện giống chó thông minh</string>
+    <string name="splash_tagline">Khám phá &amp; Nhận diện thế giới loài chó</string>
+    <string name="splash_version">DogLens v1.0 • AI Powered</string>
 </resources>

@@ -21,12 +21,11 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Color
 import android.widget.FrameLayout
+import com.example.doglens.data.model.User
+import com.example.doglens.data.model.profile.ProfileStats
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
-
-    private val profileRepository: ProfileRepository =
-        MockProfileRepository()
-
+    private val profileRepository: ProfileRepository = MockProfileRepository()
     private lateinit var imgUserAvatar: ImageView
 
     // Chọn ảnh từ thư viện
@@ -53,15 +52,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     // AVATAR
     private fun setupAvatar(view: View) {
+        imgUserAvatar = view.findViewById(R.id.imgUserAvatar)
 
-        imgUserAvatar =
-            view.findViewById(R.id.imgUserAvatar)
+        val avatarContainer = view.findViewById<View>(R.id.avatarContainer)
 
-        val avatarContainer =
-            view.findViewById<View>(R.id.avatarContainer)
-
-        val imgChangeAvatar =
-            view.findViewById<ImageView>(R.id.imgChangeAvatar)
+        val imgChangeAvatar = view.findViewById<ImageView>(R.id.imgChangeAvatar)
 
         // Bấm vào avatar
         avatarContainer.setOnClickListener {
@@ -85,38 +80,23 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     // LOAD PROFILE
     private fun loadProfile(view: View) {
-
         viewLifecycleOwner.lifecycleScope.launch {
-
             try {
-
-                val profile =
-                    profileRepository.getProfile()
-
+                val profile = profileRepository.getProfile()
                 // Hiển thị thông tin User
                 displayUserInfo(view, profile.user)
-
                 // Hiển thị thống kê
                 setupStats(view, profile.stats)
-
             } catch (e: Exception) {
-
                 e.printStackTrace()
             }
         }
     }
 
     // DISPLAY USER
-    private fun displayUserInfo(
-        view: View,
-        user: com.example.doglens.data.model.User
-    ) {
-
-        view.findViewById<TextView>(R.id.txtName).text =
-            user.fullName
-
-        view.findViewById<TextView>(R.id.txtEmail).text =
-            user.email
+    private fun displayUserInfo(view: View, user: User) {
+        view.findViewById<TextView>(R.id.txtName).text = user.fullName
+        view.findViewById<TextView>(R.id.txtEmail).text = user.email
 
         val membershipText = when (user.membership) {
             "FREE" -> "Thành viên miễn phí"
@@ -124,26 +104,16 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             else -> user.membership
         }
 
-        view.findViewById<TextView>(R.id.txtMembership).text =
-            membershipText
+        view.findViewById<TextView>(R.id.txtMembership).text = membershipText
     }
 
     // DISPLAY PROFILE STATS
-    private fun setupStats(
-        view: View,
-        profileStats: com.example.doglens.data.model.profile.ProfileStats
-    ) {
-
-        val recyclerView =
-            view.findViewById<RecyclerView>(R.id.rvProfileStats)
-
-        recyclerView.layoutManager =
-            GridLayoutManager(requireContext(), 3)
-
+    private fun setupStats(view: View, profileStats: ProfileStats) {
+        val recyclerView = view.findViewById<RecyclerView>(R.id.rvProfileStats)
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         addStatDividers(recyclerView)
 
         val stats = listOf(
-
             ProfileStatsAdapter.StatItem(
                 icon = R.drawable.ic_stat_gallery,
                 value = profileStats.saveDogs,
@@ -151,7 +121,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 iconBackgroundColor = "#D9ECFF",
                 iconTintColor = "#1683F8"
             ),
-
             ProfileStatsAdapter.StatItem(
                 icon = R.drawable.ic_stat_history,
                 value = profileStats.recognitionCount,
@@ -159,7 +128,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 iconBackgroundColor = "#D5F2E3",
                 iconTintColor = "#16B978"
             ),
-
             ProfileStatsAdapter.StatItem(
                 icon = R.drawable.ic_stat_heart_outline,
                 value = profileStats.viewedArticles,
@@ -168,9 +136,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 iconTintColor = "#FF4564"
             )
         )
-
-        recyclerView.adapter =
-            ProfileStatsAdapter(stats)
+        recyclerView.adapter = ProfileStatsAdapter(stats)
     }
 
     private fun addStatDividers(recyclerView: RecyclerView) {
@@ -180,22 +146,18 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             strokeWidth = 1.dp
         }
 
-        recyclerView.addItemDecoration(
-            object : RecyclerView.ItemDecoration() {
-
+        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
                 override fun onDraw(
                     canvas: Canvas,
                     parent: RecyclerView,
                     state: RecyclerView.State
                 ) {
                     super.onDraw(canvas, parent, state)
-
                     for (i in 0 until parent.childCount) {
 
                         val child = parent.getChildAt(i)
 
-                        val params =
-                            child.layoutParams as GridLayoutManager.LayoutParams
+                        val params = child.layoutParams as GridLayoutManager.LayoutParams
 
                         if (params.spanIndex < 2) {
 
@@ -218,12 +180,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         )
     }
 
-    private val Int.dp: Float
-        get() = this * resources.displayMetrics.density
-
+    private val Int.dp: Float get() = this * resources.displayMetrics.density
 
     private fun setupProfileMenu(view: View) {
-
         fun bindMenu(
             id: Int,
             icon: Int,
@@ -259,7 +218,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_pink,
             "#FF4564"
         )
-
         bindMenu(
             R.id.menuHistory,
             R.drawable.ic_history,
@@ -268,7 +226,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_blue,
             "#1683F8"
         )
-
         bindMenu(
             R.id.menuViewedArticles,
             R.drawable.ic_viewed_articles,
@@ -277,7 +234,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_purple,
             "#A855F7"
         )
-
         bindMenu(
             R.id.menuPersonalInfo,
             R.drawable.ic_person_info,
@@ -286,7 +242,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_blue,
             "#1683F8"
         )
-
         bindMenu(
             R.id.menuNotification,
             R.drawable.ic_notifications,
@@ -295,7 +250,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_orange,
             "#F59E0B"
         )
-
         bindMenu(
             R.id.menuSettings,
             R.drawable.ic_setting,
@@ -304,7 +258,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_gray,
             "#64748B"
         )
-
         bindMenu(
             R.id.menuLogout,
             R.drawable.ic_logout,

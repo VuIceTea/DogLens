@@ -225,7 +225,6 @@
 
             </LinearLayout>
 
-            <!-- Hình Corgi trang trí -->
             <ImageView
                 android:id="@+id/imgPremiumCorgi"
                 android:layout_width="125dp"
@@ -235,7 +234,6 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/corgi" />
 
-            <!-- Mũi tên -->
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
@@ -245,7 +243,6 @@
                 android:scaleType="fitCenter" />
 
         </FrameLayout>
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProfileStats"
@@ -294,7 +291,6 @@
 
         </LinearLayout>
 
-        <!-- MENU NHÓM 2: TÀI KHOẢN -->
         <LinearLayout
             android:id="@+id/layoutAccountMenu"
             android:layout_width="match_parent"
@@ -332,7 +328,6 @@
 
         </LinearLayout>
 
-        <!-- MENU NHÓM 3: ĐĂNG XUẤT -->
         <LinearLayout
             android:id="@+id/layoutLogoutMenu"
             android:layout_width="match_parent"

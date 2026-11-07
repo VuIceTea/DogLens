@@ -14,7 +14,6 @@ import com.example.doglens.R
 class ProfileStatsAdapter(
     private val stats: List<StatItem>
 ) : RecyclerView.Adapter<ProfileStatsAdapter.StatViewHolder>() {
-
     data class StatItem(
         val icon: Int,
         val value: Int,
@@ -28,16 +27,11 @@ class ProfileStatsAdapter(
         val txtValue: TextView = itemView.findViewById(R.id.txtStatValue)
         val txtLabel: TextView = itemView.findViewById(R.id.txtStatLabel)
         val statIconContainer: FrameLayout = itemView.findViewById(R.id.statIconContainer)
-
         val imgStatIcon: ImageView = itemView.findViewById(R.id.imgStatIcon)
     }
 
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): ProfileStatsAdapter.StatViewHolder {
-        val view =
-            LayoutInflater.from(parent.context).inflate(R.layout.item_profile_stat, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfileStatsAdapter.StatViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_profile_stat, parent, false)
         return StatViewHolder(view)
     }
 
@@ -52,8 +46,7 @@ class ProfileStatsAdapter(
         holder.txtLabel.text = item.label.toString()
         holder.imgStatIcon.setImageResource(item.icon)
 
-        holder.statIconContainer.backgroundTintList =
-            ColorStateList.valueOf(Color.parseColor(item.iconBackgroundColor))
+        holder.statIconContainer.backgroundTintList = ColorStateList.valueOf(Color.parseColor(item.iconBackgroundColor))
     }
 
     override fun getItemCount(): Int {

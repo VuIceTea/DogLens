@@ -23,6 +23,7 @@ import android.graphics.Color
 import android.widget.FrameLayout
 import com.example.doglens.data.model.User
 import com.example.doglens.data.model.profile.ProfileStats
+import com.example.doglens.ui.auth.LoginFragment
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private val profileRepository: ProfileRepository = MockProfileRepository()
@@ -147,36 +148,36 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
-                override fun onDraw(
-                    canvas: Canvas,
-                    parent: RecyclerView,
-                    state: RecyclerView.State
-                ) {
-                    super.onDraw(canvas, parent, state)
-                    for (i in 0 until parent.childCount) {
+            override fun onDraw(
+                canvas: Canvas,
+                parent: RecyclerView,
+                state: RecyclerView.State
+            ) {
+                super.onDraw(canvas, parent, state)
+                for (i in 0 until parent.childCount) {
 
-                        val child = parent.getChildAt(i)
+                    val child = parent.getChildAt(i)
 
-                        val params = child.layoutParams as GridLayoutManager.LayoutParams
+                    val params = child.layoutParams as GridLayoutManager.LayoutParams
 
-                        if (params.spanIndex < 2) {
+                    if (params.spanIndex < 2) {
 
-                            val x = child.right.toFloat()
+                        val x = child.right.toFloat()
 
-                            val top = child.top + 16.dp
-                            val bottom = child.bottom - 16.dp
+                        val top = child.top + 16.dp
+                        val bottom = child.bottom - 16.dp
 
-                            canvas.drawLine(
-                                x,
-                                top.toFloat(),
-                                x,
-                                bottom.toFloat(),
-                                dividerPaint
-                            )
-                        }
+                        canvas.drawLine(
+                            x,
+                            top.toFloat(),
+                            x,
+                            bottom.toFloat(),
+                            dividerPaint
+                        )
                     }
                 }
             }
+        }
         )
     }
 
@@ -266,5 +267,22 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_pink,
             "#FF4564"
         )
+
+        // Bắt sự kiện bấm vào nút Đăng xuất
+        val menuLogout = view.findViewById<View>(R.id.menuLogout)
+        menuLogout.setOnClickListener {
+
+            // Ẩn thanh Bottom Navigation của MainActivity
+            activity?.findViewById<View>(R.id.bottomNavigation)?.visibility = View.GONE
+
+            // Chuyển sang màn hình LoginFragment
+            parentFragmentManager.beginTransaction()
+                .setCustomAnimations(
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+                )
+                .replace(R.id.fragmentContainer, LoginFragment())
+                .commit()
+        }
     }
 }

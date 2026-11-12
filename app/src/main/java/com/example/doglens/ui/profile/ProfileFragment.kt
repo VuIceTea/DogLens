@@ -21,9 +21,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Color
 import android.widget.FrameLayout
+import com.bumptech.glide.Glide
 import com.example.doglens.data.model.User
 import com.example.doglens.data.model.profile.ProfileStats
 import com.example.doglens.ui.auth.LoginFragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private val profileRepository: ProfileRepository = MockProfileRepository()
@@ -83,15 +86,58 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun loadProfile(view: View) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Lấy thông tin tài khoản đang đăng nhập Firebase
+                val firebaseUser = FirebaseAuth.getInstance().currentUser
+
+                // Hiển thị thông tin Google
+                displayFirebaseUser(view, firebaseUser)
+
+                // Vẫn lấy dữ liệu thống kê từ MockProfileRepository
                 val profile = profileRepository.getProfile()
-                // Hiển thị thông tin User
-                displayUserInfo(view, profile.user)
-                // Hiển thị thống kê
                 setupStats(view, profile.stats)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
+    }
+
+
+    private fun displayFirebaseUser(view: View, firebaseUser: FirebaseUser?) {
+        val txtName = view.findViewById<TextView>(R.id.txtName)
+        val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
+        val txtMembership = view.findViewById<TextView>(R.id.txtMembership)
+        val imgAvatar = view.findViewById<ImageView>(R.id.imgUserAvatar)
+
+        if (firebaseUser != null) {
+            // Hiển thị tên Google
+            txtName.text = firebaseUser.displayName ?: "Người dùng DogLens"
+
+            // Hiển thị email Google
+            txtEmail.text = firebaseUser.email ?: "Chưa có email"
+
+            // Hiển thị ảnh đại diện Google
+            val photoUrl = firebaseUser.photoUrl
+
+            if (photoUrl != null) {
+                Glide.with(this)
+                    .load(photoUrl)
+                    .placeholder(R.drawable.avatar_golden_retriever)
+                    .error(R.drawable.avatar_golden_retriever)
+                    .circleCrop()
+                    .into(imgAvatar)
+            } else {
+                imgAvatar.setImageResource(R.drawable.avatar_golden_retriever)
+            }
+
+        } else {
+            // Trường hợp chưa đăng nhập
+            txtName.text = "Khách"
+            txtEmail.text = "Chưa đăng nhập"
+            imgAvatar.setImageResource(R.drawable.avatar_golden_retriever)
+        }
+
+        // Giữ hạng thành viên hiện tại
+        txtMembership.text = "Thành viên miễn phí"
     }
 
     // DISPLAY USER
@@ -271,6 +317,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         // Bắt sự kiện bấm vào nút Đăng xuất
         val menuLogout = view.findViewById<View>(R.id.menuLogout)
         menuLogout.setOnClickListener {
+
+            // Đăng xuất Firebase
+            FirebaseAuth.getInstance().signOut()
 
             // Ẩn thanh Bottom Navigation của MainActivity
             activity?.findViewById<View>(R.id.bottomNavigation)?.visibility = View.GONE

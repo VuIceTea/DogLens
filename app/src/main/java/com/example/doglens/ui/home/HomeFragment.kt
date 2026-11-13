@@ -1,10 +1,12 @@
 
 package com.example.doglens.ui.home
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
@@ -23,6 +25,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         setupHomeFeatures(view)
         setupPopularDogs(view)
+        setupPickImage(view)
+    }
+
+    private fun setupPickImage(view: View) {
+        view.findViewById<View>(R.id.btnChooseImage).setOnClickListener {
+            if(parentFragmentManager.findFragmentByTag(PickImageBottomSheet.TAG) == null) {
+                PickImageBottomSheet().show(parentFragmentManager, PickImageBottomSheet.TAG)
+            }
+        }
+
+        setFragmentResultListener(PickImageBottomSheet.REQUEST_KEY) { _, bundle ->
+            val urlString = bundle.getString(PickImageBottomSheet.KEY_URI)
+                ?: return@setFragmentResultListener
+            onImagePicked(Uri.parse(urlString))
+        }
+    }
+
+    private fun onImagePicked(uri: Uri) {
+        Toast.makeText(
+            requireContext(),
+            "Đã chọn ảnh: $uri",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     // Hiển thị các tính năng trên trang chủ

@@ -136,4 +136,15 @@ class MainActivity : AppCompatActivity() {
 
         transaction.replace(R.id.fragmentContainer, fragment).commit()
     }
+
+    fun goToHome() {
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        bottomNavigation.visibility = View.VISIBLE
+
+        // Tích chọn tab Trang chủ mà không kích hoạt listener
+        bottomNavigation.menu.findItem(R.id.nav_home).isChecked = true
+        currentTabId = R.id.nav_home
+
+        showFragment(HomeFragment(), animate = false)
+    }
 }

@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.browser.trusted.Token
 import androidx.core.content.ContextCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -16,10 +17,18 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.ui.home.HomeFragment
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
@@ -28,6 +37,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
+    private val callbackManager = CallbackManager.Factory.create()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,6 +52,9 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         // Thiết lập đăng nhập Google
         setUpGoogleSignIn(view)
+
+        // Thiết lập đăng nhập Facebook
+        setUpFacebookSignIn(view)
 
         // Bấm Chưa có tài khoản? Đăng ký
         view.findViewById<TextView>(R.id.tvGoToRegister).setOnClickListener {
@@ -71,6 +84,63 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             // Đưa con trỏ văn bản về cuối dòng
             etPassword.setSelection(etPassword.text.length)
         }
+    }
+
+    private fun setUpFacebookSignIn(view: View) {
+        LoginManager.getInstance().registerCallback(
+            callbackManager,
+            object: FacebookCallback<LoginResult> {
+                override fun onCancel() {
+                    Log.d("FacebookSignIn", "User cancelled")
+                }
+
+                override fun onError(error: FacebookException) {
+                    Log.d("FacebookSignIn", "Facebook error", error)
+                    Toast.makeText(
+                        requireContext(),
+                        "Đăng nhập Facebook thất bại: ${error.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                override fun onSuccess(result: LoginResult) {
+                    firebaseAuthWithFacebook(result.accessToken)
+                }
+            }
+        )
+
+        view.findViewById<View>(R.id.btnFacebookLogin).setOnClickListener {
+            LoginManager.getInstance().logInWithReadPermissions(
+                this,
+                callbackManager,
+                listOf("email", "public_profile")
+            )
+        }
+    }
+
+    private fun firebaseAuthWithFacebook(token: AccessToken) {
+        val firebaseCredential = FacebookAuthProvider.getCredential(token.token)
+
+        auth.signInWithCredential(firebaseCredential)
+            .addOnCompleteListener(requireActivity()) { task ->
+                if(task.isSuccessful) {
+                    val user = auth.currentUser
+                    Log.d("FacebookSignIn", "UID: ${user?.uid}, Email: ${user?.email}")
+                    Toast.makeText(
+                        requireContext(),
+                        "Xin chào ${user?.displayName}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    navigateToHome()
+                } else {
+                    Log.e("FacebookSignIn", "Firebase authentication failed", task.exception)
+                    Toast.makeText(
+                        requireContext(),
+                        "Firebase xác thực thất bại: ${task.exception?.localizedMessage}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
     }
 
     private fun setUpGoogleSignIn(view: View) {
@@ -172,14 +242,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     }
 
     private fun navigateToHome() {
-        // Hiện lại thanh Bottom Navigation
-        requireActivity()
-            .findViewById<View>(R.id.bottomNavigation)
-            .visibility = View.VISIBLE
-
-        // Chuyển sang HomeFragment
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.fragmentContainer, HomeFragment())
-            .commit()
+        (requireActivity() as MainActivity).goToHome()
     }
 }

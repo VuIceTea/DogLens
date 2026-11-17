@@ -47,4 +47,9 @@
         <item name="android:textSize">17sp</item>
         <item name="android:textColor">#0B1B3F</item>
     </style>
+
+    <style name="ShapeAppearance.DogLens.Rounded16" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">16dp</item>
+    </style>
 </resources>

@@ -22,9 +22,11 @@ import android.graphics.Paint
 import android.graphics.Color
 import android.widget.FrameLayout
 import com.bumptech.glide.Glide
+import com.example.doglens.MainActivity
 import com.example.doglens.data.model.User
 import com.example.doglens.data.model.profile.ProfileStats
 import com.example.doglens.ui.auth.LoginFragment
+import com.example.doglens.ui.history.HistoryFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
@@ -313,6 +315,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             R.drawable.bg_menu_icon_pink,
             "#FF4564"
         )
+
+        // Mở màn Lịch sử nhận diện
+        view.findViewById<View>(R.id.menuHistory).setOnClickListener {
+            (requireActivity() as MainActivity).openScreen(HistoryFragment(), R.color.explore_background)
+        }
 
         // Bắt sự kiện bấm vào nút Đăng xuất
         val menuLogout = view.findViewById<View>(R.id.menuLogout)

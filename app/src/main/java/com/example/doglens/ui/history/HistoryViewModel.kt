@@ -1,0 +1,152 @@
+package com.example.doglens.ui.history
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.doglens.data.AppContainer
+import com.example.doglens.data.model.RecognitionHistoryItem
+import com.example.doglens.data.repository.DogRepository
+import com.example.doglens.data.repository.FavoriteRepository
+import com.example.doglens.data.repository.RecognitionRepository
+import com.example.doglens.utils.TimeUtils
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+// Bộ lọc thời gian (chỉ UI)
+enum class HistoryFilter { ALL, TODAY, LAST_7_DAYS, LAST_30_DAYS }
+
+// 1 dòng trong danh sách: tiêu đề ngày hoặc 1 lần nhận diện (chỉ UI)
+sealed interface HistoryRow {
+    data class Header(val title: String, val count: Int) : HistoryRow
+    data class Entry(val item: RecognitionHistoryItem, val timeLabel: String) : HistoryRow
+}
+
+data class HistoryUiState(
+    val loading: Boolean = true,
+    val rows: List<HistoryRow> = emptyList(),
+    val totalCount: Int = 0,          // tổng số bản ghi (chưa lọc)
+    val filter: HistoryFilter = HistoryFilter.ALL,
+    val query: String = ""
+)
+
+class HistoryViewModel(
+    private val recognitionRepository: RecognitionRepository = AppContainer.recognitionRepository,
+    private val dogRepository: DogRepository = AppContainer.dogRepository,
+    private val favoriteRepository: FavoriteRepository = AppContainer.favoriteRepository
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(HistoryUiState())
+    val state: StateFlow<HistoryUiState> = _state.asStateFlow()
+
+    // Toàn bộ lịch sử đã ghép với Dog + trạng thái yêu thích
+    private var allItems: List<RecognitionHistoryItem> = emptyList()
+
+    // Gọi mỗi lần vào màn (kể cả quay lại từ màn Kết quả) để cập nhật tim yêu thích
+    fun refresh() {
+        viewModelScope.launch {
+            try {
+                allItems = loadItems()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                allItems = emptyList()
+            }
+            publish()
+        }
+    }
+
+    // Ghép RecognitionResult -> Dog (dogId) và FavoriteDog (dogId)
+    private suspend fun loadItems(): List<RecognitionHistoryItem> {
+        val dogsById = dogRepository.getDogs().associateBy { it.id }
+        val favoriteDogIds = favoriteRepository.getFavoriteItems().map { it.dog.id }.toSet()
+
+        return recognitionRepository.getHistory()
+            .sortedByDescending { TimeUtils.parseIso(it.recognizedAt) }
+            .mapNotNull { result ->
+                val dog = dogsById[result.dogId] ?: return@mapNotNull null
+                RecognitionHistoryItem(result, dog, dog.id in favoriteDogIds)
+            }
+    }
+
+    fun setFilter(filter: HistoryFilter) {
+        if (_state.value.filter == filter) return
+        _state.update { it.copy(filter = filter) }
+        publish()
+    }
+
+    fun setQuery(query: String) {
+        val trimmed = query.trim()
+        if (_state.value.query == trimmed) return
+        _state.update { it.copy(query = trimmed) }
+        publish()
+    }
+
+    fun toggleFavorite(item: RecognitionHistoryItem) {
+        viewModelScope.launch {
+            if (item.isFavorite) favoriteRepository.removeFavorite(item.dog.id)
+            else favoriteRepository.addFavorite(item.dog.id)
+
+            // 1 giống có thể xuất hiện nhiều lần trong lịch sử -> cập nhật hết
+            allItems = allItems.map {
+                if (it.dog.id == item.dog.id) it.copy(isFavorite = !item.isFavorite) else it
+            }
+            publish()
+        }
+    }
+
+    fun delete(item: RecognitionHistoryItem) {
+        viewModelScope.launch {
+            recognitionRepository.delete(item.result.id)
+            allItems = allItems.filterNot { it.result.id == item.result.id }
+            publish()
+        }
+    }
+
+    fun clearAll() {
+        viewModelScope.launch {
+            recognitionRepository.clearHistory()
+            allItems = emptyList()
+            publish()
+        }
+    }
+
+    // Lọc + tìm kiếm + gom nhóm theo ngày -> danh sách dòng cho RecyclerView
+    private fun publish() {
+        val current = _state.value
+        val todayStart = TimeUtils.startOfDay(System.currentTimeMillis())
+        val minTime = when (current.filter) {
+            HistoryFilter.ALL -> Long.MIN_VALUE
+            HistoryFilter.TODAY -> todayStart
+            HistoryFilter.LAST_7_DAYS -> todayStart - 6 * DAY_MILLIS
+            HistoryFilter.LAST_30_DAYS -> todayStart - 29 * DAY_MILLIS
+        }
+        val keyword = current.query.lowercase()
+
+        val filtered = allItems.filter { item ->
+            val time = TimeUtils.parseIso(item.result.recognizedAt)
+            time >= minTime && (keyword.isEmpty() || item.dog.name.lowercase().contains(keyword))
+        }
+
+        val rows = mutableListOf<HistoryRow>()
+        filtered
+            .groupBy { TimeUtils.startOfDay(TimeUtils.parseIso(it.result.recognizedAt)) } // giữ thứ tự mới -> cũ
+            .forEach { (dayStart, items) ->
+                rows += HistoryRow.Header(TimeUtils.dayLabel(dayStart), items.size)
+                items.forEach { item ->
+                    rows += HistoryRow.Entry(
+                        item = item,
+                        timeLabel = TimeUtils.timeLabel(TimeUtils.parseIso(item.result.recognizedAt))
+                    )
+                }
+            }
+
+        _state.value = current.copy(loading = false, rows = rows, totalCount = allItems.size)
+    }
+
+    companion object {
+        private const val DAY_MILLIS = 24 * 60 * 60 * 1000L
+    }
+}

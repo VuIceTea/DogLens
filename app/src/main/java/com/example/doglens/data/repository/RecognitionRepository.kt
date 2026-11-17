@@ -10,6 +10,7 @@ interface RecognitionRepository {
     suspend fun getHistory(): List<RecognitionResult>
     suspend fun getById(id: String): RecognitionResult?
     suspend fun delete(id: String)
+    suspend fun clearHistory()
 }
 
 class RecognitionFailedException(

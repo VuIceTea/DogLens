@@ -40,11 +40,13 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         boundRecognitionId = null // view mới -> bind lại
 
         view.findViewById<View>(R.id.bottomActions).applyNavigationBarPadding()
-        view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
+        view.findViewById<View>(R.id.btnBack)
+            .setOnClickListener { parentFragmentManager.popBackStack() }
 
         val btnFavorite = view.findViewById<MaterialButton>(R.id.btnFavorite)
         btnFavorite.setOnClickListener {
-            val content = viewModel.state.value as? ResultUiState.Content ?: return@setOnClickListener
+            val content =
+                viewModel.state.value as? ResultUiState.Content ?: return@setOnClickListener
             viewModel.toggleFavorite()
             val msg = if (content.isFavorite) "Đã bỏ khỏi yêu thích"
             else "Đã lưu ${content.dog.name} vào yêu thích"
@@ -65,9 +67,14 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
                     when (state) {
                         ResultUiState.Loading -> Unit
                         ResultUiState.NotFound -> {
-                            Toast.makeText(requireContext(), "Không tìm thấy kết quả", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Không tìm thấy kết quả",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             parentFragmentManager.popBackStack()
                         }
+
                         is ResultUiState.Content -> {
                             if (boundRecognitionId != state.recognition.id) {
                                 bindContent(view, state)
@@ -85,7 +92,8 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         val dog = state.dog
         val confidence = state.recognition.confidence
 
-        Glide.with(this).load(state.recognition.imageUrl).centerCrop().into(view.findViewById(R.id.imgResult))
+        Glide.with(this).load(state.recognition.imageUrl).centerCrop()
+            .into(view.findViewById(R.id.imgResult))
 
         view.findViewById<TextView>(R.id.tvDogName).text = dog.name
         view.findViewById<TextView>(R.id.tvConfidence).text = "$confidence%"
@@ -126,9 +134,9 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     @DrawableRes
     private fun traitIcon(iconKey: String?): Int = when (iconKey) {
         "smile" -> R.drawable.ic_trait_smile
-        "bulb" -> R.drawable.ic_trait_bulb
-        "heart" -> R.drawable.ic_heart_favorite // icon có sẵn trong project
-        "bolt" -> R.drawable.ic_trait_bolt
+        "brain" -> R.drawable.ic_trait_brain
+        "heart" -> R.drawable.ic_trait_heart_outline
+        "run" -> R.drawable.ic_trait_run
         "leaf" -> R.drawable.ic_trait_leaf
         else -> R.drawable.ic_trait_star
     }
@@ -136,17 +144,31 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     // ---------- Thông tin cơ bản 2x2 ----------
 
     private fun bindInfo(view: View, dog: Dog) {
-        setInfoCell(view, R.id.infoWeight, R.drawable.ic_weight, "Cân nặng",
-            range(dog.minWeightKg, dog.maxWeightKg, "kg"))
-        setInfoCell(view, R.id.infoHeight, R.drawable.ic_height_ruler, "Chiều cao",
-            range(dog.minHeightCm, dog.maxHeightCm, "cm"))
-        setInfoCell(view, R.id.infoLifespan, R.drawable.ic_result_clock, "Tuổi thọ",
-            range(dog.minLifespanYears, dog.maxLifespanYears, " năm"))
-        setInfoCell(view, R.id.infoCoat, R.drawable.ic_result_palette, "Màu lông phổ biến",
-            dog.coatColors ?: "Đang cập nhật")
+        setInfoCell(
+            view, R.id.infoWeight, R.drawable.ic_weight, "Cân nặng",
+            range(dog.minWeightKg, dog.maxWeightKg, "kg")
+        )
+        setInfoCell(
+            view, R.id.infoHeight, R.drawable.ic_height_ruler, "Chiều cao",
+            range(dog.minHeightCm, dog.maxHeightCm, "cm")
+        )
+        setInfoCell(
+            view, R.id.infoLifespan, R.drawable.ic_result_clock, "Tuổi thọ",
+            range(dog.minLifespanYears, dog.maxLifespanYears, " năm")
+        )
+        setInfoCell(
+            view, R.id.infoCoat, R.drawable.ic_result_palette, "Màu lông phổ biến",
+            dog.coatColors ?: "Đang cập nhật"
+        )
     }
 
-    private fun setInfoCell(root: View, cellId: Int, @DrawableRes icon: Int, label: String, value: String) {
+    private fun setInfoCell(
+        root: View,
+        cellId: Int,
+        @DrawableRes icon: Int,
+        label: String,
+        value: String
+    ) {
         val cell = root.findViewById<View>(cellId)
         cell.findViewById<ImageView>(R.id.infoIcon).setImageResource(icon)
         cell.findViewById<TextView>(R.id.infoLabel).text = label
@@ -178,7 +200,8 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     }
 
     private fun shareResult(state: ResultUiState.Content) {
-        val text = "DogLens nhận diện: ${state.dog.name} – ${state.recognition.confidence}% độ giống 🐶"
+        val text =
+            "DogLens nhận diện: ${state.dog.name} – ${state.recognition.confidence}% độ giống 🐶"
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)

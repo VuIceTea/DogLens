@@ -144,9 +144,9 @@ class MockDogRepository : DogRepository {
 
     private val traits = listOf(
         Trait("friendly", "Thân thiện", "smile", "#FFF4DC"),
-        Trait("smart", "Thông minh", "buld", "#F1E9FF"),
+        Trait("smart", "Thông minh", "brain", "#F1E9FF"),
         Trait("loyal", "Trung thành", "heart", "#FFE9EE"),
-        Trait("active", "Năng động", "bolt", "#FFF1DE"),
+        Trait("active", "Năng động", "run", "#FFF1DE"),
         Trait("gentle", "Hiền lành", "leaf", "#E4F8EC"),
         Trait("independent", "Độc lập", "star", "#E6F1FD")
     )

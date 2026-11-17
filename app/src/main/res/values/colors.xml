@@ -7,4 +7,5 @@
     <color name="explore_background">#F7F9FC</color>
     <color name="favorite_background">#F7F9FC</color>
     <color name="profile_background">#F7F9FC</color>
+    <color name="recognition_background">#F7F9FC</color>
 </resources>

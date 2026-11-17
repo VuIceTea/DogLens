@@ -5,5 +5,7 @@ data class User(
     val fullName: String,
     val email: String,
     val avatarUrl: String?,
-    val membership: String
+    val membership: String,
+    val authProvider: String = "email",
+    val createdAt: String
 )

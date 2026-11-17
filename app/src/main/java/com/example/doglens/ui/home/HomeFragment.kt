@@ -1,4 +1,3 @@
-
 package com.example.doglens.ui.home
 
 import android.net.Uri
@@ -9,11 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.adapter.HomeFeatureAdapter
 import com.example.doglens.data.adapter.PopularDogAdapter
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.HomeFeature
+import com.example.doglens.ui.recognition.RecognitionFragment
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -30,7 +31,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private fun setupPickImage(view: View) {
         view.findViewById<View>(R.id.btnChooseImage).setOnClickListener {
-            if(parentFragmentManager.findFragmentByTag(PickImageBottomSheet.TAG) == null) {
+            if (parentFragmentManager.findFragmentByTag(PickImageBottomSheet.TAG) == null) {
                 PickImageBottomSheet().show(parentFragmentManager, PickImageBottomSheet.TAG)
             }
         }
@@ -43,11 +44,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun onImagePicked(uri: Uri) {
-        Toast.makeText(
-            requireContext(),
-            "Đã chọn ảnh: $uri",
-            Toast.LENGTH_SHORT
-        ).show()
+        (requireActivity() as MainActivity).openScreen(RecognitionFragment.newInstance(uri))
     }
 
     // Hiển thị các tính năng trên trang chủ

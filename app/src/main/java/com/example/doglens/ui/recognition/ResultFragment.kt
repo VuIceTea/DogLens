@@ -1,4 +1,216 @@
 package com.example.doglens.ui.recognition
 
-class ResultFragment {
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.GridLayout
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
+import com.example.doglens.R
+import com.example.doglens.data.model.Dog
+import com.example.doglens.data.model.DogTrait
+import com.example.doglens.data.model.Trait
+import com.example.doglens.utils.ImageUtils
+import com.example.doglens.utils.applyNavigationBarPadding
+import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+class ResultFragment : Fragment(R.layout.fragment_result) {
+
+    private val viewModel: ResultViewModel by viewModels()
+    private var boundRecognitionId: String? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        boundRecognitionId = null // view mới -> bind lại
+
+        view.findViewById<View>(R.id.bottomActions).applyNavigationBarPadding()
+        view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
+
+        val btnFavorite = view.findViewById<MaterialButton>(R.id.btnFavorite)
+        btnFavorite.setOnClickListener {
+            val content = viewModel.state.value as? ResultUiState.Content ?: return@setOnClickListener
+            viewModel.toggleFavorite()
+            val msg = if (content.isFavorite) "Đã bỏ khỏi yêu thích"
+            else "Đã lưu ${content.dog.name} vào yêu thích"
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+        }
+        view.findViewById<View>(R.id.btnShare).setOnClickListener {
+            (viewModel.state.value as? ResultUiState.Content)?.let { shareResult(it) }
+        }
+        view.findViewById<View>(R.id.btnDownload).setOnClickListener {
+            (viewModel.state.value as? ResultUiState.Content)?.let { saveImage(it.recognition.imageUrl) }
+        }
+
+        viewModel.load(requireArguments().getString(ARG_RECOGNITION_ID).orEmpty())
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    when (state) {
+                        ResultUiState.Loading -> Unit
+                        ResultUiState.NotFound -> {
+                            Toast.makeText(requireContext(), "Không tìm thấy kết quả", Toast.LENGTH_SHORT).show()
+                            parentFragmentManager.popBackStack()
+                        }
+                        is ResultUiState.Content -> {
+                            if (boundRecognitionId != state.recognition.id) {
+                                bindContent(view, state)
+                                boundRecognitionId = state.recognition.id
+                            }
+                            renderFavorite(btnFavorite, state.isFavorite)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun bindContent(view: View, state: ResultUiState.Content) {
+        val dog = state.dog
+        val confidence = state.recognition.confidence
+
+        Glide.with(this).load(state.recognition.imageUrl).centerCrop().into(view.findViewById(R.id.imgResult))
+
+        view.findViewById<TextView>(R.id.tvDogName).text = dog.name
+        view.findViewById<TextView>(R.id.tvConfidence).text = "$confidence%"
+        view.findViewById<TextView>(R.id.tvAccuracyLabel).text = when {
+            confidence >= 90 -> "Độ chính xác cao"
+            confidence >= 75 -> "Độ chính xác khá"
+            else -> "Độ chính xác trung bình"
+        }
+        view.findViewById<TextView>(R.id.tvSummary).text = dog.summary ?: dog.description
+
+        bindTraits(view.findViewById(R.id.gridTraits), state.traits)
+        bindInfo(view, dog)
+    }
+
+    // ---------- Đặc điểm nổi bật: lưới 2 cột ----------
+
+    private fun bindTraits(grid: GridLayout, traits: List<Pair<Trait, DogTrait>>) {
+        grid.removeAllViews()
+        val inflater = LayoutInflater.from(requireContext())
+
+        traits.forEach { (trait, dogTrait) ->
+            val cell = inflater.inflate(R.layout.item_result_trait, grid, false)
+            cell.findViewById<View>(R.id.traitCircle).backgroundTintList =
+                ColorStateList.valueOf(Color.parseColor(trait.colorHex))
+            cell.findViewById<ImageView>(R.id.traitIcon).setImageResource(traitIcon(trait.iconKey))
+            cell.findViewById<TextView>(R.id.traitName).text = trait.name
+            cell.findViewById<TextView>(R.id.traitDesc).text = dogTrait.description.orEmpty()
+
+            // width 0 + weight 1 -> 2 cột chia đều
+            cell.layoutParams = GridLayout.LayoutParams(
+                GridLayout.spec(GridLayout.UNDEFINED),
+                GridLayout.spec(GridLayout.UNDEFINED, 1f)
+            ).apply { width = 0 }
+            grid.addView(cell)
+        }
+    }
+
+    @DrawableRes
+    private fun traitIcon(iconKey: String?): Int = when (iconKey) {
+        "smile" -> R.drawable.ic_trait_smile
+        "bulb" -> R.drawable.ic_trait_bulb
+        "heart" -> R.drawable.ic_heart_favorite // icon có sẵn trong project
+        "bolt" -> R.drawable.ic_trait_bolt
+        "leaf" -> R.drawable.ic_trait_leaf
+        else -> R.drawable.ic_trait_star
+    }
+
+    // ---------- Thông tin cơ bản 2x2 ----------
+
+    private fun bindInfo(view: View, dog: Dog) {
+        setInfoCell(view, R.id.infoWeight, R.drawable.ic_weight, "Cân nặng",
+            range(dog.minWeightKg, dog.maxWeightKg, "kg"))
+        setInfoCell(view, R.id.infoHeight, R.drawable.ic_height_ruler, "Chiều cao",
+            range(dog.minHeightCm, dog.maxHeightCm, "cm"))
+        setInfoCell(view, R.id.infoLifespan, R.drawable.ic_result_clock, "Tuổi thọ",
+            range(dog.minLifespanYears, dog.maxLifespanYears, " năm"))
+        setInfoCell(view, R.id.infoCoat, R.drawable.ic_result_palette, "Màu lông phổ biến",
+            dog.coatColors ?: "Đang cập nhật")
+    }
+
+    private fun setInfoCell(root: View, cellId: Int, @DrawableRes icon: Int, label: String, value: String) {
+        val cell = root.findViewById<View>(cellId)
+        cell.findViewById<ImageView>(R.id.infoIcon).setImageResource(icon)
+        cell.findViewById<TextView>(R.id.infoLabel).text = label
+        cell.findViewById<TextView>(R.id.infoValue).text = value
+    }
+
+    private fun range(min: Int?, max: Int?, unit: String): String = when {
+        min != null && max != null -> "$min – $max$unit"
+        min != null -> "$min$unit"
+        max != null -> "$max$unit"
+        else -> "Đang cập nhật"
+    }
+
+    // ---------- Yêu thích / Chia sẻ / Lưu ảnh ----------
+
+    private fun renderFavorite(button: MaterialButton, saved: Boolean) {
+        val blue = ContextCompat.getColor(requireContext(), R.color.identify_blue)
+        if (saved) {
+            button.text = "Đã lưu vào yêu thích"
+            button.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E6F1FD"))
+            button.setTextColor(blue)
+            button.setIconResource(R.drawable.ic_heart_favorite)
+        } else {
+            button.text = "Lưu vào yêu thích"
+            button.backgroundTintList = ColorStateList.valueOf(blue)
+            button.setTextColor(Color.WHITE)
+            button.setIconResource(R.drawable.ic_heart_white)
+        }
+    }
+
+    private fun shareResult(state: ResultUiState.Content) {
+        val text = "DogLens nhận diện: ${state.dog.name} – ${state.recognition.confidence}% độ giống 🐶"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+        }
+        startActivity(Intent.createChooser(intent, "Chia sẻ kết quả"))
+    }
+
+    // Glide tải được cả content:// (mock) lẫn URL (API) -> lưu vào thư viện
+    private fun saveImage(imageUrl: String) {
+        val appContext = requireContext().applicationContext
+        viewLifecycleOwner.lifecycleScope.launch {
+            val ok = withContext(Dispatchers.IO) {
+                try {
+                    val bitmap = Glide.with(appContext).asBitmap().load(imageUrl).submit().get()
+                    ImageUtils.saveToGallery(appContext, bitmap)
+                } catch (e: Exception) {
+                    false
+                }
+            }
+            Toast.makeText(
+                appContext,
+                if (ok) "Đã lưu ảnh vào Pictures/DogLens" else "Không lưu được ảnh (cần Android 10 trở lên)",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    companion object {
+        private const val ARG_RECOGNITION_ID = "arg_recognition_id"
+
+        fun newInstance(recognitionId: String) = ResultFragment().apply {
+            arguments = bundleOf(ARG_RECOGNITION_ID to recognitionId)
+        }
+    }
 }

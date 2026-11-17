@@ -12,7 +12,8 @@ object ProfileMockData {
             fullName = "Nguyễn Phi Vũ",
             email = "nguyenphivu@gmail.com",
             avatarUrl = null,
-            membership = "FREE"
+            membership = "FREE",
+            createdAt = "2026-10-01T08:00:00Z"
         ),
         stats = ProfileStats(
             saveDogs = 12,

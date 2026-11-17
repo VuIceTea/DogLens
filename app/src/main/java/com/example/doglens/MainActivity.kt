@@ -4,6 +4,7 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -11,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.fragment.app.FragmentManager
 import com.example.doglens.ui.home.HomeFragment
 import com.example.doglens.ui.explore.ExploreFragment
 import com.example.doglens.ui.favorite.FavoriteFragment
@@ -21,6 +23,13 @@ class MainActivity : AppCompatActivity() {
 
     private var currentTabId: Int = R.id.nav_home
     private var currentColor: Int = 0
+    private var colorAnimator: ValueAnimator? = null
+
+    @ColorRes
+    private var screenBackgroundRes: Int = R.color.identify_background
+
+    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var root: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,14 +45,9 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        val bottomNavigation =
-            findViewById<BottomNavigationView>(
-                R.id.bottomNavigation
-            )
-
+        bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
         bottomNavigation.setItemActiveIndicatorEnabled(false)
-
-        val root = findViewById<View>(R.id.main)
+        root = findViewById(R.id.main)
 
         ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
             val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
@@ -80,6 +84,22 @@ class MainActivity : AppCompatActivity() {
             showFragment(fragment, isMovingRight = isMovingRight, animate = true)
             true
         }
+
+        // Back stack rỗng = đang ở 4 tab chính -> hiện bottom nav; còn màn phụ -> ẩn
+        supportFragmentManager.addOnBackStackChangedListener {
+            if (supportFragmentManager.backStackEntryCount == 0) {
+                bottomNavigation.visibility = View.VISIBLE
+                applyBackground(tabBackground(currentTabId), animate = true)
+            } else {
+                bottomNavigation.visibility = View.GONE
+                applyBackground(screenBackgroundRes, animate = false)
+            }
+        }
+
+        // Xoay màn hình khi đang ở màn phụ -> vẫn ẩn bottom nav
+        if (supportFragmentManager.backStackEntryCount > 0) {
+            bottomNavigation.visibility = View.GONE
+        }
     }
 
     private fun getTabIndex(itemId: Int): Int = when (itemId) {
@@ -88,6 +108,34 @@ class MainActivity : AppCompatActivity() {
         R.id.nav_favorite -> 2
         R.id.nav_profile -> 3
         else -> 0
+    }
+
+    @ColorRes
+    private fun tabBackground(tabId: Int): Int =
+        if (tabId == R.id.nav_home) R.color.home_background else R.color.explore_background
+
+    private fun applyBackground(@ColorRes colorRes: Int, animate: Boolean) {
+        val targetColor = ContextCompat.getColor(this, colorRes)
+
+        colorAnimator?.cancel()
+        colorAnimator = null
+
+        if (animate && currentColor != targetColor) {
+            colorAnimator =
+                ValueAnimator.ofObject(ArgbEvaluator(), currentColor, targetColor).apply {
+                    duration = 250
+                    addUpdateListener { animator ->
+                        val animatedColor = animator.animatedValue as Int
+                        root.setBackgroundColor(animatedColor)
+                        window.statusBarColor = animatedColor
+                    }
+                    start()
+                }
+        } else {
+            root.setBackgroundColor(targetColor)
+            window.statusBarColor = targetColor
+        }
+        currentColor = targetColor
     }
 
     private fun showFragment(
@@ -99,52 +147,50 @@ class MainActivity : AppCompatActivity() {
             is HomeFragment -> R.color.home_background
             else -> R.color.explore_background
         }
-
-        val targetColor = ContextCompat.getColor(this, backgroundColor)
-
-        if (animate && currentColor != targetColor) {
-            ValueAnimator.ofObject(ArgbEvaluator(), currentColor, targetColor).apply {
-                duration = 250
-                addUpdateListener { animator ->
-                    val animatedColor = animator.animatedValue as Int
-                    findViewById<View>(R.id.main).setBackgroundColor(animatedColor)
-                    window.statusBarColor = animatedColor
-                }
-                start()
-            }
-        } else {
-            findViewById<View>(R.id.main).setBackgroundColor(targetColor)
-            window.statusBarColor = targetColor
-        }
-
-        currentColor = targetColor
+        applyBackground(backgroundColor, animate)
 
         val transaction = supportFragmentManager.beginTransaction()
         if (animate) {
             if (isMovingRight) {
-                transaction.setCustomAnimations(
-                    R.anim.slide_in_right,
-                    R.anim.slide_out_left
-                )
+                transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
             } else {
-                transaction.setCustomAnimations(
-                    R.anim.slide_in_left,
-                    R.anim.slide_out_right
-                )
+                transaction.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right)
             }
         }
-
         transaction.replace(R.id.fragmentContainer, fragment).commit()
     }
 
-    fun goToHome() {
-        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottomNavigation)
-        bottomNavigation.visibility = View.VISIBLE
+    // Mở màn phụ (Đang nhận diện, Kết quả, Lỗi, Chi tiết...): ẩn bottom nav, có Back
+    fun openScreen(fragment: Fragment, @ColorRes backgroundRes: Int = R.color.identify_background) {
+        screenBackgroundRes = backgroundRes
+        bottomNavigation.visibility = View.GONE
+        applyBackground(backgroundRes, animate = false)
 
-        // Tích chọn tab Trang chủ mà không kích hoạt listener
+        supportFragmentManager.beginTransaction()
+            .setReorderingAllowed(true)
+            .setCustomAnimations(
+                R.anim.slide_in_right, R.anim.slide_out_left,  // mở
+                R.anim.slide_in_left, R.anim.slide_out_right   // Back
+            )
+            .replace(R.id.fragmentContainer, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
+    // Thay màn phụ hiện tại (Đang nhận diện -> Kết quả: Back ở Kết quả về thẳng Trang chủ)
+    fun replaceScreen(
+        fragment: Fragment,
+        @ColorRes backgroundRes: Int = R.color.identify_background
+    ) {
+        supportFragmentManager.popBackStack()
+        openScreen(fragment, backgroundRes)
+    }
+
+    fun goToHome() {
+        supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+        bottomNavigation.visibility = View.VISIBLE
         bottomNavigation.menu.findItem(R.id.nav_home).isChecked = true
         currentTabId = R.id.nav_home
-
         showFragment(HomeFragment(), animate = false)
     }
 }

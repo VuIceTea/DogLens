@@ -1,4 +1,12 @@
 package com.example.doglens.data.model
 
-class Article {
-}
+data class Article(
+    val id: String,
+    val categoryId: String,
+    val summary: String = "",
+    val imageUrl: String? = null,
+    val localImageRes: Int? = null,
+    val publishedAt: String,
+    val readMinutes: Int = 0,
+    val viewCount: Int = 0
+)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="identify_background">#F6FAFE</color>
+    <color name="identify_blue">#1485FE</color>
+    <color name="identify_icon_pending">#6F7A92</color>
+</resources>

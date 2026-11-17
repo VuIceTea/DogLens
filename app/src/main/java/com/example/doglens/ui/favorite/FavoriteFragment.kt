@@ -15,12 +15,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
 import com.example.doglens.data.adapter.FavoriteDogAdapter
 import com.example.doglens.data.model.FavoriteDogItem
-import com.example.doglens.data.repository.FavoriteRepository
 import java.util.Locale
+import androidx.lifecycle.lifecycleScope
+import com.example.doglens.data.AppContainer
+import kotlinx.coroutines.launch
 
 class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
 
-    private val repository by lazy { FavoriteRepository() }
+    private val repository = AppContainer.favoriteRepository
 
     private lateinit var favoriteAdapter: FavoriteDogAdapter
     private lateinit var recyclerView: RecyclerView
@@ -46,14 +48,15 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
         emptyText = view.findViewById(R.id.txtFavoriteEmpty)
         sortSpinner = view.findViewById(R.id.spinnerFavoriteSort)
 
-        allFavorites = repository.getFavoriteItems()
-
         setupRecyclerView()
         setupSortSpinner()
         setupFilters(view)
         setupSearch()
 
-        renderFavorites()
+        viewLifecycleOwner.lifecycleScope.launch {
+            allFavorites = repository.getFavoriteItems()
+            renderFavorites()
+        }
     }
 
     private fun setupRecyclerView() {
@@ -66,9 +69,11 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
                 ).show()
             },
             onFavoriteClick = { item ->
-                repository.removeFavorite(item.dog.id)
-                allFavorites = repository.getFavoriteItems()
-                renderFavorites()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    repository.removeFavorite(item.dog.id)
+                    allFavorites = repository.getFavoriteItems()
+                    renderFavorites()
+                }
             },
         )
 

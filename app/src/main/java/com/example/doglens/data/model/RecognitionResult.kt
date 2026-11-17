@@ -1,4 +1,10 @@
 package com.example.doglens.data.model
 
-class RecognitionResult {
-}
+data class RecognitionResult(
+    val id: String,
+    val userId: String,
+    val dogId: String,
+    val confidence: Int,
+    val imageUrl: String,
+    val recognizedAt: String
+)

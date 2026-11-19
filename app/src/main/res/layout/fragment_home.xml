@@ -349,9 +349,10 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvHomePopular"
             android:layout_width="match_parent"
-            android:layout_height="190dp"
+            android:layout_height="145dp"
             android:layout_marginRight="12dp"
-            android:layout_marginVertical="10dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
             android:overScrollMode="never"
             android:clipToPadding="false"
             tools:itemCount="5"

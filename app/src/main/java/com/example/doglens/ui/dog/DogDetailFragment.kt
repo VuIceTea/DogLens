@@ -197,13 +197,19 @@ class DogDetailFragment : Fragment() {
                     orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER
                     background = round(colors[i], 18); setPadding(dp(6), dp(10), dp(6), dp(8))
                 }
-                val symbol = when (trait.iconKey) {
-                    "brain" -> "🧠"; "heart" -> "♥"; "run" -> "🐕"; "leaf" -> "🍃"; "star" -> "★"; else -> "🐾"
+                val iconRes = when (trait.iconKey) {
+                    "smile" -> R.drawable.ic_trait_smile
+                    "brain" -> R.drawable.ic_trait_brain
+                    "heart" -> R.drawable.ic_trait_heart_outline
+                    "run" -> R.drawable.ic_trait_run
+                    "leaf" -> R.drawable.ic_trait_leaf
+                    else -> R.drawable.ic_trait_star
                 }
-                tile.addView(txt(symbol, 23, ink[i], true).apply {
-                    gravity = Gravity.CENTER; background = round("#FFFFFF", 50)
+                tile.addView(ImageView(requireContext()).apply {
+                    setImageResource(iconRes)
+                    background = round("#FFFFFF", 50)
                     setPadding(dp(10), dp(7), dp(10), dp(7))
-                })
+                }, LinearLayout.LayoutParams(dp(48), dp(48)))
                 tile.addView(txt(trait.name, 12, "#10234A", true).apply {
                     gravity = Gravity.CENTER; setPadding(0, dp(7), 0, dp(2))
                 })
@@ -255,10 +261,15 @@ class DogDetailFragment : Fragment() {
                     orientation = LinearLayout.VERTICAL; background = round(tip.colorHex, 16)
                     setPadding(dp(9), dp(10), dp(8), dp(8))
                 }
-                val symbol = when (tip.iconKey) {
-                    "brush" -> "✦"; "run" -> "🐕"; "heart" -> "♥"; "brain" -> "🧠"; "sun" -> "☀"; else -> "✧"
+                val iconRes = when (tip.iconKey) {
+                    "brush" -> R.drawable.ic_detail_brush
+                    "run" -> R.drawable.ic_trait_run
+                    "heart" -> R.drawable.ic_trait_heart_outline
+                    "brain" -> R.drawable.ic_trait_brain
+                    else -> R.drawable.ic_detail_flame
                 }
-                tile.addView(txt(symbol, 21, "#1684F8", true))
+                tile.addView(ImageView(requireContext()).apply { setImageResource(iconRes) },
+                    LinearLayout.LayoutParams(dp(28), dp(28)))
                 tile.addView(txt(tip.name, 11, "#10234A", true).apply { setPadding(0, dp(5), 0, dp(3)) })
                 tile.addView(txt(link.description.orEmpty(), 9, "#71809B", false))
                 box.addView(tile, LinearLayout.LayoutParams(0, dp(126), 1f).apply { marginEnd = dp(7) })
@@ -268,7 +279,7 @@ class DogDetailFragment : Fragment() {
     private fun addInfo(parent: LinearLayout, icon: Int, title: String, value: String) {
         val cell = LinearLayout(requireContext()).apply { gravity = Gravity.CENTER_VERTICAL; setPadding(dp(8), dp(12), dp(4), dp(12)) }
         cell.addView(ImageView(requireContext()).apply {
-            setImageResource(icon); background = round("#E5F1FF", 50); setPadding(dp(9))
+            setImageResource(icon); background = round("#E5F1FF", 50); setPadding(dp(9), dp(9), dp(9), dp(9))
         }, LinearLayout.LayoutParams(dp(42), dp(42)))
         val labels = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
         labels.addView(txt(title, 12, "#71809B", false))

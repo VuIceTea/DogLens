@@ -15,6 +15,7 @@ import com.example.doglens.data.adapter.PopularDogAdapter
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.HomeFeature
 import com.example.doglens.ui.recognition.RecognitionFragment
+import com.example.doglens.ui.dog.DogDetailFragment
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -126,7 +127,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 sortOrder = 2
             ),
             Dog(
-                id = "husky",
+                id = "siberian_husky",
                 name = "Husky",
                 description = "Mạnh mẽ, năng động",
                 localImageRes = R.drawable.siberian_husky,
@@ -153,7 +154,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         val popularAdapter = PopularDogAdapter(
             popularDogs.sortedBy { it.sortOrder }
-        )
+        ) { dog ->
+            (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(dog.id))
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(
             requireContext(),

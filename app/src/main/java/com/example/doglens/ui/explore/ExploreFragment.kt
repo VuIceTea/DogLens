@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
+import com.example.doglens.MainActivity
+import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.data.adapter.ExploreCategoryAdaper
 import com.example.doglens.data.adapter.ExploreFeatureTopicAdapter
 import com.example.doglens.data.adapter.ExploreDogUseCaseAdapter
@@ -157,7 +159,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
     // Nhấn vào danh mục giống chó
     private fun onCategoryClicked(dog: Dog) {
-        showMessage("Danh mục: ${dog.name}")
+        (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(dog.id))
     }
 
     // Nhấn vào chủ đề nổi bật

@@ -6,6 +6,9 @@ import com.example.doglens.data.model.DogSizeCategory
 import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.Trait
 import com.example.doglens.data.repository.DogRepository
+import com.example.doglens.data.model.CareTip
+import com.example.doglens.data.model.DogCareTip
+import com.example.doglens.data.model.DogImage
 
 class MockDogRepository : DogRepository {
 
@@ -35,7 +38,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 4,
             apartmentScore = 3,
             summary = "Golden Retriever là giống chó thân thiện, thông minh và dễ huấn luyện. " +
-                    "Đây là một trong những giống chó phổ biến nhất trên thế giới."
+                    "Đây là một trong những giống chó phổ biến nhất trên thế giới.",
+            rating = 4.9,
+            favoriteCount = 120000
         ),
         Dog(
             id = "corgi",
@@ -56,7 +61,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 4,
             apartmentScore = 4,
             summary = "Corgi có chân ngắn, thân dài và tính cách vui vẻ. " +
-                    "Vốn là chó chăn gia súc nên rất lanh lợi và thích vận động."
+                    "Vốn là chó chăn gia súc nên rất lanh lợi và thích vận động.",
+            rating = 4.8,
+            favoriteCount = 98000
         ),
         Dog(
             id = "siberian_husky", name = "Husky",
@@ -76,7 +83,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 3,
             apartmentScore = 2,
             summary = "Siberian Husky là giống chó kéo xe có sức bền rất cao, " +
-                    "nổi bật với đôi mắt xanh và bộ lông dày hai lớp."
+                    "nổi bật với đôi mắt xanh và bộ lông dày hai lớp.",
+            rating = 4.7,
+            favoriteCount = 86000
         ),
         Dog(
             id = "poodle", name = "Poodle",
@@ -96,7 +105,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 5,
             apartmentScore = 5,
             summary = "Poodle là một trong những giống chó thông minh nhất, " +
-                    "lông xoăn ít rụng nên rất hợp với gia đình ở căn hộ."
+                    "lông xoăn ít rụng nên rất hợp với gia đình ở căn hộ.",
+            rating = 4.8,
+            favoriteCount = 91000
         ),
         Dog(
             id = "french_bulldog",
@@ -117,7 +128,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 3,
             apartmentScore = 5,
             summary = "French Bulldog có đôi tai dơi đặc trưng, tính cách điềm tĩnh, " +
-                    "ít sủa và rất hợp với cuộc sống trong căn hộ."
+                    "ít sủa và rất hợp với cuộc sống trong căn hộ.",
+            rating = 4.6,
+            favoriteCount = 75000
         ),
         Dog(
             id = "pomeranian",
@@ -138,7 +151,9 @@ class MockDogRepository : DogRepository {
             trainingScore = 4,
             apartmentScore = 5,
             summary = "Pomeranian nhỏ nhắn với bộ lông xù như cục bông, " +
-                    "hoạt bát, tự tin và rất quấn chủ."
+                    "hoạt bát, tự tin và rất quấn chủ.",
+            rating = 4.7,
+            favoriteCount = 64000
         )
     )
 
@@ -183,14 +198,77 @@ class MockDogRepository : DogRepository {
         DogTrait("pomeranian", "independent", "Tự tin, cá tính")
     )
 
+    // Ảnh phụ
+    private val dogImages = listOf(
+        DogImage(
+            "img_golden_1",
+            "golden_retriever",
+            localImageRes = R.drawable.golden_retriever,
+            sortOrder = 1
+        ),
+        DogImage(
+            "img_golden_2",
+            "golden_retriever",
+            localImageRes = R.drawable.group_hunting_golden,
+            sortOrder = 2
+        ),
+        DogImage(
+            "img_husky_1",
+            "siberian_husky",
+            localImageRes = R.drawable.group_sled_husky,
+            sortOrder = 1
+        )
+    )
+
+    private val careTips = listOf(
+        CareTip("grooming", "Chải lông thường xuyên", "brush", "#E8F2FE"),
+        CareTip("exercise", "Cần vận động hằng ngày", "run", "#FFF4E5"),
+        CareTip("social", "Thích giao tiếp", "heart", "#E7F8EE"),
+        CareTip("training", "Huấn luyện sớm", "brain", "#F1E9FF"),
+        CareTip("heat", "Tránh nắng nóng", "sun", "#FFF8E1")
+    )
+
+    private val dogCareTips = listOf(
+        DogCareTip("golden_retriever", "grooming", "Giúp bộ lông luôn sạch đẹp và khỏe mạnh"),
+        DogCareTip("golden_retriever", "exercise", "Đi dạo, chơi đùa để duy trì sức khỏe tốt"),
+        DogCareTip("golden_retriever", "social", "Rất thích ở bên con người và các thú cưng khác"),
+
+        DogCareTip("corgi", "exercise", "Đi dạo 2 lần mỗi ngày, tránh tăng cân"),
+        DogCareTip("corgi", "grooming", "Rụng lông nhiều, nên chải 2–3 lần mỗi tuần"),
+        DogCareTip("corgi", "training", "Dạy lệnh sớm để bớt sủa và cắn gót chân"),
+
+        DogCareTip("siberian_husky", "exercise", "Cần chạy nhảy ít nhất 1–2 giờ mỗi ngày"),
+        DogCareTip("siberian_husky", "heat", "Lông dày, cần chỗ mát mẻ khi trời nóng"),
+        DogCareTip("siberian_husky", "grooming", "Chải kỹ vào mùa thay lông"),
+
+        DogCareTip("poodle", "grooming", "Cắt tỉa lông định kỳ 4–6 tuần một lần"),
+        DogCareTip("poodle", "training", "Học rất nhanh, nên chơi trò chơi trí tuệ"),
+        DogCareTip("poodle", "social", "Quấn chủ, không nên để ở một mình lâu"),
+
+        DogCareTip("french_bulldog", "heat", "Mũi ngắn, dễ mệt khi trời nóng"),
+        DogCareTip("french_bulldog", "exercise", "Chỉ cần đi dạo nhẹ nhàng mỗi ngày"),
+        DogCareTip("french_bulldog", "social", "Thích được ôm ấp, ở gần chủ"),
+
+        DogCareTip("pomeranian", "grooming", "Lông xù dày, chải 3–4 lần mỗi tuần"),
+        DogCareTip("pomeranian", "training", "Dạy sớm để hạn chế sủa nhiều"),
+        DogCareTip("pomeranian", "social", "Rất quấn chủ, thích được chú ý")
+    )
+
     override suspend fun getDogs(): List<Dog> = dogs
 
     override suspend fun getDogById(id: String): Dog? = dogs.firstOrNull { it.id == id }
+    override suspend fun getDogImages(dogId: String): List<DogImage> =
+        dogImages.filter { it.dogId == dogId }.sortedBy { it.sortOrder }
 
     override suspend fun getTraits(): List<Trait> = traits
 
     override suspend fun getDogTraits(dogId: String): List<DogTrait> =
         dogTraits.filter { it.dogId == dogId }
+
+    override suspend fun getCareTips(): List<CareTip> = careTips
+
+    override suspend fun getDogCareTips(dogId: String): List<DogCareTip> =
+        dogCareTips.filter { it.dogId == dogId }
 
     override suspend fun getSizeCategories(): List<DogSizeCategory> = sizeCategories
 }

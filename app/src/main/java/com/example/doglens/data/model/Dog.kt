@@ -26,5 +26,7 @@ data class Dog (
     val apartmentScore: Int? = null,
 
     // đoạn giới thiệu dài
-    val summary: String? = null
+    val summary: String? = null,
+    val rating: Double? = null,
+    val favoriteCount: Int? = null
 )

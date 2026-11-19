@@ -11,7 +11,8 @@ import com.example.doglens.R
 import com.example.doglens.data.model.Dog
 
 class PopularDogAdapter(
-    private  val populars: List<Dog>
+    private val populars: List<Dog>,
+    private val onDogClick: (Dog) -> Unit = {}
 ) : RecyclerView.Adapter<PopularDogAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -35,6 +36,7 @@ class PopularDogAdapter(
         val popular = populars[position]
 
         holder.name.text = popular.name
+        holder.itemView.setOnClickListener { onDogClick(popular) }
         if(popular.localImageRes != null) {
             holder.img.setImageResource(popular.localImageRes)
         } else {

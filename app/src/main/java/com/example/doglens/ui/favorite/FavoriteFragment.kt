@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
+import com.example.doglens.MainActivity
+import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.data.adapter.FavoriteDogAdapter
 import com.example.doglens.data.model.FavoriteDogItem
 import java.util.Locale
@@ -62,11 +64,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
     private fun setupRecyclerView() {
         favoriteAdapter = FavoriteDogAdapter(
             onDogClick = { item ->
-                Toast.makeText(
-                    requireContext(),
-                    item.dog.name,
-                    Toast.LENGTH_SHORT
-                ).show()
+                (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(item.dog.id))
             },
             onFavoriteClick = { item ->
                 viewLifecycleOwner.lifecycleScope.launch {

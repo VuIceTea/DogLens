@@ -20,6 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.doglens.R
+import com.example.doglens.MainActivity
+import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.Trait
@@ -42,6 +44,11 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         view.findViewById<View>(R.id.bottomActions).applyNavigationBarPadding()
         view.findViewById<View>(R.id.btnBack)
             .setOnClickListener { parentFragmentManager.popBackStack() }
+
+        view.findViewById<View>(R.id.tvDogName).setOnClickListener {
+            val content = viewModel.state.value as? ResultUiState.Content ?: return@setOnClickListener
+            (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(content.dog.id))
+        }
 
         val btnFavorite = view.findViewById<MaterialButton>(R.id.btnFavorite)
         btnFavorite.setOnClickListener {

@@ -91,6 +91,7 @@ class DogDetailFragment : Fragment() {
                 }
             }
         }
+        viewModel.load(dogId)
     }
 
     private fun buildUi(): View {
@@ -164,9 +165,17 @@ class DogDetailFragment : Fragment() {
             setPadding(dp(2), dp(8), dp(2), dp(4))
         })
         body.addView(section("Đặc điểm nổi bật"))
-        body.addView(LinearLayout(requireContext()).apply {
-            tag = "traits"; orientation = LinearLayout.HORIZONTAL
-        })
+        val traitsScroll = HorizontalScrollView(requireContext()).apply {
+            tag = "traitsScroll"
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+        val traitsBox = LinearLayout(requireContext()).apply {
+            tag = "traits"
+            orientation = LinearLayout.HORIZONTAL
+        }
+        traitsScroll.addView(traitsBox)
+        body.addView(traitsScroll)
         body.addView(section("Thông tin cơ bản"))
         body.addView(LinearLayout(requireContext()).apply {
             tag = "info"; orientation = LinearLayout.VERTICAL
@@ -177,9 +186,16 @@ class DogDetailFragment : Fragment() {
             tag = "scores"; orientation = LinearLayout.VERTICAL
         })
         body.addView(section("Chăm sóc"))
-        body.addView(LinearLayout(requireContext()).apply {
-            tag = "care"; orientation = LinearLayout.HORIZONTAL
-        })
+        val careScroll = HorizontalScrollView(requireContext()).apply {
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = View.OVER_SCROLL_NEVER
+        }
+        val careBox = LinearLayout(requireContext()).apply {
+            tag = "care"
+            orientation = LinearLayout.HORIZONTAL
+        }
+        careScroll.addView(careBox)
+        body.addView(careScroll)
         scroll.addView(body)
         root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
 
@@ -314,7 +330,7 @@ class DogDetailFragment : Fragment() {
         links.mapNotNull { link ->
             all.firstOrNull { it.id == link.traitId }?.let { Pair(it, link) }
         }
-            .take(4).forEachIndexed { i, pair ->
+            .forEachIndexed { i, pair ->
                 val trait = pair.first;
                 val link = pair.second
                 val tile = LinearLayout(requireContext()).apply {
@@ -342,15 +358,16 @@ class DogDetailFragment : Fragment() {
                     setPadding(dp(10), dp(10), dp(10), dp(10))
                     scaleType = ImageView.ScaleType.FIT_CENTER
                 }, LinearLayout.LayoutParams(dp(48), dp(48)))
-                tile.addView(txt(trait.name, 12, "#10234A", true).apply {
+                tile.addView(txt(trait.name, 14, "#10234A", true).apply {
                     gravity = Gravity.CENTER; setPadding(0, dp(7), 0, dp(2))
                 })
-                tile.addView(txt(link.description.orEmpty(), 10, "#71809B", false).apply {
+                tile.addView(txt(link.description.orEmpty(), 13, "#71809B", false).apply {
                     gravity = Gravity.CENTER
+                    setLineSpacing(dp(2).toFloat(), 1f)
                 })
                 box.addView(
                     tile,
-                    LinearLayout.LayoutParams(0, dp(132), 1f).apply { marginEnd = dp(7) })
+                    LinearLayout.LayoutParams(dp(110), dp(145), 1f).apply { marginEnd = dp(8) })
             }
     }
 
@@ -405,7 +422,7 @@ class DogDetailFragment : Fragment() {
         links.mapNotNull { link ->
             all.firstOrNull { it.id == link.careTipId }?.let { Pair(it, link) }
         }
-            .take(3).forEach { pair ->
+            .forEach { pair ->
                 val tip = pair.first;
                 val link = pair.second
                 val tile = LinearLayout(requireContext()).apply {
@@ -456,13 +473,15 @@ class DogDetailFragment : Fragment() {
                     scaleType = ImageView.ScaleType.FIT_CENTER
                 }, LinearLayout.LayoutParams(dp(42), dp(42)))
 
-                tile.addView(txt(tip.name, 13, "#10234A", true).apply {
+                tile.addView(txt(tip.name, 15, "#10234A", true).apply {
                     setPadding(0, dp(7), 0, dp(4))
                 })
 
-                tile.addView(txt(link.description.orEmpty(), 11, "#71809B", false))
-                box.addView(tile, LinearLayout.LayoutParams(0, dp(142), 1f).apply {
-                    marginEnd = dp(7)
+                tile.addView(txt(link.description.orEmpty(), 13, "#71809B", false).apply {
+                    setLineSpacing(dp(2).toFloat(), 1f)
+                })
+                box.addView(tile, LinearLayout.LayoutParams(dp(160), dp(165)).apply {
+                    marginEnd = dp(8)
                 })
             }
     }

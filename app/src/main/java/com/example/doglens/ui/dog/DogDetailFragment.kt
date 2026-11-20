@@ -1,5 +1,8 @@
 package com.example.doglens.ui.dog
 
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
@@ -14,16 +17,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.doglens.R
-import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.*
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
 class DogDetailFragment : Fragment() {
-    private val repo get() = AppContainer.dogRepository
-    private val favoriteRepo get() = AppContainer.favoriteRepository
+    private val viewModel: DogDetailViewModel by viewModels()
     private var dogId = ""
+    private var renderedDogId: String? = null
     private var dog: Dog? = null
     private var favorite = false
     private var images: List<DogImage> = emptyList()
@@ -47,22 +49,47 @@ class DogDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, state: Bundle?) {
         super.onViewCreated(view, state)
+        renderedDogId = null
         viewLifecycleOwner.lifecycleScope.launch {
-            val selected = repo.getDogById(dogId)
-            if (selected == null) {
-                Toast.makeText(requireContext(), "Không tìm thấy giống chó", Toast.LENGTH_SHORT)
-                    .show()
-                parentFragmentManager.popBackStack()
-                return@launch
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    when (state) {
+                        DogDetailUiState.Loading -> {
+
+                        }
+
+                        DogDetailUiState.NotFound -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Không tìm thấy giống chó",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        DogDetailUiState.Error -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Không thể tải thông tin giống chó",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is DogDetailUiState.Content -> {
+                            dog = state.dog
+                            images = state.images
+                            favorite = state.isFavorite
+                            if (renderedDogId != state.dog.id) {
+                                renderedDogId = state.dog.id
+                                renderDog(state.dog)
+                                renderTraits(state.traits, state.dogTraits)
+                                renderCare(state.careTips, state.dogCareTips)
+                                renderScores(state.dog)
+                            }
+                            updateFavorite()
+                        }
+                    }
+                }
             }
-            dog = selected
-            images = repo.getDogImages(dogId)
-            favorite = favoriteRepo.isFavorite(dogId)
-            renderDog(selected)
-            renderTraits(repo.getTraits(), repo.getDogTraits(dogId))
-            renderCare(repo.getCareTips(), repo.getDogCareTips(dogId))
-            renderScores(selected)
-            updateFavorite()
         }
     }
 
@@ -480,12 +507,7 @@ class DogDetailFragment : Fragment() {
     }
 
     private fun toggleFavorite() {
-        val item = dog ?: return
-        viewLifecycleOwner.lifecycleScope.launch {
-            if (favorite) favoriteRepo.removeFavorite(item.id) else favoriteRepo.addFavorite(item.id)
-            favorite = !favorite
-            updateFavorite()
-        }
+        viewModel.toggleFavorite()
     }
 
     private fun updateFavorite() {

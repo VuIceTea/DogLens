@@ -1,6 +1,301 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F3F7FF"
+    android:clipToPadding="false"
+    android:fillViewport="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="28dp">
+
+        <!-- Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="58dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerVertical="true"
+                android:background="@android:color/transparent"
+                android:contentDescription="Quay lại"
+                android:padding="8dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="#168FF2" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Chỉnh sửa thông tin"
+                android:textColor="#10245E"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:alpha="0.3"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_paw"
+                app:tint="#70B4F7" />
+        </RelativeLayout>
+
+        <!-- Avatar -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="4dp"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="210dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:scaleX="1.12"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_avatar_wave" />
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginStart="38dp"
+                android:alpha="0.3"
+                android:contentDescription="@null"
+                android:rotation="35"
+                android:src="@drawable/ic_paw"
+                app:tint="#70B4F7" />
+
+            <ImageView
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginStart="38dp"
+                android:alpha="0.3"
+                android:contentDescription="@null"
+                android:rotation="35"
+                android:src="@drawable/ic_paw"
+                app:tint="#70B4F7" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="9dp">
+
+                <FrameLayout
+                    android:layout_width="156dp"
+                    android:layout_height="156dp"
+                    android:background="@drawable/bg_avatar_ring"
+                    android:padding="9dp">
+
+                    <ImageView
+                        android:id="@+id/imgEditAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_circle_avatar"
+                        android:clipToOutline="true"
+                        android:contentDescription="Ảnh đại diện"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/avatar_golden_retriever" />
+
+                    <ImageButton
+                        android:id="@+id/btnChangeAvatar"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        android:layout_gravity="bottom|end"
+                        android:background="@drawable/bg_camera_button"
+                        android:contentDescription="Thay đổi ảnh đại diện"
+                        android:padding="13dp"
+                        android:src="@drawable/ic_camera_white"
+                        app:tint="#FFFFFF" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Thay đổi ảnh đại diện của bạn"
+                    android:textColor="#7885B3"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Basic info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_profile_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="8dp">
+
+            <include
+                android:id="@+id/basicSectionTitle"
+                layout="@layout/item_edit_profile_section_title" />
+
+            <include
+                android:id="@+id/rowFullName"
+                layout="@layout/item_edit_profile_row" />
+
+            <include
+                android:id="@+id/rowBirthDate"
+                layout="@layout/item_edit_profile_row" />
+
+            <include
+                android:id="@+id/rowGender"
+                layout="@layout/item_edit_profile_row" />
+        </LinearLayout>
+
+        <!--Contact info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_profile_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="8dp">
+
+            <include
+                android:id="@+id/contactSectionTitle"
+                layout="@layout/item_edit_profile_section_title" />
+
+            <include
+                android:id="@+id/rowEmail"
+                layout="@layout/item_edit_profile_row" />
+
+            <include
+                android:id="@+id/rowPhone"
+                layout="@layout/item_edit_profile_row" />
+
+            <include
+                android:id="@+id/rowAddress"
+                layout="@layout/item_edit_profile_row" />
+        </LinearLayout>
+
+        <!-- Secutity -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_profile_card"
+            android:elevation="2dp"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="12dp">
+
+            <include
+                android:id="@+id/securitySectionTitle"
+                layout="@layout/item_edit_profile_section_title" />
+
+            <LinearLayout
+                android:id="@+id/rowChangePassword"
+                android:layout_width="match_parent"
+                android:layout_height="82dp"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:background="@drawable/bg_profile_icon_circle">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_lock"
+                        app:tint="#168FF2" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="18dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Đổi mật khẩu"
+                        android:textColor="#10245E"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Cập nhật mật khẩu tài khoản của bạn"
+                        android:textColor="#7885B3"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_chevron_right" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Save Button -->
+        <LinearLayout
+            android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent"
+            android:layout_height="66dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/bg_save_profile_button"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_save" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="Lưu thay đổi"
+                android:textColor="#FFFFFF"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

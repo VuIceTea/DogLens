@@ -29,10 +29,17 @@ import com.example.doglens.ui.auth.LoginFragment
 import com.example.doglens.ui.history.HistoryFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.launch
+import android.widget.Toast
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private val profileRepository: ProfileRepository = MockProfileRepository()
     private lateinit var imgUserAvatar: ImageView
+    private val userViewModel: UserViewModel by viewModels()
 
     // Chọn ảnh từ thư viện
     private val pickAvatarLauncher =
@@ -51,9 +58,71 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        observeUser(view)
         setupAvatar(view)
         setupProfileMenu(view)
         loadProfile(view)
+    }
+
+
+    private fun observeUser(view: View) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(
+                Lifecycle.State.STARTED
+            ) {
+                userViewModel.uiState.collect { state ->
+
+                    if (state.isLoading) {
+                    }
+
+                    state.user?.let { user ->
+                        displayUser(view, user)
+                    }
+
+                    state.error?.let { message ->
+                        Toast.makeText(
+                            requireContext(),
+                            message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun displayUser(view: View, user: User) {
+
+        val txtName = view.findViewById<TextView>(R.id.txtName)
+        val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
+        val txtMembership = view.findViewById<TextView>(R.id.txtMembership)
+        val imgAvatar = view.findViewById<ImageView>(R.id.imgUserAvatar)
+
+        txtName.text = user.fullName
+        txtEmail.text = user.email
+
+        // Chuyển mã membership thành nội dung hiển thị
+        txtMembership.text = when (user.membership) {
+            "FREE" -> "Thành viên miễn phí"
+            "PREMIUM" -> "Thành viên Premium"
+            else -> user.membership
+        }
+
+        val avatarUrl = if (
+            user.hasCustomAvatar &&
+            !user.customAvatarUrl.isNullOrBlank()
+        ) {
+            user.customAvatarUrl
+        } else {
+            user.avatarUrl
+        }
+
+        Glide.with(this)
+            .load(avatarUrl)
+            .placeholder(R.drawable.avatar_golden_retriever)
+            .error(R.drawable.avatar_golden_retriever)
+            .circleCrop()
+            .into(imgAvatar)
     }
 
     // AVATAR
@@ -88,58 +157,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun loadProfile(view: View) {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // Lấy thông tin tài khoản đang đăng nhập Firebase
-                val firebaseUser = FirebaseAuth.getInstance().currentUser
-
-                // Hiển thị thông tin Google
-                displayFirebaseUser(view, firebaseUser)
-
-                // Vẫn lấy dữ liệu thống kê từ MockProfileRepository
                 val profile = profileRepository.getProfile()
                 setupStats(view, profile.stats)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
-    }
-
-
-    private fun displayFirebaseUser(view: View, firebaseUser: FirebaseUser?) {
-        val txtName = view.findViewById<TextView>(R.id.txtName)
-        val txtEmail = view.findViewById<TextView>(R.id.txtEmail)
-        val txtMembership = view.findViewById<TextView>(R.id.txtMembership)
-        val imgAvatar = view.findViewById<ImageView>(R.id.imgUserAvatar)
-
-        if (firebaseUser != null) {
-            // Hiển thị tên Google
-            txtName.text = firebaseUser.displayName ?: "Người dùng DogLens"
-
-            // Hiển thị email Google
-            txtEmail.text = firebaseUser.email ?: "Chưa có email"
-
-            // Hiển thị ảnh đại diện Google
-            val photoUrl = firebaseUser.photoUrl
-
-            if (photoUrl != null) {
-                Glide.with(this)
-                    .load(photoUrl)
-                    .placeholder(R.drawable.avatar_golden_retriever)
-                    .error(R.drawable.avatar_golden_retriever)
-                    .circleCrop()
-                    .into(imgAvatar)
-            } else {
-                imgAvatar.setImageResource(R.drawable.avatar_golden_retriever)
-            }
-
-        } else {
-            // Trường hợp chưa đăng nhập
-            txtName.text = "Khách"
-            txtEmail.text = "Chưa đăng nhập"
-            imgAvatar.setImageResource(R.drawable.avatar_golden_retriever)
-        }
-
-        // Giữ hạng thành viên hiện tại
-        txtMembership.text = "Thành viên miễn phí"
     }
 
     // DISPLAY USER
@@ -232,6 +255,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private val Int.dp: Float get() = this * resources.displayMetrics.density
 
     private fun setupProfileMenu(view: View) {
+        fun openEditProfile() {
+            (requireActivity() as MainActivity).openScreen(
+                EditProfileFragment(),
+                R.color.explore_background
+            )
+        }
+
         fun bindMenu(
             id: Int,
             icon: Int,
@@ -318,7 +348,20 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // Mở màn Lịch sử nhận diện
         view.findViewById<View>(R.id.menuHistory).setOnClickListener {
-            (requireActivity() as MainActivity).openScreen(HistoryFragment(), R.color.explore_background)
+            (requireActivity() as MainActivity).openScreen(
+                HistoryFragment(),
+                R.color.explore_background
+            )
+        }
+
+        // Mở màn Chỉnh sửa thông tin cá nhân
+        view.findViewById<View>(R.id.menuPersonalInfo).setOnClickListener {
+            openEditProfile()
+        }
+
+        // Cho phép bấm trực tiếp vào khung hồ sơ phía trên để chỉnh sửa.
+        view.findViewById<View>(R.id.userProfileCard).setOnClickListener {
+            openEditProfile()
         }
 
         // Bắt sự kiện bấm vào nút Đăng xuất

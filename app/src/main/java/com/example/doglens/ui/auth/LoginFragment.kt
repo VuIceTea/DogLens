@@ -9,7 +9,6 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
-import androidx.browser.trusted.Token
 import androidx.core.content.ContextCompat
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -19,7 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.doglens.MainActivity
 import com.example.doglens.R
-import com.example.doglens.ui.home.HomeFragment
+import com.example.doglens.data.AppContainer
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
 import com.facebook.FacebookCallback
@@ -30,6 +29,7 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
@@ -86,10 +86,38 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
     }
 
+    private fun syncUserAndNavigate(firebaseUser: FirebaseUser?) {
+        if (firebaseUser == null) {
+            Toast.makeText(
+                requireContext(),
+                "Không tìm thấy tài khoản đăng nhập",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                AppContainer.userRepository.ensureUser(firebaseUser)
+                if (isAdded) {
+                    navigateToHome()
+                }
+            } catch (e: Exception) {
+                Log.e("UserSynce", "Không thể đồng bộ hồ sơ", e)
+                if (isAdded) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Không thể đồng bộ thông tin tài khoản",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
     private fun setUpFacebookSignIn(view: View) {
         LoginManager.getInstance().registerCallback(
             callbackManager,
-            object: FacebookCallback<LoginResult> {
+            object : FacebookCallback<LoginResult> {
                 override fun onCancel() {
                     Log.d("FacebookSignIn", "User cancelled")
                 }
@@ -123,7 +151,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         auth.signInWithCredential(firebaseCredential)
             .addOnCompleteListener(requireActivity()) { task ->
-                if(task.isSuccessful) {
+                if (task.isSuccessful) {
                     val user = auth.currentUser
                     Log.d("FacebookSignIn", "UID: ${user?.uid}, Email: ${user?.email}")
                     Toast.makeText(
@@ -131,7 +159,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         "Xin chào ${user?.displayName}",
                         Toast.LENGTH_LONG
                     ).show()
-                    navigateToHome()
+                    syncUserAndNavigate(user)
                 } else {
                     Log.e("FacebookSignIn", "Firebase authentication failed", task.exception)
                     Toast.makeText(
@@ -224,7 +252,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                         "Xin chào ${user?.displayName}",
                         Toast.LENGTH_LONG
                     ).show()
-                    navigateToHome()
+                    syncUserAndNavigate(user)
                 } else {
                     Log.e(
                         "GoogleSignIn",

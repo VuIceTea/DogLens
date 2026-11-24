@@ -63,6 +63,13 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     R.id.fragmentContainer, RegisterFragment()
                 ).addToBackStack(null).commit()
         }
+
+        view.findViewById<TextView>(R.id.tvForgotPassword).setOnClickListener {
+            (requireActivity() as MainActivity).openScreen(
+                ForgotPasswordFragment(),
+                R.color.forgot_password_background
+            )
+        }
     }
 
     private fun setUpPasswordToggle(view: View) {

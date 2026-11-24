@@ -65,7 +65,13 @@ class PickImageBottomSheet : BottomSheetDialogFragment() {
             insets
         }
 
-        view.findViewById<View>(R.id.optionCamera).setOnClickListener { launchCamera() }
+        view.findViewById<View>(R.id.optionCamera).setOnClickListener {
+            setFragmentResult(
+                REQUEST_KEY,
+                bundleOf(KEY_OPEN_CAMERA to true)
+            )
+            dismiss()
+        }
 
         view.findViewById<View>(R.id.optionGallery).setOnClickListener {
             pickImage.launch(
@@ -117,6 +123,8 @@ class PickImageBottomSheet : BottomSheetDialogFragment() {
         const val TAG = "PickImageBottomSheet"
         const val REQUEST_KEY = "pick_image_request"
         const val KEY_URI = "pick_image_uri"
+        const val KEY_OPEN_CAMERA = "open_custom_camera"
         private const val STATE_CAMERA_URI = "state_camera_uri"
+
     }
 }

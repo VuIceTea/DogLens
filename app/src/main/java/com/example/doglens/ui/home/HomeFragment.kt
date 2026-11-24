@@ -16,6 +16,7 @@ import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.HomeFeature
 import com.example.doglens.ui.recognition.RecognitionFragment
 import com.example.doglens.ui.dog.DogDetailFragment
+import com.example.doglens.ui.camera.CameraFragment
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
@@ -38,8 +39,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         setFragmentResultListener(PickImageBottomSheet.REQUEST_KEY) { _, bundle ->
-            val urlString = bundle.getString(PickImageBottomSheet.KEY_URI)
-                ?: return@setFragmentResultListener
+
+            if (bundle.getBoolean(PickImageBottomSheet.KEY_OPEN_CAMERA, false)) {
+                (requireActivity() as MainActivity).openScreen(
+                    CameraFragment(),
+                    R.color.recognition_background
+                )
+                return@setFragmentResultListener
+            }
+
+            val urlString =
+                bundle.getString(PickImageBottomSheet.KEY_URI)
+                    ?: return@setFragmentResultListener
+
             onImagePicked(Uri.parse(urlString))
         }
     }
@@ -86,11 +98,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         )
 
         val adapter = HomeFeatureAdapter(features) { feature ->
-            Toast.makeText(
-                requireContext(),
-                "Bạn chọn: ${feature.title}",
-                Toast.LENGTH_SHORT
-            ).show()
+            when (feature.id) {
+                "identify" -> {
+                    (requireActivity() as MainActivity).openScreen(
+                        CameraFragment(),
+                        R.color.recognition_background
+                    )
+                }
+
+                else -> {
+                    Toast.makeText(
+                        requireContext(),
+                        "Bạn chọn: ${feature.title}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
 
         recyclerView.layoutManager = LinearLayoutManager(

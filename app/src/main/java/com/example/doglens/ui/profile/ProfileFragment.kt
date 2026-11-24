@@ -27,6 +27,7 @@ import com.example.doglens.data.model.User
 import com.example.doglens.data.model.profile.ProfileStats
 import com.example.doglens.ui.auth.LoginFragment
 import com.example.doglens.ui.history.HistoryFragment
+import com.example.doglens.ui.article.ViewedArticlesFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import androidx.fragment.app.viewModels
@@ -350,6 +351,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         view.findViewById<View>(R.id.menuHistory).setOnClickListener {
             (requireActivity() as MainActivity).openScreen(
                 HistoryFragment(),
+                R.color.explore_background
+            )
+        }
+
+        view.findViewById<View>(R.id.menuViewedArticles).setOnClickListener {
+            (requireActivity() as MainActivity).openScreen(
+                ViewedArticlesFragment(),
                 R.color.explore_background
             )
         }

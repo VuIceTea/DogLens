@@ -3,6 +3,7 @@ package com.example.doglens.data.model
 data class Article(
     val id: String,
     val categoryId: String,
+    val title: String,
     val summary: String = "",
     val imageUrl: String? = null,
     val localImageRes: Int? = null,

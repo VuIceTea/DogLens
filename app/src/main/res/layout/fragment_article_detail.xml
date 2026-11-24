@@ -1,6 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F7F9FC"
+    android:orientation="vertical">
+    <FrameLayout android:layout_width="match_parent" android:layout_height="56dp" android:paddingHorizontal="14dp">
+        <ImageButton android:id="@+id/btnBack" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="start|center_vertical" android:background="@android:color/transparent" android:contentDescription="Quay lại" android:padding="11dp" android:src="@drawable/ic_arrow_back" />
+        <ImageButton android:id="@+id/btnBookmark" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="end|center_vertical" android:background="@android:color/transparent" android:contentDescription="Lưu bài viết" android:padding="16dp" android:src="@drawable/ic_article_bookmark_outline" />
+    </FrameLayout>
+    <ScrollView android:id="@+id/articleScroll" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:overScrollMode="never">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="30dp">
+            <com.google.android.material.imageview.ShapeableImageView android:id="@+id/imgHero" android:layout_width="match_parent" android:layout_height="260dp" android:layout_marginHorizontal="18dp" android:background="#E5EEF8" android:contentDescription="Ảnh bài viết" android:scaleType="centerCrop" app:shapeAppearanceOverlay="@style/ShapeAppearance.DogLens.Rounded20" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="18dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_identify_card"
+                android:orientation="vertical"
+                android:padding="18dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView android:id="@+id/tvCategory" android:layout_width="wrap_content" android:layout_height="28dp" android:background="@drawable/bg_article_category" android:gravity="center" android:paddingHorizontal="12dp" android:textColor="#16884A" android:textSize="12sp" />
+                <TextView android:id="@+id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:fontFamily="@font/nunitosans_extrabold" android:textColor="#10245E" android:textSize="25sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="11dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_calendar" app:tint="#7885A6" />
+                    <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:textColor="#7885A6" android:textSize="12sp" />
+
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="15dp" android:contentDescription="@null" android:src="@drawable/ic_visibility" app:tint="#7885A6" />
+                    <TextView android:id="@+id/tvViews" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:textColor="#7885A6" android:textSize="12sp" />
+
+                    <ImageView android:layout_width="18dp" android:layout_height="18dp" android:layout_marginStart="15dp" android:contentDescription="@null" android:src="@drawable/ic_result_clock" app:tint="#7885A6" />
+                    <TextView android:id="@+id/tvReadTime" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:textColor="#7885A6" android:textSize="12sp" />
+                </LinearLayout>
+                <TextView android:id="@+id/tvSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:lineSpacingExtra="4dp" android:textColor="#667895" android:textSize="15sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E8EEF6" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_article_toc"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/nunitosans_extrabold"
+                        android:text="Nội dung bài viết"
+                        android:textColor="#10245E"
+                        android:textSize="18sp" />
+
+                    <LinearLayout
+                        android:id="@+id/tocContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/sectionsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

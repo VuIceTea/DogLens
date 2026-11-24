@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="176dp"
+    android:layout_height="210dp"
+    android:layout_marginEnd="10dp"
+    android:background="@drawable/bg_result_related_card"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="7dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgRelatedDog"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:background="#E6EEF7"
+        android:contentDescription="Ảnh giống chó liên quan"
+        android:scaleType="centerCrop"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.DogLens.Rounded20" />
+
+    <TextView
+        android:id="@+id/tvRelatedDogName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="7dp"
+        android:layout_marginEnd="5dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/nunitosans_extrabold"
+        android:maxLines="1"
+        android:textColor="#10245E"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tvRelatedDogDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginTop="2dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="#7885A6"
+        android:textSize="12sp" />
+</LinearLayout>

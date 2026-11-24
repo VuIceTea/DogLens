@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="210dp"
+    android:viewportWidth="360"
+    android:viewportHeight="210">
+
+    <!-- Dải trang trí mềm phía sau avatar -->
+    <path
+        android:fillColor="#E4F0FF"
+        android:fillAlpha="0.72"
+        android:pathData="M0,92 C38,67 61,78 93,105 C124,132 151,124 179,95 C207,66 235,55 267,69 C300,84 326,55 360,49 L360,171 C327,187 300,179 273,159 C245,138 217,146 190,169 C158,195 125,186 94,160 C64,135 33,142 0,163 Z" />
+
+    <!-- Lớp sáng nhẹ giúp dải có chiều sâu giống bản thiết kế -->
+    <path
+        android:fillColor="#F0F6FF"
+        android:fillAlpha="0.7"
+        android:pathData="M0,132 C41,106 72,115 103,138 C135,161 162,158 190,137 C220,114 246,111 275,128 C307,147 332,132 360,112 L360,183 C327,193 299,183 273,165 C244,145 218,151 190,172 C158,196 128,190 97,169 C66,148 35,150 0,171 Z" />
+</vector>

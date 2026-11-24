@@ -16,6 +16,7 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.model.*
 import kotlinx.coroutines.launch
@@ -242,11 +243,11 @@ class DogDetailFragment : Fragment() {
             setPadding(dp(8), 0, dp(8), 0)
 
             setOnClickListener {
-                Toast.makeText(
-                    requireContext(),
-                    "Sẽ bổ sung danh sách giống tương tự",
-                    Toast.LENGTH_SHORT
-                ).show()
+                val currentDogId = dog?.id ?: return@setOnClickListener
+                (requireActivity() as MainActivity).openScreen(
+                    SimilarDogsFragment.newInstance(currentDogId),
+                    R.color.explore_background
+                )
             }
         }
 

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.GridLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.DrawableRes
@@ -22,6 +23,7 @@ import com.bumptech.glide.Glide
 import com.example.doglens.R
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.dog.DogDetailFragment
+import com.example.doglens.ui.dog.SimilarDogsFragment
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.Trait
@@ -61,6 +63,14 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         }
         view.findViewById<View>(R.id.btnShare).setOnClickListener {
             (viewModel.state.value as? ResultUiState.Content)?.let { shareResult(it) }
+        }
+        view.findViewById<View>(R.id.btnSeeAllSimilar).setOnClickListener {
+            val content = viewModel.state.value as? ResultUiState.Content
+                ?: return@setOnClickListener
+            (requireActivity() as MainActivity).openScreen(
+                SimilarDogsFragment.newInstance(content.dog.id),
+                R.color.explore_background
+            )
         }
         view.findViewById<View>(R.id.btnDownload).setOnClickListener {
             (viewModel.state.value as? ResultUiState.Content)?.let { saveImage(it.recognition.imageUrl) }
@@ -113,6 +123,7 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
 
         bindTraits(view.findViewById(R.id.gridTraits), state.traits)
         bindInfo(view, dog)
+        bindRelatedDogs(view.findViewById(R.id.relatedDogsList), state.relatedDogs)
     }
 
     // ---------- Đặc điểm nổi bật: lưới 2 cột ----------
@@ -187,6 +198,31 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         min != null -> "$min$unit"
         max != null -> "$max$unit"
         else -> "Đang cập nhật"
+    }
+
+    private fun bindRelatedDogs(container: LinearLayout, dogs: List<Dog>) {
+        container.removeAllViews()
+        val inflater = LayoutInflater.from(requireContext())
+
+        dogs.forEach { dog ->
+            val card = inflater.inflate(R.layout.item_result_related_dog, container, false)
+            val image = card.findViewById<ImageView>(R.id.imgRelatedDog)
+
+            when {
+                dog.localImageRes != null -> image.setImageResource(dog.localImageRes)
+                !dog.imageUrl.isNullOrBlank() -> Glide.with(this).load(dog.imageUrl).centerCrop().into(image)
+            }
+
+            card.findViewById<TextView>(R.id.tvRelatedDogName).text = dog.name
+            card.findViewById<TextView>(R.id.tvRelatedDogDescription).text = dog.description
+            card.setOnClickListener {
+                (requireActivity() as MainActivity).openScreen(
+                    DogDetailFragment.newInstance(dog.id),
+                    R.color.explore_background
+                )
+            }
+            container.addView(card)
+        }
     }
 
     // ---------- Yêu thích / Chia sẻ / Lưu ảnh ----------

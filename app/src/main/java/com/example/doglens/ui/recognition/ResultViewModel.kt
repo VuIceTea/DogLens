@@ -23,6 +23,7 @@ sealed interface ResultUiState {
         val recognition: RecognitionResult,
         val dog: Dog,
         val traits: List<Pair<Trait, DogTrait>>,
+        val relatedDogs: List<Dog>,
         val isFavorite: Boolean
     ) : ResultUiState
 }
@@ -55,11 +56,26 @@ class ResultViewModel(
                 val traits = dogRepository.getDogTraits(dog.id).mapNotNull { dogTrait ->
                     traitsById[dogTrait.traitId]?.let { trait -> trait to dogTrait }
                 }
+                val relatedDogs = dogRepository.getDogs()
+                    .filterNot { it.id == dog.id }
+                    .sortedByDescending { candidate ->
+                        var score = 0
+                        if (candidate.sizeCategoryId == dog.sizeCategoryId) score += 20
+                        score += 5 - kotlin.math.abs(
+                            (candidate.familyScore ?: 0) - (dog.familyScore ?: 0)
+                        )
+                        score += 5 - kotlin.math.abs(
+                            (candidate.trainingScore ?: 0) - (dog.trainingScore ?: 0)
+                        )
+                        score
+                    }
+                    .take(4)
 
                 _state.value = ResultUiState.Content(
                     recognition = recognition,
                     dog = dog,
                     traits = traits,
+                    relatedDogs = relatedDogs,
                     isFavorite = favoriteRepository.isFavorite(dog.id)
                 )
             } catch (e: CancellationException) {

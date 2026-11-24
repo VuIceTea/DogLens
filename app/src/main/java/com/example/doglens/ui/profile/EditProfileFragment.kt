@@ -14,6 +14,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.doglens.R
+import com.example.doglens.MainActivity
+import com.example.doglens.ui.auth.ChangePasswordFragment
 import com.example.doglens.data.model.User
 import kotlinx.coroutines.launch
 
@@ -42,6 +44,13 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
             .setOnClickListener {
                 parentFragmentManager.popBackStack()
             }
+
+        view.findViewById<View>(R.id.rowChangePassword).setOnClickListener {
+            (requireActivity() as MainActivity).openScreen(
+                ChangePasswordFragment(),
+                R.color.explore_background
+            )
+        }
     }
 
     private fun removeLastRowDividers(view: View) {

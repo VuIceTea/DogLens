@@ -17,6 +17,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.doglens.R
+import com.example.doglens.MainActivity
+import com.example.doglens.ui.auth.ChangePasswordFragment
 import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.launch
 
@@ -39,7 +41,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${requireContext().packageName}")))
         }
         bindRow(view, R.id.rowPassword, R.drawable.ic_lock, "Đổi mật khẩu", "Cập nhật mật khẩu tài khoản") {
-            Toast.makeText(requireContext(), "Màn đổi mật khẩu sẽ được bổ sung tiếp theo", Toast.LENGTH_SHORT).show()
+            (requireActivity() as MainActivity).openScreen(ChangePasswordFragment(), R.color.explore_background)
         }
         bindRow(view, R.id.rowDeleteAccount, R.drawable.ic_settings_delete, "Xóa tài khoản", "Xóa vĩnh viễn dữ liệu của bạn") {
             AlertDialog.Builder(requireContext()).setTitle("Xóa tài khoản?")

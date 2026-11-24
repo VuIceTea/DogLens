@@ -176,8 +176,15 @@
                     android:textSize="20sp" />
 
                 <TextView
+                    android:id="@+id/btnSuggestedMore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center"
+                    android:minHeight="44dp"
+                    android:paddingHorizontal="8dp"
                     android:text="Xem thêm  ›"
                     android:textColor="#168FF2"
                     android:textSize="14sp" />

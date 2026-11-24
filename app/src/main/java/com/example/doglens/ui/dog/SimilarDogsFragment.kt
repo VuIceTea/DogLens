@@ -14,21 +14,21 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.doglens.MainActivity
 import com.example.doglens.R
-import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.SimilarDogItem
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
 
-    private val repository = AppContainer.dogRepository
+    private val viewModel: SimilarDogsViewModel by viewModels()
     private lateinit var sourceDog: Dog
     private var allItems: List<SimilarDogItem> = emptyList()
     private var traitNames: Map<String, List<String>> = emptyMap()
@@ -47,48 +47,42 @@ class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
             renderItems(view)
         }
 
+        val openSuggestions = View.OnClickListener {
+            val sourceId = if (::sourceDog.isInitialized) sourceDog.id
+            else requireArguments().getString(ARG_DOG_ID)
+            (requireActivity() as MainActivity).openScreen(
+                SuggestedDogsFragment.newInstance(sourceId),
+                R.color.explore_background
+            )
+        }
+        view.findViewById<View>(R.id.btnSuggestedMore).setOnClickListener(openSuggestions)
+        view.findViewById<View>(R.id.suggestionHeader).setOnClickListener(openSuggestions)
+
         loadData(view)
     }
 
     private fun loadData(view: View) {
         val dogId = requireArguments().getString(ARG_DOG_ID).orEmpty()
-
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val source = repository.getDogById(dogId)
-                if (source == null) {
-                    Toast.makeText(requireContext(), "Không tìm thấy giống chó", Toast.LENGTH_SHORT).show()
-                    parentFragmentManager.popBackStack()
-                    return@launch
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.state.collect { state ->
+                    view.findViewById<ProgressBar>(R.id.progressLoading).visibility =
+                        if (state.isLoading) View.VISIBLE else View.GONE
+                    state.sourceDog?.let { source ->
+                        sourceDog = source
+                        allItems = state.items
+                        traitNames = state.traitNames
+                        bindSource(view, source)
+                        renderItems(view)
+                        renderSuggestions(view)
+                    }
+                    state.error?.let { message ->
+                        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+                    }
                 }
-
-                sourceDog = source
-                val dogs = repository.getDogs().filterNot { it.id == source.id }
-                val traits = repository.getTraits().associateBy { it.id }
-                traitNames = dogs.associate { dog ->
-                    dog.id to repository.getDogTraits(dog.id)
-                        .mapNotNull { traits[it.traitId]?.name }
-                        .take(3)
-                }
-                allItems = dogs
-                    .map { SimilarDogItem(it, calculateSimilarity(source, it)) }
-                    .sortedByDescending { it.similarityPercent }
-
-                bindSource(view, source)
-                view.findViewById<ProgressBar>(R.id.progressLoading).visibility = View.GONE
-                renderItems(view)
-                renderSuggestions(view)
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (exception: Exception) {
-                view.findViewById<ProgressBar>(R.id.progressLoading).visibility = View.GONE
-                Toast.makeText(
-                    requireContext(),
-                    "Không thể tải giống tương tự: ${exception.localizedMessage}",
-                    Toast.LENGTH_LONG
-                ).show()
             }
         }
+        viewModel.load(dogId)
     }
 
     private fun bindSource(view: View, dog: Dog) {
@@ -238,28 +232,6 @@ class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
                 marginStart = dp(6)
             })
         }
-    }
-
-    private fun calculateSimilarity(source: Dog, candidate: Dog): Int {
-        var score = 54f
-        if (source.sizeCategoryId == candidate.sizeCategoryId) score += 16f
-        score += closeness(source.minWeightKg, candidate.minWeightKg, 35, 5f)
-        score += closeness(source.maxHeightCm, candidate.maxHeightCm, 50, 5f)
-        score += scoreCloseness(source.familyScore, candidate.familyScore)
-        score += scoreCloseness(source.kidsScore, candidate.kidsScore)
-        score += scoreCloseness(source.trainingScore, candidate.trainingScore)
-        score += scoreCloseness(source.apartmentScore, candidate.apartmentScore)
-        return score.roundToInt().coerceIn(68, 96)
-    }
-
-    private fun closeness(a: Int?, b: Int?, range: Int, points: Float): Float {
-        if (a == null || b == null) return 0f
-        return (1f - abs(a - b).toFloat() / range).coerceIn(0f, 1f) * points
-    }
-
-    private fun scoreCloseness(a: Int?, b: Int?): Float {
-        if (a == null || b == null) return 0f
-        return (5 - abs(a - b)).coerceAtLeast(0) * 1.25f
     }
 
     private fun infoValue(icon: Int, value: String): View = LinearLayout(requireContext()).apply {

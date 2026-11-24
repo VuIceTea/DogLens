@@ -28,6 +28,7 @@ import com.example.doglens.data.model.profile.ProfileStats
 import com.example.doglens.ui.auth.LoginFragment
 import com.example.doglens.ui.history.HistoryFragment
 import com.example.doglens.ui.article.ViewedArticlesFragment
+import com.example.doglens.ui.notification.NotificationFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import androidx.fragment.app.viewModels
@@ -365,6 +366,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         // Mở màn Chỉnh sửa thông tin cá nhân
         view.findViewById<View>(R.id.menuPersonalInfo).setOnClickListener {
             openEditProfile()
+        }
+
+        view.findViewById<View>(R.id.menuNotification).setOnClickListener {
+            (requireActivity() as MainActivity).openScreen(
+                NotificationFragment(),
+                R.color.explore_background
+            )
         }
 
         // Cho phép bấm trực tiếp vào khung hồ sơ phía trên để chỉnh sửa.

@@ -55,7 +55,8 @@ class FirestoreUserRepository(
                 authProvider = provider,
                 createdAt = System.currentTimeMillis().toString()
             )
-            document.set(newUser).await()
+            // The server owns premiumUntil and adds it only after payment.
+            document.set(newUser.toProfileDocument()).await()
         } else {
             // Chỉ đồng bộ thông tin tài khoản từ Firebase Auth.
             // Không ghi đè tên và avatar riêng người dùng đã chỉnh.
@@ -72,7 +73,27 @@ class FirestoreUserRepository(
         require(user.id.isNotBlank()) {
             "User ID không được để trống"
         }
-        usersCollection.document(user.id).set(user).await()
+        usersCollection.document(user.id).update(
+            mapOf(
+                "fullName" to user.fullName,
+                "phoneNumber" to user.phoneNumber,
+                "birthDate" to user.birthDate,
+                "gender" to user.gender,
+                "address" to user.address,
+                "customAvatarUrl" to user.customAvatarUrl,
+                "hasCustomAvatar" to user.hasCustomAvatar
+            )
+        ).await()
     }
+
+    private fun User.toProfileDocument(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "fullName" to fullName,
+        "email" to email,
+        "avatarUrl" to avatarUrl,
+        "membership" to membership,
+        "authProvider" to authProvider,
+        "createdAt" to createdAt
+    )
 
 }

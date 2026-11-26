@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="premium_title">Nâng cấp Premium</string>
+    <string name="premium_title">DogLens Premium</string>
     <string name="premium_brand">DogLens Premium</string>
-    <string name="premium_hero_subtitle">Khám phá quyền lợi dự kiến</string>
-    <string name="premium_benefits">Quyền lợi dự kiến</string>
-    <string name="premium_recognition">Thêm lượt nhận diện</string>
-    <string name="premium_history">Lịch sử mở rộng</string>
-    <string name="premium_suggestions">Gợi ý giống chó</string>
-    <string name="premium_plans">Các gói dự kiến</string>
+    <string name="premium_hero_subtitle">Dùng thử thanh toán Premium trên VNPAY Sandbox</string>
+    <string name="premium_plans">Chọn gói Premium</string>
     <string name="premium_monthly">Gói tháng</string>
     <string name="premium_yearly">Gói năm</string>
-    <string name="premium_coming_soon">Sắp ra mắt</string>
-    <string name="premium_unavailable">Chưa mở đăng ký</string>
-    <string name="premium_unavailable_detail">Giá và quyền lợi sẽ được công bố khi Premium ra mắt.</string>
-    <string name="premium_back_to_profile">Quay lại Cá nhân</string>
+    <string name="premium_price_period">%1$s / %2$d ngày</string>
+    <string name="premium_sandbox_note">Giá kiểm thử. Thanh toán một lần, không tự động gia hạn.</string>
+    <string name="premium_checkout">Tiếp tục với VNPAY Sandbox</string>
+    <string name="premium_checkout_continue">Mở lại VNPAY Sandbox</string>
+    <string name="premium_refresh">Kiểm tra giao dịch</string>
+    <string name="premium_loading">Đang kết nối dịch vụ thanh toán…</string>
+    <string name="premium_active_until">Premium có hiệu lực đến %1$s.</string>
+    <string name="premium_status_pending">Giao dịch đang chờ VNPAY xác nhận. Nếu đã thanh toán, hãy đợi rồi kiểm tra lại.</string>
+    <string name="premium_status_paid">VNPAY đã xác nhận thanh toán.</string>
+    <string name="premium_status_failed">Giao dịch không thành công hoặc đã bị hủy. Bạn có thể thử lại.</string>
+    <string name="premium_status_expired">Đơn đã hết hạn thanh toán. Bạn có thể tạo đơn mới.</string>
+    <string name="premium_status_review">Giao dịch đang cần đối soát. Vui lòng kiểm tra trên cổng quản trị Sandbox.</string>
+    <string name="premium_status_none">Bạn chưa có giao dịch Premium.</string>
+    <string name="premium_browser_unavailable">Không tìm thấy trình duyệt để mở VNPAY Sandbox.</string>
+    <string name="premium_confirm">Xác nhận gói kiểm thử</string>
+    <string name="premium_confirm_detail">%1$s · %2$s\nBạn sẽ được chuyển sang trang VNPAY Sandbox.</string>
     <string name="premium_back">Quay lại</string>
 
     <style name="PremiumHeading">
@@ -39,39 +47,17 @@
         <item name="android:textSize">14sp</item>
     </style>
 
-    <style name="PremiumCard">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/bg_profile_menu</item>
-        <item name="android:orientation">vertical</item>
-    </style>
-
-    <style name="PremiumBenefitRow">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">58dp</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:orientation">horizontal</item>
-        <item name="android:paddingHorizontal">14dp</item>
-        <item name="android:paddingVertical">9dp</item>
-    </style>
-
-    <style name="PremiumIcon">
-        <item name="android:layout_width">38dp</item>
-        <item name="android:layout_height">38dp</item>
-        <item name="android:padding">8dp</item>
-        <item name="android:contentDescription">@null</item>
-    </style>
-
     <style name="PremiumPlan">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:minHeight">74dp</item>
-        <item name="android:background">@drawable/bg_profile_menu</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:minHeight">72dp</item>
+        <item name="android:background">@drawable/bg_premium_plan_selector</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:padding">10dp</item>
+        <item name="android:padding">12dp</item>
     </style>
 
     <style name="PremiumPlanText">

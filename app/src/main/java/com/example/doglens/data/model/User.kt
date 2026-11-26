@@ -15,5 +15,6 @@ data class User(
     val gender: String = "",
     val address: String = "",
     val customAvatarUrl: String? = null,
-    val hasCustomAvatar: Boolean = false
+    val hasCustomAvatar: Boolean = false,
+    val premiumUntil: Long? = null
 )

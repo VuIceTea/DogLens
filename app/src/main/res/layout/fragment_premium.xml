@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/explore_background"
+    android:background="#F0F7FF"
     android:orientation="vertical">
 
     <FrameLayout
@@ -70,7 +70,7 @@
                         android:layout_width="34dp"
                         android:layout_height="30dp"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_premium_crown" />
+                        android:src="@drawable/ic_premium_diamond" />
                     <TextView
                         style="@style/PremiumHeading"
                         android:layout_marginTop="6dp"
@@ -93,79 +93,7 @@
                         android:contentDescription="@null"
                         android:scaleType="fitEnd"
                         android:src="@drawable/corgi" />
-                    <ImageView
-                        android:layout_width="33dp"
-                        android:layout_height="26dp"
-                        android:layout_gravity="top|center_horizontal"
-                        android:contentDescription="@null"
-                        android:rotation="12"
-                        android:src="@drawable/ic_premium_crown" />
                 </FrameLayout>
-            </LinearLayout>
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:layout_marginBottom="8dp">
-
-                <TextView
-                    style="@style/PremiumHeading"
-                    android:layout_marginEnd="38dp"
-                    android:text="@string/premium_benefits" />
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:alpha="0.25"
-                    android:contentDescription="@null"
-                    android:rotation="18"
-                    android:src="@drawable/ic_paw"
-                    app:tint="#168BFF" />
-            </FrameLayout>
-
-            <LinearLayout style="@style/PremiumCard">
-
-                <LinearLayout
-                    style="@style/PremiumBenefitRow">
-                    <ImageView
-                        style="@style/PremiumIcon"
-                        android:background="@drawable/bg_notification_icon_blue"
-                        android:src="@drawable/ic_premium_scan_outline"
-                        app:tint="#0877DE" />
-                    <TextView
-                        style="@style/PremiumRowTitle"
-                        android:layout_marginStart="12dp"
-                        android:text="@string/premium_recognition" />
-                </LinearLayout>
-                <View style="@style/SettingsDivider" />
-
-                <LinearLayout
-                    style="@style/PremiumBenefitRow">
-                    <ImageView
-                        style="@style/PremiumIcon"
-                        android:background="@drawable/bg_notification_icon_purple"
-                        android:src="@drawable/ic_premium_history_outline"
-                        app:tint="#783DC4" />
-                    <TextView
-                        style="@style/PremiumRowTitle"
-                        android:layout_marginStart="12dp"
-                        android:text="@string/premium_history" />
-                </LinearLayout>
-                <View style="@style/SettingsDivider" />
-
-                <LinearLayout
-                    style="@style/PremiumBenefitRow">
-                    <ImageView
-                        style="@style/PremiumIcon"
-                        android:background="@drawable/bg_settings_icon_teal"
-                        android:src="@drawable/ic_paw"
-                        app:tint="#087C63" />
-                    <TextView
-                        style="@style/PremiumRowTitle"
-                        android:layout_marginStart="12dp"
-                        android:text="@string/premium_suggestions" />
-                </LinearLayout>
             </LinearLayout>
 
             <TextView
@@ -175,94 +103,102 @@
                 android:text="@string/premium_plans" />
 
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:baselineAligned="false"
-                android:orientation="horizontal">
+                android:id="@+id/premiumPlanMonthly"
+                style="@style/PremiumPlan">
 
-                <LinearLayout
-                    style="@style/PremiumPlan">
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_premium_month_outline" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_premium_month_outline" />
 
-                    <LinearLayout
-                        style="@style/PremiumPlanText">
-
-                        <TextView
-                            style="@style/PremiumRowTitle"
-                            android:text="@string/premium_monthly" />
-
-                        <TextView
-                            style="@style/PremiumDescription"
-                            android:layout_marginTop="3dp"
-                            android:text="@string/premium_coming_soon" />
-                    </LinearLayout>
+                <LinearLayout style="@style/PremiumPlanText">
+                    <TextView
+                        style="@style/PremiumRowTitle"
+                        android:text="@string/premium_monthly" />
+                    <TextView
+                        android:id="@+id/premiumPriceMonthly"
+                        style="@style/PremiumDescription"
+                        android:layout_marginTop="3dp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    style="@style/PremiumPlan"
-                    android:layout_marginStart="10dp">
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_premium_year_outline" />
-
-                    <LinearLayout
-                        style="@style/PremiumPlanText">
-
-                        <TextView
-                            style="@style/PremiumRowTitle"
-                            android:text="@string/premium_yearly" />
-
-                        <TextView
-                            style="@style/PremiumDescription"
-                            android:layout_marginTop="3dp"
-                            android:text="@string/premium_coming_soon" />
-                    </LinearLayout>
-                </LinearLayout>
+                <RadioButton
+                    android:id="@+id/premiumRadioMonthly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:importantForAccessibility="no"
+                    app:buttonTint="#0873E5" />
             </LinearLayout>
 
             <LinearLayout
-                style="@style/PremiumBenefitRow"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_notification_unread">
+                android:id="@+id/premiumPlanYearly"
+                style="@style/PremiumPlan">
 
                 <ImageView
-                    style="@style/PremiumIcon"
-                    android:src="@drawable/ic_settings_info"
-                    app:tint="#0877DE" />
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_premium_year_outline" />
+
+                <LinearLayout style="@style/PremiumPlanText">
                     <TextView
                         style="@style/PremiumRowTitle"
-                        android:text="@string/premium_unavailable" />
+                        android:text="@string/premium_yearly" />
                     <TextView
+                        android:id="@+id/premiumPriceYearly"
                         style="@style/PremiumDescription"
-                        android:layout_marginTop="3dp"
-                        android:text="@string/premium_unavailable_detail" />
+                        android:layout_marginTop="3dp" />
                 </LinearLayout>
+
+                <RadioButton
+                    android:id="@+id/premiumRadioYearly"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:importantForAccessibility="no"
+                    app:buttonTint="#0873E5" />
             </LinearLayout>
 
+            <TextView
+                style="@style/PremiumDescription"
+                android:layout_marginTop="10dp"
+                android:text="@string/premium_sandbox_note" />
+
+            <TextView
+                android:id="@+id/tvPremiumStatus"
+                style="@style/PremiumDescription"
+                android:layout_width="match_parent"
+                android:layout_marginTop="16dp"
+                android:accessibilityLiveRegion="polite"
+                android:background="@drawable/bg_notification_unread"
+                android:padding="14dp"
+                android:visibility="gone" />
+
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnPremiumBackToProfile"
+                android:id="@+id/btnPremiumCheckout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:minHeight="52dp"
-                android:text="@string/premium_back_to_profile"
+                android:text="@string/premium_checkout"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 app:backgroundTint="#0873E5"
                 app:cornerRadius="16dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPremiumRefresh"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="48dp"
+                android:text="@string/premium_refresh"
+                android:textAllCaps="false"
+                android:textColor="#0873E5" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

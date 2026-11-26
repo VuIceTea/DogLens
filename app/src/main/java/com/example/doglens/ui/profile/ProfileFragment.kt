@@ -117,11 +117,13 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         txtEmail.text = user.email
 
         // Chuyển mã membership thành nội dung hiển thị
-        txtMembership.text = when (user.membership) {
-            "FREE" -> "Thành viên miễn phí"
-            "PREMIUM" -> "Thành viên Premium"
-            else -> user.membership
+        val paymentExpiry = user.premiumUntil
+        val hasPremium = if (paymentExpiry != null) {
+            paymentExpiry > System.currentTimeMillis()
+        } else {
+            user.membership == "PREMIUM"
         }
+        txtMembership.text = if (hasPremium) "Thành viên Premium" else "Thành viên miễn phí"
 
         val avatarUrl = if (
             user.hasCustomAvatar &&

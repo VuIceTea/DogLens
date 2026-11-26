@@ -29,6 +29,7 @@ import com.example.doglens.ui.auth.LoginFragment
 import com.example.doglens.ui.history.HistoryFragment
 import com.example.doglens.ui.article.ViewedArticlesFragment
 import com.example.doglens.ui.notification.NotificationFragment
+import com.example.doglens.ui.premium.PremiumFragment
 import com.example.doglens.ui.settings.SettingsFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -258,6 +259,19 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private val Int.dp: Float get() = this * resources.displayMetrics.density
 
     private fun setupProfileMenu(view: View) {
+        val openPremium = View.OnClickListener {
+            if (!parentFragmentManager.isStateSaved &&
+                parentFragmentManager.findFragmentById(R.id.fragmentContainer) === this
+            ) {
+                (requireActivity() as MainActivity).openScreen(
+                    PremiumFragment(),
+                    R.color.explore_background
+                )
+            }
+        }
+        view.findViewById<View>(R.id.premiumCard).setOnClickListener(openPremium)
+        view.findViewById<View>(R.id.btnPremium).setOnClickListener(openPremium)
+
         fun openEditProfile() {
             (requireActivity() as MainActivity).openScreen(
                 EditProfileFragment(),

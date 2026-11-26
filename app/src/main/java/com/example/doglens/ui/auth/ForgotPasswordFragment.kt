@@ -22,11 +22,15 @@ class ForgotPasswordFragment : Fragment(R.layout.fragment_forgot_password) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val email = view.findViewById<TextInputEditText>(R.id.etResetEmail)
+        if (savedInstanceState == null && email.text.isNullOrEmpty()) {
+            email.setText(arguments?.getString(ARG_EMAIL).orEmpty())
+        }
+        val resend = view.findViewById<TextView>(R.id.btnResend)
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<View>(R.id.btnBackToLogin).setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<View>(R.id.btnBackToLoginSuccess).setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<View>(R.id.btnSendReset).setOnClickListener { viewModel.send(email.text?.toString().orEmpty()) }
-        view.findViewById<View>(R.id.btnResend).setOnClickListener { viewModel.resend() }
+        resend.setOnClickListener { viewModel.resend() }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -37,6 +41,13 @@ class ForgotPasswordFragment : Fragment(R.layout.fragment_forgot_password) {
                     view.findViewById<View>(R.id.imgForgotDog).visibility = if (state.sent) View.GONE else View.VISIBLE
                     view.findViewById<TextView>(R.id.tvSentEmail).text = state.email
                     view.findViewById<View>(R.id.btnSendReset).isEnabled = !state.isLoading
+                    email.isEnabled = !state.isLoading
+                    resend.isEnabled = !state.isLoading && state.resendSeconds == 0
+                    resend.text = when {
+                        state.isLoading -> "Đang gửi lại…"
+                        state.resendSeconds > 0 -> getString(R.string.reset_resend_wait, state.resendSeconds)
+                        else -> getString(R.string.reset_resend)
+                    }
                     view.findViewById<View>(R.id.tvSendReset).visibility = if (state.isLoading) View.INVISIBLE else View.VISIBLE
                     view.findViewById<ProgressBar>(R.id.progressSendReset).visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     state.message?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show(); viewModel.consumeMessage() }
@@ -50,5 +61,13 @@ class ForgotPasswordFragment : Fragment(R.layout.fragment_forgot_password) {
         val background = ContextCompat.getColor(requireContext(), R.color.forgot_password_background)
         requireActivity().window.statusBarColor = background
         requireActivity().findViewById<View>(R.id.main)?.setBackgroundColor(background)
+    }
+
+    companion object {
+        private const val ARG_EMAIL = "reset_email"
+
+        fun newInstance(email: String) = ForgotPasswordFragment().apply {
+            arguments = Bundle().apply { putString(ARG_EMAIL, email) }
+        }
     }
 }

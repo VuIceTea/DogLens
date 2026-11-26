@@ -36,7 +36,7 @@ class FirestoreUserRepository(
         }
     }
 
-    override suspend fun ensureUser(firebaseUser: FirebaseUser) {
+    override suspend fun ensureUser(firebaseUser: FirebaseUser, registrationName: String?) {
         val uid = firebaseUser.uid
         val document = usersCollection.document(uid)
         val snapshot = document.get().await()
@@ -48,7 +48,7 @@ class FirestoreUserRepository(
         if (!snapshot.exists()) {
             val newUser = User(
                 id = uid,
-                fullName = firebaseUser.displayName ?: "",
+                fullName = registrationName ?: firebaseUser.displayName.orEmpty(),
                 email = firebaseUser.email ?: "",
                 avatarUrl = firebaseUser.photoUrl?.toString(),
                 membership = "FREE",

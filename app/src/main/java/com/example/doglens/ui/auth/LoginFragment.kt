@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
 import android.util.Log
+import android.util.Patterns
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageButton
@@ -15,7 +16,10 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.AppContainer
@@ -34,6 +38,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment(R.layout.fragment_login) {
+    private val emailAuth: EmailAuthViewModel by viewModels()
 
     private lateinit var auth: FirebaseAuth
     private lateinit var credentialManager: CredentialManager
@@ -55,6 +60,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         // Thiết lập đăng nhập Facebook
         setUpFacebookSignIn(view)
+        bindEmailLogin(view)
 
         // Bấm Chưa có tài khoản? Đăng ký
         view.findViewById<TextView>(R.id.tvGoToRegister).setOnClickListener {
@@ -66,9 +72,42 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         view.findViewById<TextView>(R.id.tvForgotPassword).setOnClickListener {
             (requireActivity() as MainActivity).openScreen(
-                ForgotPasswordFragment(),
+                ForgotPasswordFragment.newInstance(
+                    view.findViewById<EditText>(R.id.etLoginEmail).text.toString().trim()
+                ),
                 R.color.forgot_password_background
             )
+        }
+    }
+
+    private fun bindEmailLogin(view: View) {
+        val email = view.findViewById<EditText>(R.id.etLoginEmail)
+        val password = view.findViewById<EditText>(R.id.etLoginPassword)
+        val submit = view.findViewById<TextView>(R.id.btnLogin)
+        val label = submit.text
+        val otherActions = listOf(R.id.btnGoogleLogin, R.id.btnFacebookLogin, R.id.tvGoToRegister, R.id.tvForgotPassword)
+
+        submit.setOnClickListener {
+            val address = email.text.toString().trim()
+            val secret = password.text.toString()
+            when {
+                !Patterns.EMAIL_ADDRESS.matcher(address).matches() -> email.error = "Nhập email hợp lệ"
+                secret.isEmpty() -> password.error = "Nhập mật khẩu"
+                else -> emailAuth.signIn(address, secret)
+            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                emailAuth.state.collect { state ->
+                    submit.isEnabled = !state.loading
+                    submit.text = if (state.loading) "Đang đăng nhập…" else label
+                    otherActions.forEach { view.findViewById<View>(it).isEnabled = !state.loading }
+                    state.message?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
+                    if (state.completed || state.message != null) emailAuth.consumeOutcome()
+                    if (state.completed) navigateToHome()
+                }
+            }
         }
     }
 

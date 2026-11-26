@@ -19,6 +19,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.doglens.R
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.auth.ChangePasswordFragment
+import com.google.firebase.auth.FirebaseAuth
 import com.google.android.material.switchmaterial.SwitchMaterial
 import kotlinx.coroutines.launch
 
@@ -43,12 +44,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         bindRow(view, R.id.rowPassword, R.drawable.ic_lock, "Đổi mật khẩu", "Cập nhật mật khẩu tài khoản") {
             (requireActivity() as MainActivity).openScreen(ChangePasswordFragment(), R.color.explore_background)
         }
-        bindRow(view, R.id.rowDeleteAccount, R.drawable.ic_settings_delete, "Xóa tài khoản", "Xóa vĩnh viễn dữ liệu của bạn") {
-            AlertDialog.Builder(requireContext()).setTitle("Xóa tài khoản?")
-                .setMessage("Hành động này sẽ xóa vĩnh viễn dữ liệu của bạn.")
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Xóa") { _, _ -> Toast.makeText(requireContext(), "Chưa kết nối chức năng xóa tài khoản", Toast.LENGTH_SHORT).show() }
-                .show()
+        bindRow(view, R.id.rowDeleteAccount, R.drawable.ic_settings_delete, "Xóa tài khoản", "Xóa tài khoản và hồ sơ DogLens") {
+            confirmDeleteAccount()
         }
         bindRow(view, R.id.rowTerms, R.drawable.ic_settings_document, "Điều khoản sử dụng", null) { showInfo("Điều khoản sử dụng") }
         bindRow(view, R.id.rowPrivacy, R.drawable.ic_settings_privacy, "Chính sách riêng tư", null) { showInfo("Chính sách riêng tư") }
@@ -71,9 +68,45 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                     toggle(view, R.id.rowTheme).isChecked = state.darkMode
                     toggle(view, R.id.rowRecognitionNotification).isChecked = state.recognitionNotifications
                     toggle(view, R.id.rowArticleNotification).isChecked = state.articleNotifications
+                    val deleteRow = view.findViewById<View>(R.id.rowDeleteAccount)
+                    deleteRow.isEnabled = !state.deletingAccount
+                    deleteRow.findViewById<TextView>(R.id.tvSettingSubtitle).text =
+                        if (state.deletingAccount) "Đang xóa tài khoản…" else "Xóa tài khoản và hồ sơ DogLens"
+                    state.deletionMessage?.let {
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+                        viewModel.consumeDeletionOutcome()
+                    }
+                    if (state.accountDeleted) {
+                        viewModel.consumeDeletionOutcome()
+                        Toast.makeText(requireContext(), "Tài khoản DogLens đã được xóa.", Toast.LENGTH_LONG).show()
+                        (requireActivity() as MainActivity).goToHome()
+                    }
                 }
             }
         }
+    }
+
+    private fun confirmDeleteAccount() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(requireContext(), "Bạn cần đăng nhập để xóa tài khoản.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (!resources.getBoolean(R.bool.account_deletion_enabled)) {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Xóa tài khoản")
+                .setMessage("Tính năng xóa tài khoản hiện chưa khả dụng.")
+                .setPositiveButton("Đóng", null)
+                .show()
+            return
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Xóa tài khoản?")
+            .setMessage("Tài khoản và hồ sơ DogLens của bạn sẽ bị xóa vĩnh viễn.")
+            .setNegativeButton("Hủy", null)
+            .setPositiveButton("Xóa tài khoản") { _, _ -> viewModel.deleteAccount(uid) }
+            .show()
     }
 
     private fun bindRow(view: View, id: Int, icon: Int, title: String, subtitle: String?, value: String? = null, showChevron: Boolean = true, click: (() -> Unit)?) {

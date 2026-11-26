@@ -9,7 +9,7 @@ interface UserRepository {
     fun observeUser(uid: String): Flow<User?>
 
     // Tạo hồ sơ lần đầu nếu chưa có
-    suspend fun ensureUser(firebaseUser: FirebaseUser)
+    suspend fun ensureUser(firebaseUser: FirebaseUser, registrationName: String? = null)
 
     // Cập nhật hồ sơ người dùng
     suspend fun updateUser(user: User)

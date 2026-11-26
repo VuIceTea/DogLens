@@ -32,7 +32,6 @@ import com.example.doglens.ui.notification.NotificationFragment
 import com.example.doglens.ui.premium.PremiumFragment
 import com.example.doglens.ui.settings.SettingsFragment
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -62,10 +61,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
-        observeUser(view)
         setupAvatar(view)
         setupProfileMenu(view)
-        loadProfile(view)
+        observeUser(view)
     }
 
 
@@ -75,12 +73,25 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 Lifecycle.State.STARTED
             ) {
                 userViewModel.uiState.collect { state ->
+                    val user = state.user
+                    val signedIn = user != null
+                    val accountVisibility = if (signedIn) View.VISIBLE else View.GONE
+                    view.findViewById<View>(R.id.txtEmail).visibility = accountVisibility
+                    view.findViewById<View>(R.id.txtMembership).visibility = accountVisibility
+                    view.findViewById<View>(R.id.premiumCard).visibility = accountVisibility
+                    val stats = view.findViewById<RecyclerView>(R.id.rvProfileStats)
+                    stats.visibility = accountVisibility
+                    view.findViewById<View>(R.id.imgChangeAvatar).visibility = accountVisibility
+                    view.findViewById<View>(R.id.layoutLogoutMenu).visibility = accountVisibility
 
-                    if (state.isLoading) {
-                    }
-
-                    state.user?.let { user ->
+                    if (user == null) {
+                        view.findViewById<TextView>(R.id.txtName).setText(R.string.profile_not_signed_in)
+                        view.findViewById<TextView>(R.id.txtEmail).text = null
+                        Glide.with(this@ProfileFragment).clear(imgUserAvatar)
+                        imgUserAvatar.setImageResource(R.drawable.avatar_golden_retriever)
+                    } else {
                         displayUser(view, user)
+                        if (stats.adapter == null) loadProfile(view)
                     }
 
                     state.error?.let { message ->
@@ -102,7 +113,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         val txtMembership = view.findViewById<TextView>(R.id.txtMembership)
         val imgAvatar = view.findViewById<ImageView>(R.id.imgUserAvatar)
 
-        txtName.text = user.fullName
+        txtName.text = user.fullName.ifBlank { user.email }
         txtEmail.text = user.email
 
         // Chuyển mã membership thành nội dung hiển thị
@@ -139,7 +150,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // Bấm vào avatar
         avatarContainer.setOnClickListener {
-            openImagePicker()
+            if (FirebaseAuth.getInstance().currentUser != null) {
+                openImagePicker()
+            } else {
+                openLogin()
+            }
         }
 
         // Bấm vào icon camera
@@ -258,6 +273,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private val Int.dp: Float get() = this * resources.displayMetrics.density
 
+    private fun openLogin() {
+        (requireActivity() as MainActivity).openScreen(LoginFragment(), R.color.home_background)
+    }
+
     private fun setupProfileMenu(view: View) {
         val openPremium = View.OnClickListener {
             if (!parentFragmentManager.isStateSaved &&
@@ -273,6 +292,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         view.findViewById<View>(R.id.btnPremium).setOnClickListener(openPremium)
 
         fun openEditProfile() {
+            if (FirebaseAuth.getInstance().currentUser == null) {
+                openLogin()
+                return
+            }
             (requireActivity() as MainActivity).openScreen(
                 EditProfileFragment(),
                 R.color.explore_background

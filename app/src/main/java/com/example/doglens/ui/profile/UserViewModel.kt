@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.User
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,42 +14,57 @@ import kotlinx.coroutines.launch
 
 
 data class UserUiState(
-    val isLoading: Boolean = true,
     val user: User? = null,
     val error: String? = null
 )
 
 class UserViewModel : ViewModel() {
+    private val auth = FirebaseAuth.getInstance()
     private val userRepository = AppContainer.userRepository
     private val _uiState = MutableStateFlow(UserUiState())
     val uiState: StateFlow<UserUiState> = _uiState.asStateFlow()
+    private var observedUid: String? = null
+    private var profileJob: Job? = null
+    private val authListener = FirebaseAuth.AuthStateListener { loadUser() }
 
     init {
         loadUser()
+        auth.addAuthStateListener(authListener)
     }
 
     private fun loadUser() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
-        if (uid == null) {
-            _uiState.value = UserUiState(
-                isLoading = false,
-                error = "Không tìm thấy thông tin tài khoản"
-            )
+        val account = auth.currentUser
+        if (observedUid == account?.uid) return
+
+        observedUid = account?.uid
+        profileJob?.cancel()
+        if (account == null) {
+            _uiState.value = UserUiState()
             return
         }
-        viewModelScope.launch {
-            userRepository.observeUser(uid)
-                .catch { exeption ->
+
+        val fallback = User(
+            id = account.uid,
+            fullName = account.displayName.orEmpty().ifBlank { account.email.orEmpty() },
+            email = account.email.orEmpty(),
+            avatarUrl = account.photoUrl?.toString()
+        )
+        _uiState.value = UserUiState(user = fallback)
+        profileJob = viewModelScope.launch {
+            userRepository.observeUser(account.uid)
+                .catch { exception ->
                     _uiState.value = UserUiState(
-                        isLoading = false,
-                        error = exeption.message ?: "Không thể tải thông tin người dùng."
+                        user = fallback,
+                        error = exception.message ?: "Không thể tải thông tin người dùng."
                     )
                 }.collect { user ->
-                    _uiState.value = UserUiState(
-                        isLoading = false,
-                        user = user
-                    )
+                    _uiState.value = UserUiState(user = user ?: fallback)
                 }
         }
+    }
+
+    override fun onCleared() {
+        auth.removeAuthStateListener(authListener)
+        super.onCleared()
     }
 }

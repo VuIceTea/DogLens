@@ -103,7 +103,8 @@
                     android:focusable="true"
                     android:padding="8dp"
                     android:scaleType="centerInside"
-                    android:src="@drawable/ic_camera_white" />
+                    android:src="@drawable/ic_camera_white"
+                    android:visibility="gone" />
             </FrameLayout>
 
             <!-- User Information-->
@@ -121,6 +122,7 @@
                     android:ellipsize="end"
                     android:fontFamily="@font/nunitosans_extrabold"
                     android:maxLines="1"
+                    android:text="@string/profile_not_signed_in"
                     android:textColor="#10213D"
                     android:textSize="21sp"
                     android:textStyle="bold"
@@ -135,6 +137,7 @@
                     android:maxLines="1"
                     android:textColor="#71809B"
                     android:textSize="14sp"
+                    android:visibility="gone"
                     tools:text="nguyenphivu@gmail.com" />
 
                 <!-- Mamber Ship-->
@@ -151,7 +154,8 @@
                     android:text="Thành viên miễn phí"
                     android:textColor="#1585FD"
                     android:textSize="13sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:visibility="gone" />
             </LinearLayout>
 
             <ImageButton
@@ -168,6 +172,7 @@
 
         <FrameLayout
             android:id="@+id/premiumCard"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_marginTop="16dp"
@@ -250,6 +255,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvProfileStats"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -334,6 +340,7 @@
 
         <LinearLayout
             android:id="@+id/layoutLogoutMenu"
+            android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"

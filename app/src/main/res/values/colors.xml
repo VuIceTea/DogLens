@@ -5,6 +5,7 @@
     <color name="red">#FF0000</color>
     <color name="home_background">#DEF6FD</color>
     <color name="explore_background">#F7F9FC</color>
+    <color name="forgot_password_background">#F3F8FF</color>
     <color name="favorite_background">#F7F9FC</color>
     <color name="profile_background">#F7F9FC</color>
     <color name="recognition_background">#F7F9FC</color>

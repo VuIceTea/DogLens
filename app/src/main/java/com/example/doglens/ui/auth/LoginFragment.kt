@@ -85,14 +85,33 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val password = view.findViewById<EditText>(R.id.etLoginPassword)
         val submit = view.findViewById<TextView>(R.id.btnLogin)
         val label = submit.text
+        val emailError = view.findViewById<TextView>(R.id.tvLoginEmailError)
+        val passwordError = view.findViewById<TextView>(R.id.tvLoginPasswordError)
+        emailError.clearErrorOnEdit(email)
+        passwordError.clearErrorOnEdit(password)
+        passwordError.clearErrorOnEdit(email)
+        parentFragmentManager.setFragmentResultListener(
+            RegisterFragment.REGISTERED_EMAIL_RESULT, viewLifecycleOwner
+        ) { _, result ->
+            email.setText(result.getString(RegisterFragment.REGISTERED_EMAIL))
+            password.text.clear()
+        }
         val otherActions = listOf(R.id.btnGoogleLogin, R.id.btnFacebookLogin, R.id.tvGoToRegister, R.id.tvForgotPassword)
 
         submit.setOnClickListener {
             val address = email.text.toString().trim()
             val secret = password.text.toString()
+            val addressError = when {
+                address.isEmpty() -> "Vui lòng nhập email."
+                !Patterns.EMAIL_ADDRESS.matcher(address).matches() -> "Nhập email hợp lệ."
+                else -> null
+            }
+            val secretError = if (secret.isEmpty()) "Vui lòng nhập mật khẩu." else null
+            emailError.showFieldError(addressError)
+            passwordError.showFieldError(secretError)
             when {
-                !Patterns.EMAIL_ADDRESS.matcher(address).matches() -> email.error = "Nhập email hợp lệ"
-                secret.isEmpty() -> password.error = "Nhập mật khẩu"
+                addressError != null -> email.requestFocus()
+                secretError != null -> password.requestFocus()
                 else -> emailAuth.signIn(address, secret)
             }
         }
@@ -101,9 +120,20 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 emailAuth.state.collect { state ->
                     submit.isEnabled = !state.loading
+                    email.isEnabled = !state.loading
+                    password.isEnabled = !state.loading
                     submit.text = if (state.loading) "Đang đăng nhập…" else label
                     otherActions.forEach { view.findViewById<View>(it).isEnabled = !state.loading }
                     state.message?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
+                    state.passwordError?.let {
+                        passwordError.showFieldError(it)
+                        password.requestFocus()
+                        emailAuth.consumeOutcome()
+                    }
+                    state.verification?.let { verification ->
+                        emailAuth.consumeOutcome()
+                        showEmailVerification(verification, "Đã hiểu") { password.requestFocus() }
+                    }
                     if (state.completed || state.message != null) emailAuth.consumeOutcome()
                     if (state.completed) navigateToHome()
                 }

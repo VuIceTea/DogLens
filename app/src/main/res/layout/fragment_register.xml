@@ -117,7 +117,7 @@
             android:padding="20dp"
             app:layout_constraintTop_toBottomOf="@id/tvWelcomeDesc">
 
-            <!-- Email -->
+            <!-- Full name -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="54dp"
@@ -143,6 +143,11 @@
                     android:textColorHint="#94A3B8"
                     android:textSize="14dp"/>
             </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/tvRegisterNameError"
+                style="@style/AuthInputError" />
 
             <!-- Email -->
             <LinearLayout
@@ -171,6 +176,11 @@
                     android:textColorHint="#94A3B8"
                     android:textSize="14dp"/>
             </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/tvRegisterEmailError"
+                style="@style/AuthInputError" />
 
             <!-- Password -->
             <LinearLayout
@@ -208,6 +218,11 @@
                     app:tint="#94A3B8"/>
             </LinearLayout>
 
+
+            <TextView
+                android:id="@+id/tvRegisterPasswordError"
+                style="@style/AuthInputError" />
+
             <!-- Confirm Password -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -243,6 +258,11 @@
                     android:src="@drawable/ic_visibility_off"
                     app:tint="#94A3B8"/>
             </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/tvRegisterConfirmError"
+                style="@style/AuthInputError" />
 
             <!-- Login button -->
             <androidx.appcompat.widget.AppCompatButton

@@ -144,6 +144,11 @@
                     android:textSize="14dp"/>
             </LinearLayout>
 
+
+            <TextView
+                android:id="@+id/tvLoginEmailError"
+                style="@style/AuthInputError" />
+
             <!-- Password -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -179,6 +184,11 @@
                     android:src="@drawable/ic_visibility_off"
                     app:tint="#94A3B8"/>
             </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/tvLoginPasswordError"
+                style="@style/AuthInputError" />
 
             <!-- Forgot Password -->
             <TextView

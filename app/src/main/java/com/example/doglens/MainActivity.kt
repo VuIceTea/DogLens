@@ -13,6 +13,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
+import com.example.doglens.ui.auth.ForgotPasswordFragment
+import com.example.doglens.ui.auth.LoginFragment
+import com.example.doglens.ui.auth.RegisterFragment
 import com.example.doglens.ui.home.HomeFragment
 import com.example.doglens.ui.explore.ExploreFragment
 import com.example.doglens.ui.favorite.FavoriteFragment
@@ -64,6 +67,21 @@ class MainActivity : AppCompatActivity() {
 
         currentColor = ContextCompat.getColor(this, R.color.home_background)
 
+        supportFragmentManager.registerFragmentLifecycleCallbacks(
+            object : FragmentManager.FragmentLifecycleCallbacks() {
+                override fun onFragmentViewCreated(
+                    fm: FragmentManager,
+                    fragment: Fragment,
+                    view: View,
+                    savedInstanceState: Bundle?
+                ) {
+                    if (fragment.id == R.id.fragmentContainer) updateBottomNavigation(fragment)
+                }
+            },
+            false
+        )
+        updateBottomNavigation(supportFragmentManager.findFragmentById(R.id.fragmentContainer))
+
         if (savedInstanceState == null) {
             showFragment(HomeFragment(), animate = false)
         }
@@ -85,21 +103,32 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Back stack rỗng = đang ở 4 tab chính -> hiện bottom nav; còn màn phụ -> ẩn
         supportFragmentManager.addOnBackStackChangedListener {
-            if (supportFragmentManager.backStackEntryCount == 0) {
-                bottomNavigation.visibility = View.VISIBLE
-                applyBackground(tabBackground(currentTabId), animate = true)
-            } else {
-                bottomNavigation.visibility = View.GONE
-                applyBackground(screenBackgroundRes, animate = false)
+            val current = supportFragmentManager.findFragmentById(R.id.fragmentContainer)
+            val isTab = updateBottomNavigation(current)
+            val background = when (current) {
+                is LoginFragment, is RegisterFragment -> R.color.home_background
+                is ForgotPasswordFragment -> R.color.forgot_password_background
+                else -> if (isTab) tabBackground(currentTabId) else screenBackgroundRes
             }
+            applyBackground(background, animate = isTab)
         }
+    }
 
-        // Xoay màn hình khi đang ở màn phụ -> vẫn ẩn bottom nav
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            bottomNavigation.visibility = View.GONE
+    private fun updateBottomNavigation(fragment: Fragment?): Boolean {
+        val tabId = when (fragment) {
+            is HomeFragment -> R.id.nav_home
+            is ExploreFragment -> R.id.nav_explore
+            is FavoriteFragment -> R.id.nav_favorite
+            is ProfileFragment -> R.id.nav_profile
+            else -> null
         }
+        if (tabId != null) {
+            currentTabId = tabId
+            bottomNavigation.menu.findItem(tabId).isChecked = true
+        }
+        bottomNavigation.visibility = if (tabId != null) View.VISIBLE else View.GONE
+        return tabId != null
     }
 
     private fun getTabIndex(itemId: Int): Int = when (itemId) {
@@ -188,9 +217,6 @@ class MainActivity : AppCompatActivity() {
 
     fun goToHome() {
         supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-        bottomNavigation.visibility = View.VISIBLE
-        bottomNavigation.menu.findItem(R.id.nav_home).isChecked = true
-        currentTabId = R.id.nav_home
         showFragment(HomeFragment(), animate = false)
     }
 }

@@ -432,9 +432,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             // Đăng xuất Firebase
             FirebaseAuth.getInstance().signOut()
 
-            // Ẩn thanh Bottom Navigation của MainActivity
-            activity?.findViewById<View>(R.id.bottomNavigation)?.visibility = View.GONE
-
             // Chuyển sang màn hình LoginFragment
             parentFragmentManager.beginTransaction()
                 .setCustomAnimations(

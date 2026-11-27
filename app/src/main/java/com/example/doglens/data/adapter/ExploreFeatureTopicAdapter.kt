@@ -1,5 +1,7 @@
 package com.example.doglens.data.adapter
 
+import com.bumptech.glide.Glide
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,11 +46,7 @@ class ExploreFeatureTopicAdapter(
 
         holder.title.text = topic.title
 
-        if(topic.localImageRes != null) {
-            holder.image.setImageResource(topic.localImageRes)
-        } else {
-            holder.image.setImageDrawable(null)
-        }
+        Glide.with(holder.image).load(topic.imageUrl ?: topic.localImageRes).into(holder.image)
 
         holder.itemView.setOnClickListener {
             onClick(topic)

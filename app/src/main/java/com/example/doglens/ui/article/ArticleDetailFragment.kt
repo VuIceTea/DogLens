@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.doglens.R
+import com.example.doglens.utils.addCatalogSources
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -28,23 +29,28 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
         super.onViewCreated(view, savedInstanceState)
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
         val bookmarkButton = view.findViewById<ImageButton>(R.id.btnBookmark)
-        bookmarkButton.setOnClickListener {
-            val wasBookmarked = viewModel.state.value.isBookmarked
-            viewModel.toggleBookmark()
-            Toast.makeText(
-                requireContext(),
-                if (wasBookmarked) "Đã bỏ lưu bài viết" else "Đã lưu bài viết",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+        val articleId = requireArguments().getString(ARG_ARTICLE_ID).orEmpty()
+        val loadStatus = view.findViewById<TextView>(R.id.articleLoadStatus)
+        loadStatus.setOnClickListener { viewModel.load(articleId, retry = true) }
+        bookmarkButton.setOnClickListener { viewModel.toggleBookmark() }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
+                    bookmarkButton.isEnabled = state.article != null && !state.isSaving
+                    if (state.article != null) state.error?.let {
+                        viewModel.clearError()
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    }
                     bookmarkButton.setImageResource(
                         if (state.isBookmarked) R.drawable.ic_article_bookmark_saved
                         else R.drawable.ic_article_bookmark_outline
                     )
-                    val article = state.article ?: return@collect
+                    val article = state.article
+                    view.findViewById<View>(R.id.articleScroll).visibility = if (article == null) View.GONE else View.VISIBLE
+                    loadStatus.visibility = if (article == null) View.VISIBLE else View.GONE
+                    loadStatus.text = if (state.isLoading) "Đang tải bài viết…" else "Không thể tải bài viết. Thử lại"
+                    loadStatus.isClickable = !state.isLoading
+                    if (article == null) return@collect
                     val image = view.findViewById<ImageView>(R.id.imgHero)
                     when {
                         article.localImageRes != null -> image.setImageResource(article.localImageRes)
@@ -56,14 +62,16 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
                     }
                     view.findViewById<TextView>(R.id.tvTitle).text = article.title
                     view.findViewById<TextView>(R.id.tvDate).text = article.publishedAt
-                    view.findViewById<TextView>(R.id.tvViews).text = "${article.viewCount} lượt xem"
+                    view.findViewById<TextView>(R.id.tvViews).text =
+                        if (article.viewCount > 0) "${article.viewCount} lượt xem" else "— lượt xem"
                     view.findViewById<TextView>(R.id.tvReadTime).text = "${article.readMinutes} phút đọc"
                     view.findViewById<TextView>(R.id.tvSummary).text = article.summary
                     renderSections(view, state.sections)
+                    view.findViewById<LinearLayout>(R.id.sectionsContainer).addCatalogSources(article.sources)
                 }
             }
         }
-        viewModel.load(requireArguments().getString(ARG_ARTICLE_ID).orEmpty())
+        viewModel.load(articleId)
     }
 
     private fun renderSections(view: View, sections: List<com.example.doglens.data.model.ArticleSection>) {

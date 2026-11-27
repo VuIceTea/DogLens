@@ -9,5 +9,6 @@ data class Article(
     val localImageRes: Int? = null,
     val publishedAt: String,
     val readMinutes: Int = 0,
-    val viewCount: Int = 0
+    val viewCount: Int = 0,
+    val sources: Map<String, String> = emptyMap()
 )

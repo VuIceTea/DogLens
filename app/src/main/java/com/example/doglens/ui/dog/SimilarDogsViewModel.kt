@@ -5,13 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.SimilarDogItem
+import com.example.doglens.data.model.hasComparableSize
+import com.example.doglens.data.model.sizeSimilarityTo
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.abs
-import kotlin.math.roundToInt
 
 data class SimilarDogsUiState(
     val isLoading: Boolean = true,
@@ -33,25 +35,34 @@ class SimilarDogsViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value = SimilarDogsUiState(isLoading = true)
             try {
-                val source = repository.getDogById(dogId)
-                    ?: error("Không tìm thấy giống chó")
-                val dogs = repository.getDogs().filterNot { it.id == source.id }
-                val traits = repository.getTraits().associateBy { it.id }
-                val traitNames = dogs.associate { dog ->
-                    dog.id to repository.getDogTraits(dog.id)
-                        .mapNotNull { traits[it.traitId]?.name }
-                        .take(3)
-                }
-                val items = dogs
-                    .map { SimilarDogItem(it, calculateSimilarity(source, it)) }
+                val dogs = repository.getDogs()
+                val source = dogs.firstOrNull { it.id == dogId } ?: error("Không tìm thấy giống chó")
+                val items = if (!source.hasComparableSize()) emptyList() else dogs
+                    .filter { it.id != source.id }
+                    .mapNotNull { candidate ->
+                        source.sizeSimilarityTo(candidate)?.let { SimilarDogItem(candidate, it) }
+                    }
                     .sortedByDescending { it.similarityPercent }
-
+                    .take(12)
                 _state.value = SimilarDogsUiState(
                     isLoading = false,
                     sourceDog = source,
-                    items = items,
-                    traitNames = traitNames
+                    items = items
                 )
+                if (items.isEmpty()) return@launch
+                try {
+                    val (links, traits) = coroutineScope {
+                        val labels = async { repository.getTraits().associateBy { it.id } }
+                        repository.getDogTraitsByDog(items.map { it.dog.id }.toSet()) to labels.await()
+                    }
+                    _state.value = _state.value.copy(traitNames = links.mapValues { (_, dogTraits) ->
+                        dogTraits.mapNotNull { traits[it.traitId]?.name }.take(3)
+                    })
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    // The size comparison is usable while trait labels are unavailable.
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (exception: Exception) {
@@ -63,25 +74,4 @@ class SimilarDogsViewModel : ViewModel() {
         }
     }
 
-    private fun calculateSimilarity(source: Dog, candidate: Dog): Int {
-        var score = 54f
-        if (source.sizeCategoryId == candidate.sizeCategoryId) score += 16f
-        score += closeness(source.minWeightKg, candidate.minWeightKg, 35, 5f)
-        score += closeness(source.maxHeightCm, candidate.maxHeightCm, 50, 5f)
-        score += scoreCloseness(source.familyScore, candidate.familyScore)
-        score += scoreCloseness(source.kidsScore, candidate.kidsScore)
-        score += scoreCloseness(source.trainingScore, candidate.trainingScore)
-        score += scoreCloseness(source.apartmentScore, candidate.apartmentScore)
-        return score.roundToInt().coerceIn(68, 96)
-    }
-
-    private fun closeness(a: Int?, b: Int?, range: Int, points: Float): Float {
-        if (a == null || b == null) return 0f
-        return (1f - abs(a - b).toFloat() / range).coerceIn(0f, 1f) * points
-    }
-
-    private fun scoreCloseness(a: Int?, b: Int?): Float {
-        if (a == null || b == null) return 0f
-        return (5 - abs(a - b)).coerceAtLeast(0) * 1.25f
-    }
 }

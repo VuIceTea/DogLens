@@ -2,8 +2,11 @@ package com.example.doglens.ui.notification
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -30,7 +33,16 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
             adapter = notificationAdapter
         }
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
-        view.findViewById<View>(R.id.btnReadAll).setOnClickListener { viewModel.markAllRead() }
+        val readAll = view.findViewById<View>(R.id.btnReadAll)
+        if (resources.configuration.run { screenWidthDp / fontScale < 300 }) {
+            val header = view.findViewById<LinearLayout>(R.id.notificationHeader)
+            val column = header.parent as LinearLayout
+            header.removeView(readAll)
+            column.addView(readAll, column.indexOfChild(header) + 1, LinearLayout.LayoutParams(-2, -2).apply {
+                gravity = Gravity.END
+            })
+        }
+        readAll.setOnClickListener { viewModel.markAllRead() }
         bindFilter(view, R.id.filterAll, NotificationFilter.ALL)
         bindFilter(view, R.id.filterRecognition, NotificationFilter.RECOGNITION)
         bindFilter(view, R.id.filterUpdate, NotificationFilter.UPDATE)
@@ -38,6 +50,10 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
+                    state.error?.let {
+                        viewModel.clearError()
+                        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                    }
                     notificationAdapter.submitList(state.rows)
                     updateFilters(view, state.selectedFilter)
                     view.findViewById<TextView>(R.id.tvEmpty).visibility = if (state.rows.isEmpty()) View.VISIBLE else View.GONE

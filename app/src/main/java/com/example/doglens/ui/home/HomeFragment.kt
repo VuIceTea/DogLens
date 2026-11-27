@@ -2,23 +2,33 @@ package com.example.doglens.ui.home
 
 import android.net.Uri
 import android.os.Bundle
+import android.graphics.drawable.GradientDrawable
 import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.MainActivity
 import com.example.doglens.R
-import com.example.doglens.data.adapter.HomeFeatureAdapter
 import com.example.doglens.data.adapter.PopularDogAdapter
-import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.HomeFeature
 import com.example.doglens.ui.recognition.RecognitionFragment
 import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.ui.camera.CameraFragment
+import com.example.doglens.ui.article.openArticleCatalog
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
+    private val viewModel: HomeViewModel by activityViewModels()
 
     override fun onViewCreated(
         view: View,
@@ -62,7 +72,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     // Hiển thị các tính năng trên trang chủ
     private fun setupHomeFeatures(view: View) {
-        val recyclerView = view.findViewById<RecyclerView>(
+        val featureGrid = view.findViewById<LinearLayout>(
             R.id.rvHomeFeatures
         )
 
@@ -97,33 +107,32 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             )
         )
 
-        val adapter = HomeFeatureAdapter(features) { feature ->
-            when (feature.id) {
-                "identify" -> {
-                    (requireActivity() as MainActivity).openScreen(
-                        CameraFragment(),
-                        R.color.recognition_background
+        val density = resources.displayMetrics.density
+        val cardWidth = (90 * resources.configuration.fontScale.coerceIn(1f, 1.65f) * density).toInt()
+        features.forEach { feature ->
+            val card = layoutInflater.inflate(R.layout.item_home_feature, featureGrid, false)
+            card.findViewById<ImageView>(R.id.imgFeature).setImageResource(feature.image)
+            card.findViewById<TextView>(R.id.txtFeatureTitle).text = feature.title
+            card.findViewById<TextView>(R.id.txtFeatureDesc).text = feature.description
+            card.background = GradientDrawable().apply {
+                setColor(feature.backgroundColor)
+                cornerRadius = 16f * density
+            }
+            card.setOnClickListener {
+                when (feature.id) {
+                    "identify" -> (requireActivity() as MainActivity).openScreen(
+                        CameraFragment(), R.color.recognition_background
                     )
-                }
-
-                else -> {
-                    Toast.makeText(
-                        requireContext(),
-                        "Bạn chọn: ${feature.title}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    "information" -> openArticleCatalog()
+                    "favorite" -> (requireActivity() as MainActivity).selectFavoriteTab()
+                    else -> Toast.makeText(requireContext(), "Bạn chọn: ${feature.title}", Toast.LENGTH_SHORT).show()
                 }
             }
+            val params = card.layoutParams as LinearLayout.LayoutParams
+            params.width = cardWidth
+            params.weight = 1f
+            featureGrid.addView(card, params)
         }
-
-        recyclerView.layoutManager = LinearLayoutManager(
-            requireContext(),
-            LinearLayoutManager.HORIZONTAL,
-            false
-        )
-
-        recyclerView.adapter = adapter
-        recyclerView.isNestedScrollingEnabled = false
     }
 
     // Hiển thị các giống chó phổ biến
@@ -132,63 +141,45 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             R.id.rvHomePopular
         )
 
-        val popularDogs = listOf(
-            Dog(
-                id = "golden_retriever",
-                name = "Golden Retriever",
-                description = "Thân thiện, thông minh",
-                localImageRes = R.drawable.golden_retriever,
-                backgroundColorHex = "#E3E2E2",
-                sortOrder = 1
-            ),
-            Dog(
-                id = "corgi",
-                name = "Corgi",
-                description = "Năng động, đáng yêu",
-                localImageRes = R.drawable.corgi,
-                backgroundColorHex = "#E3E2E2",
-                sortOrder = 2
-            ),
-            Dog(
-                id = "siberian_husky",
-                name = "Husky",
-                description = "Mạnh mẽ, năng động",
-                localImageRes = R.drawable.siberian_husky,
-                backgroundColorHex = "#E3E2E2",
-                sortOrder = 3
-            ),
-            Dog(
-                id = "poodle",
-                name = "Poodle",
-                description = "Thông minh, dễ huấn luyện",
-                localImageRes = R.drawable.poodle,
-                backgroundColorHex = "#E3E2E2",
-                sortOrder = 4
-            ),
-            Dog(
-                id = "french_bulldog",
-                name = "French Bulldog",
-                description = "Điềm tĩnh, tình cảm",
-                localImageRes = R.drawable.french_bulldog,
-                backgroundColorHex = "#E3E2E2",
-                sortOrder = 5
-            )
-        )
-
-        val popularAdapter = PopularDogAdapter(
-            popularDogs.sortedBy { it.sortOrder }
-        ) { dog ->
-            (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(dog.id))
-        }
-
         recyclerView.layoutManager = LinearLayoutManager(
             requireContext(),
             LinearLayoutManager.HORIZONTAL,
             false
         )
-
-        recyclerView.adapter = popularAdapter
         recyclerView.isNestedScrollingEnabled = false
+
+        val skeleton = PopularDogSkeletonAdapter()
+        val loadError = Snackbar.make(view, R.string.popular_dogs_load_error, Snackbar.LENGTH_INDEFINITE)
+            .setAction(R.string.popular_dogs_retry) { viewModel.retryPopularDogs() }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                try {
+                    viewModel.popularDogs.collect { state ->
+                        when (state) {
+                            PopularDogsState.Loading -> {
+                                loadError.dismiss()
+                                recyclerView.adapter = skeleton
+                            }
+                            PopularDogsState.Error -> {
+                                recyclerView.adapter = null
+                                loadError.show()
+                            }
+                            is PopularDogsState.Content -> {
+                                loadError.dismiss()
+                                if (recyclerView.adapter !is PopularDogAdapter) {
+                                    recyclerView.adapter = PopularDogAdapter(state.dogs) { dog ->
+                                        (requireActivity() as MainActivity)
+                                            .openScreen(DogDetailFragment.newInstance(dog.id))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } finally {
+                    loadError.dismiss()
+                }
+            }
+        }
     }
 
     private fun String.toColorInt(): Int {

@@ -1,5 +1,7 @@
 package com.example.doglens.data.adapter
 
+import com.example.doglens.utils.loadBreedPhoto
+
 import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
@@ -37,11 +39,7 @@ class PopularDogAdapter(
 
         holder.name.text = popular.name
         holder.itemView.setOnClickListener { onDogClick(popular) }
-        if(popular.localImageRes != null) {
-            holder.img.setImageResource(popular.localImageRes)
-        } else {
-            holder.img.setImageDrawable(null)
-        }
+        holder.img.loadBreedPhoto(popular)
     }
 
     override fun getItemCount(): Int {

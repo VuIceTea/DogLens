@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
+import com.example.doglens.utils.loadBreedPhoto
 import com.example.doglens.R
 import com.example.doglens.data.model.Dog
 import kotlin.math.roundToInt
@@ -53,11 +53,7 @@ class SuggestedDogsAdapter(
             weight.text = range(dog.minWeightKg, dog.maxWeightKg, "kg")
             height.text = range(dog.minHeightCm, dog.maxHeightCm, "cm")
 
-            when {
-                dog.localImageRes != null -> image.setImageResource(dog.localImageRes)
-                !dog.imageUrl.isNullOrBlank() -> Glide.with(image).load(dog.imageUrl).centerCrop().into(image)
-                else -> image.setImageDrawable(null)
-            }
+            image.loadBreedPhoto(dog)
 
             traits.removeAllViews()
             val palette = listOf(

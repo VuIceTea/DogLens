@@ -29,7 +29,8 @@ data class HistoryUiState(
     val rows: List<HistoryRow> = emptyList(),
     val totalCount: Int = 0,          // tổng số bản ghi (chưa lọc)
     val filter: HistoryFilter = HistoryFilter.ALL,
-    val query: String = ""
+    val query: String = "",
+    val error: String? = null
 )
 
 class HistoryViewModel(
@@ -52,7 +53,7 @@ class HistoryViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                allItems = emptyList()
+                _state.update { it.copy(error = "Không tải được lịch sử nhận diện.") }
             }
             publish()
         }
@@ -85,7 +86,7 @@ class HistoryViewModel(
     }
 
     fun toggleFavorite(item: RecognitionHistoryItem) {
-        viewModelScope.launch {
+        updateHistory("Không lưu được giống chó yêu thích.") {
             if (item.isFavorite) favoriteRepository.removeFavorite(item.dog.id)
             else favoriteRepository.addFavorite(item.dog.id)
 
@@ -98,7 +99,7 @@ class HistoryViewModel(
     }
 
     fun delete(item: RecognitionHistoryItem) {
-        viewModelScope.launch {
+        updateHistory("Không xóa được kết quả nhận diện.") {
             recognitionRepository.delete(item.result.id)
             allItems = allItems.filterNot { it.result.id == item.result.id }
             publish()
@@ -106,10 +107,25 @@ class HistoryViewModel(
     }
 
     fun clearAll() {
-        viewModelScope.launch {
+        updateHistory("Không xóa được toàn bộ lịch sử. Hãy kiểm tra và thử lại.") {
             recognitionRepository.clearHistory()
             allItems = emptyList()
             publish()
+        }
+    }
+
+    fun clearError() { _state.update { it.copy(error = null) } }
+
+    private fun updateHistory(error: String, action: suspend () -> Unit) {
+        viewModelScope.launch {
+            try {
+                action()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                refresh()
+                _state.update { it.copy(error = error) }
+            }
         }
     }
 

@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="108dp"
+    android:layout_height="wrap_content"
+    android:minHeight="108dp"
+    android:paddingVertical="12dp"
     android:layout_marginBottom="10dp"
     android:background="@drawable/bg_notification_read"
     android:clickable="true"
@@ -38,8 +40,6 @@
             android:id="@+id/tvNotificationTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
             android:textColor="#071B4D"
             android:textSize="17sp"
             android:textStyle="bold" />
@@ -49,8 +49,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:ellipsize="end"
-            android:maxLines="2"
             android:textColor="#52627C"
             android:textSize="15sp" />
 
@@ -73,7 +71,6 @@
             android:id="@+id/unreadDot"
             android:layout_width="9dp"
             android:layout_height="9dp"
-            android:layout_marginTop="13dp"
             android:background="@drawable/bg_notification_unread_dot" />
 
         <View
@@ -84,7 +81,6 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginBottom="13dp"
             android:src="@drawable/ic_chevron_right"
             app:tint="#71809B" />
     </LinearLayout>

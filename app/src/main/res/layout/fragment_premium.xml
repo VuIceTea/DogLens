@@ -83,7 +83,8 @@
                 </LinearLayout>
 
                 <FrameLayout
-                    android:layout_width="116dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.48"
                     android:layout_height="140dp"
                     android:layout_gravity="bottom">
                     <ImageView
@@ -183,6 +184,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:minHeight="52dp"
+                android:maxLines="2"
+                android:paddingVertical="8dp"
                 android:text="@string/premium_checkout"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

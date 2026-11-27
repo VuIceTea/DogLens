@@ -45,7 +45,8 @@
                 <TextView
                     android:id="@+id/txtFavoriteCount"
                     android:layout_width="wrap_content"
-                    android:layout_height="44dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="44dp"
                     android:background="@drawable/bg_favorite_count"
                     android:drawableStart="@drawable/ic_heart_favorite"
                     android:drawablePadding="6dp"
@@ -102,94 +103,103 @@
 
 
 
-        <!-- Filter + Sort: hiển thị trên cùng một hàng -->
-        <LinearLayout
+        <HorizontalScrollView
             android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_height="wrap_content"
+            android:scrollbars="none">
+                <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/filterAll"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:minWidth="0dp"
-                android:paddingHorizontal="2dp"
-                android:text="Tất cả"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textColor="#FFFFFF"
-                app:backgroundTint="#1585FD"
-                app:cornerRadius="24dp"
-                app:strokeWidth="0dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/filterAll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:minWidth="0dp"
+                    android:minHeight="42dp"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp"
+                    android:text="Tất cả"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    app:backgroundTint="#1585FD"
+                    app:cornerRadius="24dp"
+                    app:strokeWidth="0dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/filterSmall"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:minWidth="0dp"
-                android:paddingHorizontal="2dp"
-                android:text="Chó nhỏ"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textColor="#71809B"
-                app:backgroundTint="#E5EBF4"
-                app:cornerRadius="24dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#D7E0ED"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/filterSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:minWidth="0dp"
+                    android:minHeight="42dp"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp"
+                    android:text="Chó nhỏ"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="#71809B"
+                    app:backgroundTint="#E5EBF4"
+                    app:cornerRadius="24dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#D7E0ED"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/filterMedium"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:minWidth="0dp"
-                android:paddingHorizontal="2dp"
-                android:text="Chó trung"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textColor="#71809B"
-                app:backgroundTint="#E5EBF4"
-                app:cornerRadius="24dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#D7E0ED"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/filterMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:minWidth="0dp"
+                    android:minHeight="42dp"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp"
+                    android:text="Chó trung"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="#71809B"
+                    app:backgroundTint="#E5EBF4"
+                    app:cornerRadius="24dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#D7E0ED"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/filterLarge"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="4dp"
-                android:minWidth="0dp"
-                android:paddingHorizontal="2dp"
-                android:text="Chó lớn"
-                android:textAllCaps="false"
-                android:textSize="14sp"
-                android:textColor="#71809B"
-                app:backgroundTint="#E5EBF4"
-                app:cornerRadius="24dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#D7E0ED"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/filterLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:minWidth="0dp"
+                    android:minHeight="42dp"
+                    android:maxLines="1"
+                    android:paddingHorizontal="12dp"
+                    android:text="Chó lớn"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="#71809B"
+                    app:backgroundTint="#E5EBF4"
+                    app:cornerRadius="24dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#D7E0ED"/>
 
-            <Spinner
-                android:id="@+id/spinnerFavoriteSort"
-                android:layout_width="112dp"
-                android:layout_height="42dp"
-                android:layout_marginStart="6dp"
-                android:background="@drawable/bg_favorite_sort"
-                android:spinnerMode="dropdown"
-                android:dropDownVerticalOffset="4dp"
-                android:dropDownWidth="112dp"
-                android:padding="0dp" />
+                <Spinner
+                    android:id="@+id/spinnerFavoriteSort"
+                    android:layout_width="112dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_favorite_sort"
+                    android:spinnerMode="dropdown"
+                    android:dropDownVerticalOffset="4dp"
+                    android:dropDownWidth="112dp"
+                    android:minHeight="42dp"
+                    android:padding="0dp" />
 
-        </LinearLayout>
+            </LinearLayout>
 
 
+        </HorizontalScrollView>
         <TextView
             android:id="@+id/txtFavoriteEmpty"
             android:layout_width="match_parent"

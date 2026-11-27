@@ -1,5 +1,7 @@
 package com.example.doglens.data.adapter
 
+import com.bumptech.glide.Glide
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,11 +51,7 @@ class ExploreDogUseCaseAdapter(
         val item = items[position]
         holder.name.text = item.name
         holder.desc.text = item.description
-        if(item.localImageRes != null) {
-            holder.image.setImageResource(item.localImageRes)
-        } else {
-            holder.image.setImageDrawable(null)
-        }
+        Glide.with(holder.image).load(item.imageUrl ?: item.localImageRes).into(holder.image)
         holder.itemView.setOnClickListener {
             onClick(item)
         }

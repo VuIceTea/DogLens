@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
+import com.example.doglens.data.model.hasComparableSize
+import com.example.doglens.data.model.sizeSimilarityTo
 import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.RecognitionResult
 import com.example.doglens.data.model.Trait
@@ -24,7 +26,8 @@ sealed interface ResultUiState {
         val dog: Dog,
         val traits: List<Pair<Trait, DogTrait>>,
         val relatedDogs: List<Dog>,
-        val isFavorite: Boolean
+        val isFavorite: Boolean,
+        val favoriteError: Boolean = false
     ) : ResultUiState
 }
 
@@ -38,6 +41,7 @@ class ResultViewModel(
     val state: StateFlow<ResultUiState> = _state.asStateFlow()
 
     private var loadedId: String? = null
+    private var favoriteUpdating = false
 
     fun load(recognitionId: String) {
         if (loadedId == recognitionId) return
@@ -56,20 +60,12 @@ class ResultViewModel(
                 val traits = dogRepository.getDogTraits(dog.id).mapNotNull { dogTrait ->
                     traitsById[dogTrait.traitId]?.let { trait -> trait to dogTrait }
                 }
-                val relatedDogs = dogRepository.getDogs()
-                    .filterNot { it.id == dog.id }
-                    .sortedByDescending { candidate ->
-                        var score = 0
-                        if (candidate.sizeCategoryId == dog.sizeCategoryId) score += 20
-                        score += 5 - kotlin.math.abs(
-                            (candidate.familyScore ?: 0) - (dog.familyScore ?: 0)
-                        )
-                        score += 5 - kotlin.math.abs(
-                            (candidate.trainingScore ?: 0) - (dog.trainingScore ?: 0)
-                        )
-                        score
-                    }
+                val relatedDogs = if (!dog.hasComparableSize()) emptyList() else dogRepository.getDogs()
+                    .filter { it.id != dog.id }
+                    .mapNotNull { candidate -> dog.sizeSimilarityTo(candidate)?.let { candidate to it } }
+                    .sortedByDescending { it.second }
                     .take(4)
+                    .map { it.first }
 
                 _state.value = ResultUiState.Content(
                     recognition = recognition,
@@ -88,10 +84,25 @@ class ResultViewModel(
 
     fun toggleFavorite() {
         val current = _state.value as? ResultUiState.Content ?: return
+        if (favoriteUpdating) return
+        favoriteUpdating = true
         viewModelScope.launch {
-            if (current.isFavorite) favoriteRepository.removeFavorite(current.dog.id)
-            else favoriteRepository.addFavorite(current.dog.id)
-            _state.value = current.copy(isFavorite = !current.isFavorite)
+            try {
+                if (current.isFavorite) favoriteRepository.removeFavorite(current.dog.id)
+                else favoriteRepository.addFavorite(current.dog.id)
+                _state.value = current.copy(isFavorite = !current.isFavorite, favoriteError = false)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.value = current.copy(favoriteError = true)
+            } finally {
+                favoriteUpdating = false
+            }
         }
+    }
+
+    fun clearFavoriteError() {
+        val current = _state.value as? ResultUiState.Content ?: return
+        _state.value = current.copy(favoriteError = false)
     }
 }

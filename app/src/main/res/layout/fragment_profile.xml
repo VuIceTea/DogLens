@@ -174,7 +174,8 @@
             android:id="@+id/premiumCard"
             android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
+            android:layout_height="wrap_content"
+            android:minHeight="150dp"
             android:layout_marginTop="16dp"
             android:background="@drawable/bg_premium_card"
             android:clipChildren="false"
@@ -202,6 +203,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="82dp"
                 android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -223,7 +225,9 @@
                 <TextView
                     android:id="@+id/btnPremium"
                     android:layout_width="170dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="38dp"
+                    android:paddingVertical="5dp"
                     android:layout_marginTop="12dp"
                     android:background="@drawable/bg_premium_button"
                     android:gravity="center"

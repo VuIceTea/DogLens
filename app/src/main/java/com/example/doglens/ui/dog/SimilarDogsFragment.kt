@@ -18,7 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.bumptech.glide.Glide
+import com.example.doglens.utils.loadBreedPhoto
 import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.model.Dog
@@ -152,7 +152,7 @@ class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
         titleRow.addView(text(dog.name, 16, "#10245E", true).apply {
             maxLines = 2
         }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        titleRow.addView(text("${item.similarityPercent}% tương tự", 13, "#168FF2", true).apply {
+        titleRow.addView(text("${item.similarityPercent}% kích thước", 13, "#168FF2", true).apply {
             background = rounded("#E3F2FF", 20)
             setPadding(dp(9), dp(6), dp(9), dp(6))
         })
@@ -244,10 +244,7 @@ class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
     }
 
     private fun loadDogImage(image: ImageView, dog: Dog) {
-        when {
-            dog.localImageRes != null -> image.setImageResource(dog.localImageRes)
-            !dog.imageUrl.isNullOrBlank() -> Glide.with(this).load(dog.imageUrl).centerCrop().into(image)
-        }
+        image.loadBreedPhoto(dog)
     }
 
     private fun openDetail(dogId: String) {

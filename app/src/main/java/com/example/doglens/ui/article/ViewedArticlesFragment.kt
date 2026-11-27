@@ -49,6 +49,14 @@ class ViewedArticlesFragment : Fragment(R.layout.fragment_viewed_articles) {
                 viewModel.setQuery(s?.toString().orEmpty())
         })
         observe(view)
+        view.findViewById<TextView>(R.id.tvEmpty).apply {
+            text = "Chưa tìm thấy bài viết. Bấm để mở danh mục."
+            setOnClickListener { openArticleCatalog() }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
         viewModel.load()
     }
 

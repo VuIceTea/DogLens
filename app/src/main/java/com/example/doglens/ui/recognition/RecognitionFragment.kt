@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
@@ -54,7 +55,7 @@ class RecognitionFragment : Fragment(R.layout.fragment_recognition) {
     private val steps = listOf(
         Step(R.drawable.ic_step_image, "Đang xử lý hình ảnh", "Tối ưu chất lượng ảnh", 35),
         Step(R.drawable.ic_step_search, "Phân tích đặc điểm", "Nhận diện qua AI", 70),
-        Step(R.drawable.ic_step_doc, "So sánh với cơ sở dữ liệu", "Hơn 300+ giống chó", 92),
+        Step(R.drawable.ic_step_doc, "So sánh với cơ sở dữ liệu", "Đối chiếu danh mục giống chó", 92),
         Step(R.drawable.ic_step_shield, "Hoàn tất nhận diện", "Hiển thị kết quả", 100)
     )
 
@@ -101,6 +102,13 @@ class RecognitionFragment : Fragment(R.layout.fragment_recognition) {
                         }
 
                         RecognitionUiState.Failed -> goToError(imageUri)
+                        is RecognitionUiState.Unavailable -> {
+                            if (!navigated) {
+                                navigated = true
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                                parentFragmentManager.popBackStack()
+                            }
+                        }
                     }
                 }
             }

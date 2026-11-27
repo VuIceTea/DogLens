@@ -28,5 +28,13 @@ data class Dog (
     // đoạn giới thiệu dài
     val summary: String? = null,
     val rating: Double? = null,
-    val favoriteCount: Int? = null
+    val favoriteCount: Int? = null,
+    val exploreDogIds: List<String> = emptyList(),
+    val lifespanMedianYears: Double? = null,
+    val heightStandard: String? = null,
+    val weightStandard: String? = null,
+    val weightMedianKg: Double? = null,
+    val weightReferenceKg: Double? = null,
+    val lifespanReference: String? = null,
+    val sources: Map<String, String> = emptyMap()
 )

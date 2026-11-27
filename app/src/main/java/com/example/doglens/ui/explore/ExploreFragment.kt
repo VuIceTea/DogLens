@@ -7,11 +7,16 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ImageView
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.doglens.R
 import com.example.doglens.MainActivity
+import com.example.doglens.data.AppContainer
 import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.data.adapter.ExploreCategoryAdaper
 import com.example.doglens.data.adapter.ExploreFeatureTopicAdapter
@@ -20,6 +25,11 @@ import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.FeaturedTopic
 import com.example.doglens.data.model.DogUseCase
 import com.example.doglens.data.repository.ExploreRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
@@ -38,7 +48,7 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         initializeAdapters()
         initializeRecyclerViews(view)
         initializeSectionHeaders(view)
-        renderLists()
+        renderLists(view)
         initializeSearch(view)
     }
 
@@ -115,23 +125,28 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
         header.findViewById<TextView>(R.id.txtSectionTitle).text = title
 
         header.findViewById<TextView>(R.id.btnAllCategories).setOnClickListener {
-            showMessage("Chức năng xem tất cả sẽ được bổ sung sau")
+            showDogChoices(title) { true }
         }
     }
 
     // Hiển thị dữ liệu từ Repository
-    private fun renderLists() {
-        categoryAdapter.submitList(
-            repository.getCategories()
-        )
-
-        featuredTopicAdapter.submitList(
-            repository.getFeaturedTopics()
-        )
-
-        dogUseCaseAdapter.submitList(
-            repository.getDogUseCases()
-        )
+    private fun renderLists(view: View) = loadCatalog {
+        coroutineScope {
+            val categories = async(Dispatchers.IO) { repository.getCategories() }
+            val topics = async(Dispatchers.IO) { repository.getFeaturedTopics() }
+            val useCases = async(Dispatchers.IO) { repository.getDogUseCases() }
+            val bannerData = async(Dispatchers.IO) { repository.getBanner() }
+            categoryAdapter.submitList(categories.await())
+            featuredTopicAdapter.submitList(topics.await())
+            dogUseCaseAdapter.submitList(useCases.await())
+            bannerData.await()?.let { banner ->
+                val image = view.findViewById<ImageView>(R.id.imgExploreBanner)
+                image.contentDescription = banner.title
+                val imageSource = banner.imageUrl ?: banner.localImageRes
+                if (imageSource != null) Glide.with(this@ExploreFragment).load(imageSource).into(image)
+                image.setOnClickListener { showDogChoices(banner.actionText) { true } }
+            }
+        }
     }
 
     // Xử lý tìm kiếm
@@ -148,7 +163,9 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
                 val keyword = input.text.toString().trim()
 
                 if (keyword.isNotEmpty()) {
-                    showMessage("Tìm kiếm: $keyword")
+                    showDogChoices("Kết quả tìm kiếm") {
+                        it.name.contains(keyword, ignoreCase = true) || it.description.contains(keyword, ignoreCase = true)
+                    }
                 }
                 true
             } else {
@@ -159,19 +176,51 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
     // Nhấn vào danh mục giống chó
     private fun onCategoryClicked(dog: Dog) {
-        (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(dog.id))
+        val size = when (dog.id) {
+            "large_dog" -> "large"
+            "medium_dog" -> "medium"
+            "small_dog" -> "small"
+            else -> null
+        }
+        showDogChoices(dog.name) { candidate ->
+            if (size != null) candidate.sizeCategoryId == size else candidate.id in dog.exploreDogIds
+        }
     }
 
     // Nhấn vào chủ đề nổi bật
     private fun onFeaturedTopicClicked(topic: FeaturedTopic) {
-        showMessage(
-            "Chủ đề: ${topic.title.replace("\n", " ")}"
-        )
+        showDogChoices(topic.title) { it.id in topic.dogIds }
     }
 
     // Nhấn vào nhóm công dụng
     private fun onDogUseCaseClicked(useCase: DogUseCase) {
-        showMessage("Nhóm: ${useCase.name}")
+        showDogChoices(useCase.name) { it.id in useCase.dogIds }
+    }
+
+    private fun showDogChoices(title: String, predicate: (Dog) -> Boolean) = loadCatalog {
+        val dogs = AppContainer.dogRepository.getDogs().filter(predicate)
+        if (dogs.isEmpty()) {
+            showMessage("Chưa có giống chó phù hợp.")
+        } else {
+            AlertDialog.Builder(requireContext())
+                .setTitle(title)
+                .setItems(dogs.map { it.name }.toTypedArray()) { _, index ->
+                    (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(dogs[index].id))
+                }
+                .show()
+        }
+    }
+
+    private fun loadCatalog(action: suspend () -> Unit) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                action()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                showMessage("Chưa tải được dữ liệu Khám phá.")
+            }
+        }
     }
 
     private fun showMessage(message: String) {

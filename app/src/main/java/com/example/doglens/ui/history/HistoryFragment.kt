@@ -98,6 +98,10 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
     }
 
     private fun render(view: View, state: HistoryUiState) {
+        state.error?.let {
+            viewModel.clearError()
+            android.widget.Toast.makeText(requireContext(), it, android.widget.Toast.LENGTH_SHORT).show()
+        }
         adapter.submitList(state.rows)
 
         // Nút lọc đang chọn: nền xanh chữ trắng; còn lại nền xám chữ xám

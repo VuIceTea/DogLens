@@ -1,5 +1,7 @@
 package com.example.doglens.data.adapter
 
+import com.bumptech.glide.Glide
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,9 +60,9 @@ class ExploreCategoryAdaper(
 
         holder.categoryName.text = category.name
         holder.categoryDesc.text = category.description
-        category.localImageRes?.let {
-            holder.categoryImage.setImageResource(it)
-        }
+        Glide.with(holder.categoryImage)
+            .load(category.imageUrl ?: category.localImageRes)
+            .into(holder.categoryImage)
         holder.card.setCardBackgroundColor(
             android.graphics.Color.parseColor(category.backgroundColorHex)
         )

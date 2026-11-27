@@ -115,7 +115,7 @@
                             android:drawablePadding="6dp"
                             android:paddingHorizontal="10dp"
                             android:paddingVertical="6dp"
-                            android:text="Độ tương đồng cao"
+                            android:text="So sánh kích thước"
                             android:textColor="#168FF2"
                             android:textSize="13sp" />
                     </LinearLayout>

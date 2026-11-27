@@ -1,15 +1,22 @@
 package com.example.doglens.ui.notification
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.doglens.data.repository.FirestoreAccountData
+import com.example.doglens.utils.TimeUtils
+import com.google.firebase.firestore.Query
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 enum class NotificationType { RECOGNITION, FAVORITE, ARTICLE, UPDATE }
 enum class NotificationFilter { ALL, RECOGNITION, UPDATE }
 
 data class DogLensNotification(
-    val id: Long,
+    val id: String,
     val section: String,
     val type: NotificationType,
     val title: String,
@@ -25,41 +32,70 @@ sealed interface NotificationRow {
 
 data class NotificationUiState(
     val selectedFilter: NotificationFilter = NotificationFilter.ALL,
-    val rows: List<NotificationRow> = emptyList()
+    val rows: List<NotificationRow> = emptyList(),
+    val error: String? = null
 )
 
 class NotificationViewModel : ViewModel() {
-    private val notifications = MutableStateFlow(
-        listOf(
-            DogLensNotification(1, "Hôm nay", NotificationType.RECOGNITION, "Đã nhận diện thành công!", "Ảnh của bạn được nhận diện là Golden Retriever với độ chính xác 96%.", "2 phút trước", false),
-            DogLensNotification(2, "Hôm nay", NotificationType.FAVORITE, "Giống chó mới được yêu thích", "Golden Retriever đã được thêm vào danh sách yêu thích.", "1 giờ trước", false),
-            DogLensNotification(3, "Trước đó", NotificationType.ARTICLE, "Bài viết mới dành cho bạn", "5 mẹo chăm sóc bộ lông khỏe đẹp cho chó.", "Hôm qua", true),
-            DogLensNotification(4, "Trước đó", NotificationType.UPDATE, "Có bản cập nhật mới", "Khám phá trải nghiệm nhận diện nhanh và chính xác hơn.", "2 ngày trước", true)
-        )
-    )
+    private val account = FirestoreAccountData()
+    private val feed = account.collection("notifications")
+    private var notifications = emptyList<DogLensNotification>()
     private val _state = MutableStateFlow(NotificationUiState())
     val state: StateFlow<NotificationUiState> = _state.asStateFlow()
 
-    init { publish() }
+    private val listener = feed?.orderBy("createdAt", Query.Direction.DESCENDING)
+        ?.limit(100)?.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                _state.value = _state.value.copy(error = "Không tải được thông báo.")
+                return@addSnapshotListener
+            }
+            notifications = snapshot?.documents.orEmpty().mapNotNull { document ->
+                val type = NotificationType.entries.firstOrNull { it.name == document.getString("type") }
+                    ?: return@mapNotNull null
+                val date = document.getTimestamp("createdAt")?.toDate()?.time ?: return@mapNotNull null
+                val section = if (TimeUtils.startOfDay(date) == TimeUtils.startOfDay(System.currentTimeMillis()))
+                    "Hôm nay" else "Trước đó"
+                DogLensNotification(document.id, section, type, document.getString("title").orEmpty(),
+                    document.getString("message").orEmpty(), TimeUtils.timeLabel(date),
+                    document.getBoolean("isRead") == true)
+            }
+            publish()
+        }
 
     fun setFilter(filter: NotificationFilter) {
         _state.value = _state.value.copy(selectedFilter = filter)
         publish()
     }
 
-    fun markRead(id: Long) {
-        notifications.value = notifications.value.map { if (it.id == id) it.copy(isRead = true) else it }
-        publish()
+    fun markRead(id: String) {
+        if (notifications.any { it.id == id && !it.isRead }) mark(listOf(id))
     }
 
     fun markAllRead() {
-        notifications.value = notifications.value.map { it.copy(isRead = true) }
-        publish()
+        mark(notifications.filterNot { it.isRead }.map { it.id })
     }
+
+    private fun mark(ids: List<String>) {
+        val collection = feed ?: return
+        if (ids.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                val batch = account.db.batch()
+                ids.forEach { batch.update(collection.document(it), "isRead", true) }
+                batch.commit().await()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.value = _state.value.copy(error = "Không lưu được trạng thái thông báo.")
+            }
+        }
+    }
+
+    fun clearError() { _state.value = _state.value.copy(error = null) }
 
     private fun publish() {
         val filter = _state.value.selectedFilter
-        val filtered = notifications.value.filter {
+        val filtered = notifications.filter {
             when (filter) {
                 NotificationFilter.ALL -> true
                 NotificationFilter.RECOGNITION -> it.type == NotificationType.RECOGNITION
@@ -73,5 +109,10 @@ class NotificationViewModel : ViewModel() {
             }
         }
         _state.value = _state.value.copy(rows = rows)
+    }
+
+    override fun onCleared() {
+        listener?.remove()
+        super.onCleared()
     }
 }

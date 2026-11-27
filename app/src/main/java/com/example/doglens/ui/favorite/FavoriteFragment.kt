@@ -21,6 +21,7 @@ import java.util.Locale
 import androidx.lifecycle.lifecycleScope
 import com.example.doglens.data.AppContainer
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
 
@@ -55,9 +56,24 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
         setupFilters(view)
         setupSearch()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshFavorites()
+    }
+
+    private fun refreshFavorites(removeDogId: String? = null) {
         viewLifecycleOwner.lifecycleScope.launch {
-            allFavorites = repository.getFavoriteItems()
-            renderFavorites()
+            try {
+                if (removeDogId != null) repository.removeFavorite(removeDogId)
+                allFavorites = repository.getFavoriteItems()
+                renderFavorites()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), "Chưa cập nhật được danh sách yêu thích.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -67,22 +83,18 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
                 (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(item.dog.id))
             },
             onFavoriteClick = { item ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    repository.removeFavorite(item.dog.id)
-                    allFavorites = repository.getFavoriteItems()
-                    renderFavorites()
-                }
+                refreshFavorites(item.dog.id)
             },
         )
 
-        recyclerView.layoutManager = GridLayoutManager(
-            requireContext(),
-            2
-        )
+        val columns = resources.configuration.run {
+            if (screenWidthDp / fontScale >= 300) 2 else 1
+        }
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), columns)
 
         recyclerView.addItemDecoration(
             GridSpacingItemDecoration(
-                spanCount = 2,
+                spanCount = columns,
                 spacing = (12 * resources.displayMetrics.density).toInt()
             )
         )

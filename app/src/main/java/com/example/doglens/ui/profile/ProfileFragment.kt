@@ -14,8 +14,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
 import com.example.doglens.data.adapter.ProfileStatsAdapter
-import com.example.doglens.data.mock.MockProfileRepository
-import com.example.doglens.data.repository.ProfileRepository
 import kotlinx.coroutines.launch
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -23,6 +21,7 @@ import android.graphics.Color
 import android.widget.FrameLayout
 import com.bumptech.glide.Glide
 import com.example.doglens.MainActivity
+import com.example.doglens.data.repository.FirestoreAccountData
 import com.example.doglens.data.model.User
 import com.example.doglens.data.model.profile.ProfileStats
 import com.example.doglens.ui.auth.LoginFragment
@@ -34,13 +33,16 @@ import com.example.doglens.ui.settings.SettingsFragment
 import com.google.firebase.auth.FirebaseAuth
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import android.widget.Toast
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
-    private val profileRepository: ProfileRepository = MockProfileRepository()
+    private val accountData by lazy { FirestoreAccountData() }
     private lateinit var imgUserAvatar: ImageView
     private val userViewModel: UserViewModel by viewModels()
 
@@ -64,6 +66,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         setupAvatar(view)
         setupProfileMenu(view)
         observeUser(view)
+        observeStats(view)
     }
 
 
@@ -91,7 +94,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                         imgUserAvatar.setImageResource(R.drawable.avatar_golden_retriever)
                     } else {
                         displayUser(view, user)
-                        if (stats.adapter == null) loadProfile(view)
                     }
 
                     state.error?.let { message ->
@@ -174,14 +176,21 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         )
     }
 
-    // LOAD PROFILE
-    private fun loadProfile(view: View) {
+    private fun observeStats(view: View) {
         viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val profile = profileRepository.getProfile()
-                setupStats(view, profile.stats)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                userViewModel.uiState.map { it.user?.id }.distinctUntilChanged().collectLatest { uid ->
+                    setupStats(view, ProfileStats(null, null, null))
+                    if (uid == null) return@collectLatest
+                    combine(
+                        accountData.observeCount(uid, "favorites").onStart { emit(null) },
+                        accountData.observeCount(uid, "recognitions").onStart { emit(null) },
+                        accountData.observeCount(uid, "articleViews").onStart { emit(null) },
+                        ::ProfileStats
+                    ).collect { counts ->
+                        if (FirebaseAuth.getInstance().currentUser?.uid == uid) setupStats(view, counts)
+                    }
+                }
             }
         }
     }
@@ -203,8 +212,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     // DISPLAY PROFILE STATS
     private fun setupStats(view: View, profileStats: ProfileStats) {
         val recyclerView = view.findViewById<RecyclerView>(R.id.rvProfileStats)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
-        addStatDividers(recyclerView)
+        if (recyclerView.layoutManager == null) {
+            recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
+            addStatDividers(recyclerView)
+        }
 
         val stats = listOf(
             ProfileStatsAdapter.StatItem(
@@ -292,6 +303,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
         view.findViewById<View>(R.id.premiumCard).setOnClickListener(openPremium)
         view.findViewById<View>(R.id.btnPremium).setOnClickListener(openPremium)
+        if (resources.configuration.run { screenWidthDp / fontScale < 330 }) {
+            view.findViewById<View>(R.id.imgPremiumCorgi).visibility = View.GONE
+        }
 
         fun openEditProfile() {
             if (FirebaseAuth.getInstance().currentUser == null) {

@@ -38,11 +38,13 @@ class ViewedArticlesViewModel : ViewModel() {
                 allRows = repository.getViewedArticles().mapNotNull { article ->
                     categories[article.categoryId]?.let { ViewedArticleRow(article, it) }
                 }
-                publish()
+                publish(finished = true)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (exception: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = exception.message)
+            } finally {
+                loaded = false
             }
         }
     }
@@ -57,8 +59,8 @@ class ViewedArticlesViewModel : ViewModel() {
         publish()
     }
 
-    private fun publish() {
-        if (allRows.isEmpty() && _state.value.isLoading) return
+    private fun publish(finished: Boolean = false) {
+        if (!finished && _state.value.isLoading) return
         val current = _state.value
         val rows = allRows.filter { row ->
             (current.selectedCategory == null || row.article.categoryId == current.selectedCategory) &&

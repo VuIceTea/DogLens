@@ -32,6 +32,10 @@ class MockArticleRepository : ArticleRepository {
     }
 
     override suspend fun getViewedArticles(): List<Article> = articles
+    override suspend fun getArticles(): List<Article> = articles
+    override suspend fun recordView(articleId: String) = Unit
+    override suspend fun isBookmarked(articleId: String) = false
+    override suspend fun setBookmarked(articleId: String, bookmarked: Boolean) = Unit
     override suspend fun getArticleById(id: String): Article? = articles.firstOrNull { it.id == id }
     override suspend fun getCategories(): List<ArticleCategory> = categories
     override suspend fun getSections(articleId: String): List<ArticleSection> =

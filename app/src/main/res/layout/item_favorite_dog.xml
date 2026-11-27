@@ -75,14 +75,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:gravity="center_vertical">
 
                 <!-- Weight -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -98,17 +97,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:textColor="#71809B"
-                        android:textSize="14sp"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <!-- Height -->
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -124,9 +120,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:textColor="#71809B"
-                        android:textSize="14sp"
-                        android:maxLines="1"
-                        android:ellipsize="end" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
             </LinearLayout>

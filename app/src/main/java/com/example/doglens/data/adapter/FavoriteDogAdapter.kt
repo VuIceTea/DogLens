@@ -1,5 +1,7 @@
 package com.example.doglens.data.adapter
 
+import com.example.doglens.utils.loadBreedPhoto
+
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
 import com.example.doglens.data.model.FavoriteDogItem
+import java.text.NumberFormat
+import java.util.Locale
 
 class FavoriteDogAdapter(
     private val onDogClick: (FavoriteDogItem) -> Unit,
@@ -65,8 +69,10 @@ class FavoriteDogAdapter(
             dog.minWeightKg != null && dog.maxWeightKg != null
         ) {
             "${dog.minWeightKg}–${dog.maxWeightKg} kg"
+        } else if (dog.weightMedianKg != null) {
+            "${NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN")).format(dog.weightMedianKg)} kg"
         } else {
-            "Chưa có thông tin cân nặng"
+            dog.weightStandard ?: "Chưa cập nhật"
         }
 
         holder.height.text = if (
@@ -74,14 +80,10 @@ class FavoriteDogAdapter(
         ) {
             "${dog.minHeightCm}–${dog.maxHeightCm} cm"
         } else {
-            "Chưa có thông tin chiều cao"
+            dog.heightStandard ?: "Chưa cập nhật"
         }
 
-        if (dog.localImageRes != null) {
-            holder.image.setImageResource(dog.localImageRes)
-        } else {
-            holder.image.setImageDrawable(null)
-        }
+        holder.image.loadBreedPhoto(dog)
 
         holder.itemView.setOnClickListener {
             onDogClick(item)

@@ -1,0 +1,879 @@
+{
+  "dogs": [
+    {
+      "id": "golden_retriever",
+      "name": "Golden Retriever",
+      "description": "Thân thiện, thông minh, dễ huấn luyện",
+      "imageKey": "img_golden_retriever",
+      "sizeCategoryId": "large",
+      "minWeightKg": 25,
+      "maxWeightKg": 34,
+      "minHeightCm": 51,
+      "maxHeightCm": 61,
+      "origin": "Scotland",
+      "minLifespanYears": 10,
+      "maxLifespanYears": 12,
+      "coatColors": "Vàng, vàng kem, vàng đậm",
+      "familyScore": 5,
+      "kidsScore": 5,
+      "trainingScore": 4,
+      "apartmentScore": 3,
+      "summary": "Golden Retriever là giống chó thân thiện, thông minh, hiền lành và rất dễ huấn luyện. Chúng nổi tiếng với tính cách hòa đồng, thích gần gũi con người và phù hợp với nhiều gia đình.",
+      "sortOrder": 1
+    },
+    {
+      "id": "corgi",
+      "name": "Corgi",
+      "description": "Vui vẻ, năng động, thân thiện",
+      "imageKey": "corgi",
+      "sizeCategoryId": "medium",
+      "minWeightKg": 10,
+      "maxWeightKg": 14,
+      "minHeightCm": 25,
+      "maxHeightCm": 30,
+      "origin": "Xứ Wales (Anh)",
+      "minLifespanYears": 12,
+      "maxLifespanYears": 13,
+      "coatColors": "Đỏ, vàng nâu, tam thể",
+      "familyScore": 5,
+      "kidsScore": 4,
+      "trainingScore": 4,
+      "apartmentScore": 4,
+      "summary": "Corgi có chân ngắn, thân dài và tính cách vui vẻ. Vốn là chó chăn gia súc nên rất lanh lợi và thích vận động.",
+      "sortOrder": 2
+    },
+    {
+      "id": "siberian_husky",
+      "name": "Husky",
+      "description": "Năng động, thông minh, độc lập",
+      "imageKey": "siberian_husky",
+      "sizeCategoryId": "large",
+      "minWeightKg": 16,
+      "maxWeightKg": 27,
+      "minHeightCm": 51,
+      "maxHeightCm": 60,
+      "origin": "Siberia (Nga)",
+      "minLifespanYears": 12,
+      "maxLifespanYears": 14,
+      "coatColors": "Đen trắng, xám trắng, đỏ trắng",
+      "familyScore": 4,
+      "kidsScore": 4,
+      "trainingScore": 3,
+      "apartmentScore": 2,
+      "summary": "Siberian Husky là giống chó kéo xe có sức bền rất cao, nổi bật với đôi mắt xanh và bộ lông dày hai lớp.",
+      "sortOrder": 3
+    },
+    {
+      "id": "poodle",
+      "name": "Poodle",
+      "description": "Thông minh, dễ huấn luyện, thân thiện",
+      "imageKey": "poodle",
+      "sizeCategoryId": "small",
+      "minWeightKg": 6,
+      "maxWeightKg": 10,
+      "minHeightCm": 24,
+      "maxHeightCm": 28,
+      "origin": "Pháp",
+      "minLifespanYears": 12,
+      "maxLifespanYears": 15,
+      "coatColors": "Nâu đỏ, mơ, trắng, đen",
+      "familyScore": 5,
+      "kidsScore": 4,
+      "trainingScore": 5,
+      "apartmentScore": 5,
+      "summary": "Poodle là một trong những giống chó thông minh nhất, lông xoăn ít rụng nên rất hợp với gia đình ở căn hộ.",
+      "sortOrder": 4
+    },
+    {
+      "id": "french_bulldog",
+      "name": "French Bulldog",
+      "description": "Hiền lành, tình cảm, phù hợp ở căn hộ",
+      "imageKey": "french_bulldog",
+      "sizeCategoryId": "small",
+      "minWeightKg": 8,
+      "maxWeightKg": 14,
+      "minHeightCm": 28,
+      "maxHeightCm": 33,
+      "origin": "Pháp",
+      "minLifespanYears": 10,
+      "maxLifespanYears": 12,
+      "coatColors": "Vện, kem, nâu vàng, trắng",
+      "familyScore": 5,
+      "kidsScore": 4,
+      "trainingScore": 3,
+      "apartmentScore": 5,
+      "summary": "French Bulldog có đôi tai dơi đặc trưng, tính cách điềm tĩnh, ít sủa và rất hợp với cuộc sống trong căn hộ.",
+      "sortOrder": 5
+    },
+    {
+      "id": "pomeranian",
+      "name": "Pomeranian",
+      "description": "Hoạt bát, thông minh, đáng yêu",
+      "imageKey": "dog_small_pomeranian",
+      "sizeCategoryId": "small",
+      "minWeightKg": 2,
+      "maxWeightKg": 4,
+      "minHeightCm": 18,
+      "maxHeightCm": 24,
+      "origin": "Pomerania (Đức – Ba Lan)",
+      "minLifespanYears": 12,
+      "maxLifespanYears": 16,
+      "coatColors": "Cam, kem, trắng, đen",
+      "familyScore": 4,
+      "kidsScore": 3,
+      "trainingScore": 4,
+      "apartmentScore": 5,
+      "summary": "Pomeranian nhỏ nhắn với bộ lông xù như cục bông, hoạt bát, tự tin và rất quấn chủ.",
+      "sortOrder": 6
+    }
+  ],
+  "dogSizeCategories": [
+    {
+      "id": "small",
+      "name": "Chó nhỏ",
+      "sortOrder": 1
+    },
+    {
+      "id": "medium",
+      "name": "Chó trung",
+      "sortOrder": 2
+    },
+    {
+      "id": "large",
+      "name": "Chó lớn",
+      "sortOrder": 3
+    }
+  ],
+  "traits": [
+    {
+      "id": "friendly",
+      "name": "Thân thiện",
+      "iconKey": "smile",
+      "colorHex": "#FFF4DC"
+    },
+    {
+      "id": "smart",
+      "name": "Thông minh",
+      "iconKey": "brain",
+      "colorHex": "#F1E9FF"
+    },
+    {
+      "id": "loyal",
+      "name": "Trung thành",
+      "iconKey": "heart",
+      "colorHex": "#FFE9EE"
+    },
+    {
+      "id": "active",
+      "name": "Năng động",
+      "iconKey": "run",
+      "colorHex": "#FFF1DE"
+    },
+    {
+      "id": "gentle",
+      "name": "Hiền lành",
+      "iconKey": "leaf",
+      "colorHex": "#E4F8EC"
+    },
+    {
+      "id": "independent",
+      "name": "Độc lập",
+      "iconKey": "star",
+      "colorHex": "#E6F1FD"
+    }
+  ],
+  "careTips": [
+    {
+      "id": "grooming",
+      "name": "Chải lông thường xuyên",
+      "iconKey": "brush",
+      "colorHex": "#E8F2FE"
+    },
+    {
+      "id": "exercise",
+      "name": "Cần vận động hằng ngày",
+      "iconKey": "run",
+      "colorHex": "#FFF4E5"
+    },
+    {
+      "id": "social",
+      "name": "Thích giao tiếp",
+      "iconKey": "heart",
+      "colorHex": "#E7F8EE"
+    },
+    {
+      "id": "training",
+      "name": "Huấn luyện sớm",
+      "iconKey": "brain",
+      "colorHex": "#F1E9FF"
+    },
+    {
+      "id": "heat",
+      "name": "Tránh nắng nóng",
+      "iconKey": "sun",
+      "colorHex": "#FFF8E1"
+    }
+  ],
+  "dogTraits": [
+    {
+      "dogId": "golden_retriever",
+      "traitId": "friendly",
+      "description": "Hòa đồng, gần gũi",
+      "id": "golden_retriever_friendly",
+      "sortOrder": 0
+    },
+    {
+      "dogId": "golden_retriever",
+      "traitId": "smart",
+      "description": "Dễ huấn luyện",
+      "id": "golden_retriever_smart",
+      "sortOrder": 1
+    },
+    {
+      "dogId": "golden_retriever",
+      "traitId": "loyal",
+      "description": "Rất yêu chủ",
+      "id": "golden_retriever_loyal",
+      "sortOrder": 2
+    },
+    {
+      "dogId": "golden_retriever",
+      "traitId": "active",
+      "description": "Thích vận động",
+      "id": "golden_retriever_active",
+      "sortOrder": 3
+    },
+    {
+      "dogId": "corgi",
+      "traitId": "active",
+      "description": "Hoạt bát, lanh lợi",
+      "id": "corgi_active",
+      "sortOrder": 4
+    },
+    {
+      "dogId": "corgi",
+      "traitId": "smart",
+      "description": "Học lệnh nhanh",
+      "id": "corgi_smart",
+      "sortOrder": 5
+    },
+    {
+      "dogId": "corgi",
+      "traitId": "friendly",
+      "description": "Vui vẻ với mọi người",
+      "id": "corgi_friendly",
+      "sortOrder": 6
+    },
+    {
+      "dogId": "corgi",
+      "traitId": "loyal",
+      "description": "Gắn bó gia đình",
+      "id": "corgi_loyal",
+      "sortOrder": 7
+    },
+    {
+      "dogId": "siberian_husky",
+      "traitId": "active",
+      "description": "Sức bền rất cao",
+      "id": "siberian_husky_active",
+      "sortOrder": 8
+    },
+    {
+      "dogId": "siberian_husky",
+      "traitId": "independent",
+      "description": "Có chính kiến",
+      "id": "siberian_husky_independent",
+      "sortOrder": 9
+    },
+    {
+      "dogId": "siberian_husky",
+      "traitId": "friendly",
+      "description": "Thân thiện, ít cắn",
+      "id": "siberian_husky_friendly",
+      "sortOrder": 10
+    },
+    {
+      "dogId": "siberian_husky",
+      "traitId": "smart",
+      "description": "Thông minh, tò mò",
+      "id": "siberian_husky_smart",
+      "sortOrder": 11
+    },
+    {
+      "dogId": "poodle",
+      "traitId": "smart",
+      "description": "Top giống thông minh",
+      "id": "poodle_smart",
+      "sortOrder": 12
+    },
+    {
+      "dogId": "poodle",
+      "traitId": "friendly",
+      "description": "Thân thiện, tình cảm",
+      "id": "poodle_friendly",
+      "sortOrder": 13
+    },
+    {
+      "dogId": "poodle",
+      "traitId": "active",
+      "description": "Hoạt bát, ham chơi",
+      "id": "poodle_active",
+      "sortOrder": 14
+    },
+    {
+      "dogId": "poodle",
+      "traitId": "gentle",
+      "description": "Ít rụng lông",
+      "id": "poodle_gentle",
+      "sortOrder": 15
+    },
+    {
+      "dogId": "french_bulldog",
+      "traitId": "gentle",
+      "description": "Điềm tĩnh, ít sủa",
+      "id": "french_bulldog_gentle",
+      "sortOrder": 16
+    },
+    {
+      "dogId": "french_bulldog",
+      "traitId": "friendly",
+      "description": "Tình cảm, quấn chủ",
+      "id": "french_bulldog_friendly",
+      "sortOrder": 17
+    },
+    {
+      "dogId": "french_bulldog",
+      "traitId": "loyal",
+      "description": "Trung thành",
+      "id": "french_bulldog_loyal",
+      "sortOrder": 18
+    },
+    {
+      "dogId": "french_bulldog",
+      "traitId": "independent",
+      "description": "Hợp ở căn hộ",
+      "id": "french_bulldog_independent",
+      "sortOrder": 19
+    },
+    {
+      "dogId": "pomeranian",
+      "traitId": "active",
+      "description": "Hoạt bát, lanh lợi",
+      "id": "pomeranian_active",
+      "sortOrder": 20
+    },
+    {
+      "dogId": "pomeranian",
+      "traitId": "smart",
+      "description": "Thông minh",
+      "id": "pomeranian_smart",
+      "sortOrder": 21
+    },
+    {
+      "dogId": "pomeranian",
+      "traitId": "loyal",
+      "description": "Rất quấn chủ",
+      "id": "pomeranian_loyal",
+      "sortOrder": 22
+    },
+    {
+      "dogId": "pomeranian",
+      "traitId": "independent",
+      "description": "Tự tin, cá tính",
+      "id": "pomeranian_independent",
+      "sortOrder": 23
+    }
+  ],
+  "dogCareTips": [
+    {
+      "dogId": "golden_retriever",
+      "careTipId": "grooming",
+      "description": "Giúp bộ lông luôn sạch đẹp và khỏe mạnh",
+      "id": "golden_retriever_grooming",
+      "sortOrder": 0
+    },
+    {
+      "dogId": "golden_retriever",
+      "careTipId": "exercise",
+      "description": "Đi dạo, chơi đùa để duy trì sức khỏe tốt",
+      "id": "golden_retriever_exercise",
+      "sortOrder": 1
+    },
+    {
+      "dogId": "golden_retriever",
+      "careTipId": "social",
+      "description": "Rất thích ở bên con người và các thú cưng khác",
+      "id": "golden_retriever_social",
+      "sortOrder": 2
+    },
+    {
+      "dogId": "corgi",
+      "careTipId": "exercise",
+      "description": "Đi dạo 2 lần mỗi ngày, tránh tăng cân",
+      "id": "corgi_exercise",
+      "sortOrder": 3
+    },
+    {
+      "dogId": "corgi",
+      "careTipId": "grooming",
+      "description": "Rụng lông nhiều, nên chải 2–3 lần mỗi tuần",
+      "id": "corgi_grooming",
+      "sortOrder": 4
+    },
+    {
+      "dogId": "corgi",
+      "careTipId": "training",
+      "description": "Dạy lệnh sớm để bớt sủa và cắn gót chân",
+      "id": "corgi_training",
+      "sortOrder": 5
+    },
+    {
+      "dogId": "siberian_husky",
+      "careTipId": "exercise",
+      "description": "Cần chạy nhảy ít nhất 1–2 giờ mỗi ngày",
+      "id": "siberian_husky_exercise",
+      "sortOrder": 6
+    },
+    {
+      "dogId": "siberian_husky",
+      "careTipId": "heat",
+      "description": "Lông dày, cần chỗ mát mẻ khi trời nóng",
+      "id": "siberian_husky_heat",
+      "sortOrder": 7
+    },
+    {
+      "dogId": "siberian_husky",
+      "careTipId": "grooming",
+      "description": "Chải kỹ vào mùa thay lông",
+      "id": "siberian_husky_grooming",
+      "sortOrder": 8
+    },
+    {
+      "dogId": "poodle",
+      "careTipId": "grooming",
+      "description": "Cắt tỉa lông định kỳ 4–6 tuần một lần",
+      "id": "poodle_grooming",
+      "sortOrder": 9
+    },
+    {
+      "dogId": "poodle",
+      "careTipId": "training",
+      "description": "Học rất nhanh, nên chơi trò chơi trí tuệ",
+      "id": "poodle_training",
+      "sortOrder": 10
+    },
+    {
+      "dogId": "poodle",
+      "careTipId": "social",
+      "description": "Quấn chủ, không nên để ở một mình lâu",
+      "id": "poodle_social",
+      "sortOrder": 11
+    },
+    {
+      "dogId": "french_bulldog",
+      "careTipId": "heat",
+      "description": "Mũi ngắn, dễ mệt khi trời nóng",
+      "id": "french_bulldog_heat",
+      "sortOrder": 12
+    },
+    {
+      "dogId": "french_bulldog",
+      "careTipId": "exercise",
+      "description": "Chỉ cần đi dạo nhẹ nhàng mỗi ngày",
+      "id": "french_bulldog_exercise",
+      "sortOrder": 13
+    },
+    {
+      "dogId": "french_bulldog",
+      "careTipId": "social",
+      "description": "Thích được ôm ấp, ở gần chủ",
+      "id": "french_bulldog_social",
+      "sortOrder": 14
+    },
+    {
+      "dogId": "pomeranian",
+      "careTipId": "grooming",
+      "description": "Lông xù dày, chải 3–4 lần mỗi tuần",
+      "id": "pomeranian_grooming",
+      "sortOrder": 15
+    },
+    {
+      "dogId": "pomeranian",
+      "careTipId": "training",
+      "description": "Dạy sớm để hạn chế sủa nhiều",
+      "id": "pomeranian_training",
+      "sortOrder": 16
+    },
+    {
+      "dogId": "pomeranian",
+      "careTipId": "social",
+      "description": "Rất quấn chủ, thích được chú ý",
+      "id": "pomeranian_social",
+      "sortOrder": 17
+    }
+  ],
+  "dogImages": [
+    {
+      "id": "img_golden_1",
+      "dogId": "golden_retriever",
+      "imageKey": "golden_retriever",
+      "sortOrder": 1
+    },
+    {
+      "id": "img_golden_2",
+      "dogId": "golden_retriever",
+      "imageKey": "group_hunting_golden",
+      "sortOrder": 2
+    },
+    {
+      "id": "img_husky_1",
+      "dogId": "siberian_husky",
+      "imageKey": "group_sled_husky",
+      "sortOrder": 1
+    }
+  ],
+  "articleCategories": [
+    {
+      "id": "care",
+      "name": "Chăm sóc",
+      "colorHex": "#DDF7E8",
+      "sortOrder": 1
+    },
+    {
+      "id": "nutrition",
+      "name": "Dinh dưỡng",
+      "colorHex": "#FFF0D9",
+      "sortOrder": 2
+    },
+    {
+      "id": "training",
+      "name": "Huấn luyện",
+      "colorHex": "#E3F1FF",
+      "sortOrder": 3
+    },
+    {
+      "id": "breeds",
+      "name": "Giống chó",
+      "colorHex": "#F0E5FF",
+      "sortOrder": 4
+    },
+    {
+      "id": "health",
+      "name": "Sức khỏe",
+      "colorHex": "#FFE3E8",
+      "sortOrder": 5
+    }
+  ],
+  "articles": [
+    {
+      "id": "care_coat",
+      "categoryId": "care",
+      "title": "Cách chăm sóc lông chó đúng cách tại nhà",
+      "summary": "Giữ bộ lông sạch, khỏe và hạn chế rụng lông bằng quy trình chăm sóc đơn giản.",
+      "imageKey": "group_hunting_golden",
+      "publishedAt": "08/10/2026",
+      "readMinutes": 5,
+      "viewCount": 0
+    },
+    {
+      "id": "puppy_food",
+      "categoryId": "nutrition",
+      "title": "Chế độ dinh dưỡng cho chó theo từng độ tuổi",
+      "summary": "Khẩu phần phù hợp cho chó con, chó trưởng thành và chó lớn tuổi.",
+      "imageKey": "topic_kid_friendly_golden",
+      "publishedAt": "07/10/2026",
+      "readMinutes": 6,
+      "viewCount": 0
+    },
+    {
+      "id": "basic_training",
+      "categoryId": "training",
+      "title": "Hướng dẫn huấn luyện chó cơ bản cho người mới",
+      "summary": "Những khẩu lệnh và thói quen quan trọng khi bắt đầu huấn luyện.",
+      "imageKey": "corgi",
+      "publishedAt": "06/10/2026",
+      "readMinutes": 7,
+      "viewCount": 0
+    },
+    {
+      "id": "popular_breeds",
+      "categoryId": "breeds",
+      "title": "Top 10 giống chó phổ biến nhất thế giới",
+      "summary": "Khám phá các giống chó được yêu thích và đặc điểm nổi bật của chúng.",
+      "imageKey": "golden_retriever",
+      "publishedAt": "05/10/2026",
+      "readMinutes": 8,
+      "viewCount": 0
+    },
+    {
+      "id": "common_diseases",
+      "categoryId": "health",
+      "title": "Những bệnh thường gặp ở chó và cách phòng ngừa",
+      "summary": "Dấu hiệu cần chú ý và cách chăm sóc giúp chó luôn khỏe mạnh.",
+      "imageKey": "siberian_husky",
+      "publishedAt": "04/10/2026",
+      "readMinutes": 9,
+      "viewCount": 0
+    }
+  ],
+  "exploreCategories": [
+    {
+      "id": "large_dog",
+      "name": "Chó cỡ lớn",
+      "description": "Trên 25kg",
+      "imageKey": "img_golden_retriever",
+      "backgroundColorHex": "#E3F0FD",
+      "sortOrder": 1
+    },
+    {
+      "id": "medium_dog",
+      "name": "Chó cỡ trung",
+      "description": "10 - 25kg",
+      "imageKey": "corgi",
+      "backgroundColorHex": "#FDF2E5",
+      "sortOrder": 2
+    },
+    {
+      "id": "small_dog",
+      "name": "Chó cỡ nhỏ",
+      "description": "Dưới 10kg",
+      "imageKey": "dog_small_pomeranian",
+      "backgroundColorHex": "#FBE9EC",
+      "sortOrder": 3
+    },
+    {
+      "id": "long_hair_dog",
+      "dogIds": ["golden_retriever", "siberian_husky", "pomeranian"],
+      "name": "Chó lông dài",
+      "description": "Bộ lông dày, dài",
+      "imageKey": "siberian_husky",
+      "backgroundColorHex": "#DFF7EC",
+      "sortOrder": 4
+    },
+    {
+      "id": "short_hair_dog",
+      "dogIds": ["french_bulldog"],
+      "name": "Chó lông ngắn",
+      "description": "Bộ lông ngắn, mượt",
+      "imageKey": "french_bulldog",
+      "backgroundColorHex": "#ECE6FD",
+      "sortOrder": 5
+    }
+  ],
+  "featuredTopics": [
+    {
+      "id": "kid_friendly",
+      "title": "Chó thân thiện với trẻ em",
+      "description": "Những người bạn hiền lành, vui vẻ và phù hợp với gia đình có trẻ nhỏ.",
+      "imageKey": "topic_kid_friendly_golden",
+      "dogIds": [
+        "golden_retriever",
+        "labrador_retriever",
+        "beagle",
+        "cavalier_king_charles_spaniel",
+        "collie"
+      ],
+      "sortOrder": 1
+    },
+    {
+      "id": "smart_dogs",
+      "title": "Chó thông minh nhất thế giới",
+      "description": "Khám phá những giống chó học lệnh nhanh và có khả năng huấn luyện tốt.",
+      "imageKey": "topic_smart_border_collie",
+      "dogIds": [
+        "border_collie",
+        "poodle",
+        "german_shepherd",
+        "golden_retriever",
+        "doberman"
+      ],
+      "sortOrder": 2
+    },
+    {
+      "id": "apartment_dogs",
+      "title": "Chó phù hợp nuôi trong nhà",
+      "description": "Những giống chó thích nghi tốt với không gian sống nhỏ và căn hộ.",
+      "imageKey": "topic_apartment_puppy",
+      "dogIds": [
+        "french_bulldog",
+        "pomeranian",
+        "corgi",
+        "shih_tzu",
+        "pug"
+      ],
+      "sortOrder": 3
+    }
+  ],
+  "dogUseCases": [
+    {
+      "id": "working",
+      "name": "Chó nghiệp vụ",
+      "description": "Bảo vệ, tìm kiếm",
+      "imageKey": "group_guard_german_shepherd",
+      "dogIds": [
+        "german_shepherd"
+      ],
+      "sortOrder": 1
+    },
+    {
+      "id": "sled",
+      "name": "Chó kéo xe",
+      "description": "Sức bền cao",
+      "imageKey": "group_sled_husky",
+      "dogIds": [
+        "siberian_husky",
+        "alaskan_malamute"
+      ],
+      "sortOrder": 2
+    },
+    {
+      "id": "hunting",
+      "name": "Chó săn",
+      "description": "Khả năng đánh hơi tốt",
+      "imageKey": "group_hunting_golden",
+      "dogIds": [
+        "beagle",
+        "bloodhound"
+      ],
+      "sortOrder": 3
+    },
+    {
+      "id": "companion",
+      "name": "Chó cảnh",
+      "description": "Dễ thương, thân thiện",
+      "imageKey": "poodle",
+      "dogIds": [
+        "pomeranian",
+        "poodle"
+      ],
+      "sortOrder": 4
+    },
+    {
+      "id": "herding",
+      "name": "Chó chăn gia súc",
+      "description": "Thông minh, nhanh nhẹn",
+      "imageKey": "group_herding_border_collie",
+      "dogIds": [
+        "border_collie",
+        "australian_shepherd"
+      ],
+      "sortOrder": 5
+    }
+  ],
+  "explore": [
+    {
+      "title": "Khám phá các giống chó",
+      "description": "Tìm hiểu đặc điểm, tính cách, nguồn gốc và hình ảnh của từng giống chó.",
+      "actionText": "Khám phá ngay",
+      "imageKey": "explore_300_breeds",
+      "id": "banner"
+    }
+  ],
+  "articleSections": [
+    {
+      "id": "care_coat_1",
+      "articleId": "care_coat",
+      "sortIndex": 1,
+      "heading": "Tại sao điều này quan trọng?",
+      "body": "Việc hiểu đúng nhu cầu của chó giúp bạn chăm sóc thú cưng khoa học hơn, hạn chế các vấn đề sức khỏe và xây dựng thói quen tốt mỗi ngày."
+    },
+    {
+      "id": "care_coat_2",
+      "articleId": "care_coat",
+      "sortIndex": 2,
+      "heading": "Các bước thực hiện",
+      "body": "Hãy bắt đầu từ những thay đổi nhỏ, duy trì lịch trình ổn định và quan sát phản ứng của chó. Điều chỉnh phương pháp theo độ tuổi, giống chó và tình trạng sức khỏe."
+    },
+    {
+      "id": "care_coat_3",
+      "articleId": "care_coat",
+      "sortIndex": 3,
+      "heading": "Những lưu ý quan trọng",
+      "body": "Luôn ưu tiên sự an toàn và thoải mái. Nếu xuất hiện dấu hiệu bất thường, hãy tham khảo ý kiến bác sĩ thú y hoặc chuyên gia có kinh nghiệm."
+    },
+    {
+      "id": "puppy_food_1",
+      "articleId": "puppy_food",
+      "sortIndex": 1,
+      "heading": "Tại sao điều này quan trọng?",
+      "body": "Việc hiểu đúng nhu cầu của chó giúp bạn chăm sóc thú cưng khoa học hơn, hạn chế các vấn đề sức khỏe và xây dựng thói quen tốt mỗi ngày."
+    },
+    {
+      "id": "puppy_food_2",
+      "articleId": "puppy_food",
+      "sortIndex": 2,
+      "heading": "Các bước thực hiện",
+      "body": "Hãy bắt đầu từ những thay đổi nhỏ, duy trì lịch trình ổn định và quan sát phản ứng của chó. Điều chỉnh phương pháp theo độ tuổi, giống chó và tình trạng sức khỏe."
+    },
+    {
+      "id": "puppy_food_3",
+      "articleId": "puppy_food",
+      "sortIndex": 3,
+      "heading": "Những lưu ý quan trọng",
+      "body": "Luôn ưu tiên sự an toàn và thoải mái. Nếu xuất hiện dấu hiệu bất thường, hãy tham khảo ý kiến bác sĩ thú y hoặc chuyên gia có kinh nghiệm."
+    },
+    {
+      "id": "basic_training_1",
+      "articleId": "basic_training",
+      "sortIndex": 1,
+      "heading": "Tại sao điều này quan trọng?",
+      "body": "Việc hiểu đúng nhu cầu của chó giúp bạn chăm sóc thú cưng khoa học hơn, hạn chế các vấn đề sức khỏe và xây dựng thói quen tốt mỗi ngày."
+    },
+    {
+      "id": "basic_training_2",
+      "articleId": "basic_training",
+      "sortIndex": 2,
+      "heading": "Các bước thực hiện",
+      "body": "Hãy bắt đầu từ những thay đổi nhỏ, duy trì lịch trình ổn định và quan sát phản ứng của chó. Điều chỉnh phương pháp theo độ tuổi, giống chó và tình trạng sức khỏe."
+    },
+    {
+      "id": "basic_training_3",
+      "articleId": "basic_training",
+      "sortIndex": 3,
+      "heading": "Những lưu ý quan trọng",
+      "body": "Luôn ưu tiên sự an toàn và thoải mái. Nếu xuất hiện dấu hiệu bất thường, hãy tham khảo ý kiến bác sĩ thú y hoặc chuyên gia có kinh nghiệm."
+    },
+    {
+      "id": "popular_breeds_1",
+      "articleId": "popular_breeds",
+      "sortIndex": 1,
+      "heading": "Tại sao điều này quan trọng?",
+      "body": "Việc hiểu đúng nhu cầu của chó giúp bạn chăm sóc thú cưng khoa học hơn, hạn chế các vấn đề sức khỏe và xây dựng thói quen tốt mỗi ngày."
+    },
+    {
+      "id": "popular_breeds_2",
+      "articleId": "popular_breeds",
+      "sortIndex": 2,
+      "heading": "Các bước thực hiện",
+      "body": "Hãy bắt đầu từ những thay đổi nhỏ, duy trì lịch trình ổn định và quan sát phản ứng của chó. Điều chỉnh phương pháp theo độ tuổi, giống chó và tình trạng sức khỏe."
+    },
+    {
+      "id": "popular_breeds_3",
+      "articleId": "popular_breeds",
+      "sortIndex": 3,
+      "heading": "Những lưu ý quan trọng",
+      "body": "Luôn ưu tiên sự an toàn và thoải mái. Nếu xuất hiện dấu hiệu bất thường, hãy tham khảo ý kiến bác sĩ thú y hoặc chuyên gia có kinh nghiệm."
+    },
+    {
+      "id": "common_diseases_1",
+      "articleId": "common_diseases",
+      "sortIndex": 1,
+      "heading": "Tại sao điều này quan trọng?",
+      "body": "Việc hiểu đúng nhu cầu của chó giúp bạn chăm sóc thú cưng khoa học hơn, hạn chế các vấn đề sức khỏe và xây dựng thói quen tốt mỗi ngày."
+    },
+    {
+      "id": "common_diseases_2",
+      "articleId": "common_diseases",
+      "sortIndex": 2,
+      "heading": "Các bước thực hiện",
+      "body": "Hãy bắt đầu từ những thay đổi nhỏ, duy trì lịch trình ổn định và quan sát phản ứng của chó. Điều chỉnh phương pháp theo độ tuổi, giống chó và tình trạng sức khỏe."
+    },
+    {
+      "id": "common_diseases_3",
+      "articleId": "common_diseases",
+      "sortIndex": 3,
+      "heading": "Những lưu ý quan trọng",
+      "body": "Luôn ưu tiên sự an toàn và thoải mái. Nếu xuất hiện dấu hiệu bất thường, hãy tham khảo ý kiến bác sĩ thú y hoặc chuyên gia có kinh nghiệm."
+    }
+  ]
+}

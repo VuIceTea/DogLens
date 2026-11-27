@@ -20,15 +20,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
+import com.example.doglens.utils.loadBreedPhoto
 import com.example.doglens.R
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.ui.dog.SimilarDogsFragment
+import com.example.doglens.ui.favorite.whenSignedInForFavorite
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.Trait
 import com.example.doglens.utils.ImageUtils
 import com.example.doglens.utils.applyNavigationBarPadding
+import com.example.doglens.utils.catalogMedian
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,12 +57,9 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
 
         val btnFavorite = view.findViewById<MaterialButton>(R.id.btnFavorite)
         btnFavorite.setOnClickListener {
-            val content =
-                viewModel.state.value as? ResultUiState.Content ?: return@setOnClickListener
-            viewModel.toggleFavorite()
-            val msg = if (content.isFavorite) "Đã bỏ khỏi yêu thích"
-            else "Đã lưu ${content.dog.name} vào yêu thích"
-            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+            if (viewModel.state.value is ResultUiState.Content) {
+                whenSignedInForFavorite(viewModel::toggleFavorite)
+            }
         }
         view.findViewById<View>(R.id.btnShare).setOnClickListener {
             (viewModel.state.value as? ResultUiState.Content)?.let { shareResult(it) }
@@ -93,6 +93,11 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
                         }
 
                         is ResultUiState.Content -> {
+                            if (state.favoriteError) {
+                                viewModel.clearFavoriteError()
+                                Toast.makeText(requireContext(), R.string.favorite_update_error, Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                             if (boundRecognitionId != state.recognition.id) {
                                 bindContent(view, state)
                                 boundRecognitionId = state.recognition.id
@@ -115,12 +120,16 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
         view.findViewById<TextView>(R.id.tvDogName).text = dog.name
         view.findViewById<TextView>(R.id.tvConfidence).text = "$confidence%"
         view.findViewById<TextView>(R.id.tvAccuracyLabel).text = when {
-            confidence >= 90 -> "Độ chính xác cao"
-            confidence >= 75 -> "Độ chính xác khá"
-            else -> "Độ chính xác trung bình"
+            confidence >= 90 -> "Độ tin cậy cao"
+            confidence >= 75 -> "Độ tin cậy khá"
+            else -> "Độ tin cậy trung bình"
         }
         view.findViewById<TextView>(R.id.tvSummary).text = dog.summary ?: dog.description
 
+        view.findViewById<View>(R.id.resultTraitsSection).visibility =
+            if (state.traits.isEmpty()) View.GONE else View.VISIBLE
+        view.findViewById<View>(R.id.resultRelatedSection).visibility =
+            if (state.relatedDogs.isEmpty()) View.GONE else View.VISIBLE
         bindTraits(view.findViewById(R.id.gridTraits), state.traits)
         bindInfo(view, dog)
         bindRelatedDogs(view.findViewById(R.id.relatedDogsList), state.relatedDogs)
@@ -164,18 +173,20 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
     private fun bindInfo(view: View, dog: Dog) {
         setInfoCell(
             view, R.id.infoWeight, R.drawable.ic_weight, "Cân nặng",
-            range(dog.minWeightKg, dog.maxWeightKg, "kg")
+            dog.weightStandard ?: dog.weightMedianKg?.let { catalogMedian(it, "kg") }
+                ?: range(dog.minWeightKg, dog.maxWeightKg, "kg")
         )
         setInfoCell(
             view, R.id.infoHeight, R.drawable.ic_height_ruler, "Chiều cao",
-            range(dog.minHeightCm, dog.maxHeightCm, "cm")
+            dog.heightStandard ?: range(dog.minHeightCm, dog.maxHeightCm, "cm")
         )
         setInfoCell(
             view, R.id.infoLifespan, R.drawable.ic_result_clock, "Tuổi thọ",
-            range(dog.minLifespanYears, dog.maxLifespanYears, " năm")
+            dog.lifespanMedianYears?.let { catalogMedian(it, "năm") } ?: dog.lifespanReference
+                ?: range(dog.minLifespanYears, dog.maxLifespanYears, " năm")
         )
         setInfoCell(
-            view, R.id.infoCoat, R.drawable.ic_result_palette, "Màu lông phổ biến",
+            view, R.id.infoCoat, R.drawable.ic_result_palette, "Màu lông",
             dog.coatColors ?: "Đang cập nhật"
         )
     }
@@ -208,10 +219,7 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
             val card = inflater.inflate(R.layout.item_result_related_dog, container, false)
             val image = card.findViewById<ImageView>(R.id.imgRelatedDog)
 
-            when {
-                dog.localImageRes != null -> image.setImageResource(dog.localImageRes)
-                !dog.imageUrl.isNullOrBlank() -> Glide.with(this).load(dog.imageUrl).centerCrop().into(image)
-            }
+            image.loadBreedPhoto(dog)
 
             card.findViewById<TextView>(R.id.tvRelatedDogName).text = dog.name
             card.findViewById<TextView>(R.id.tvRelatedDogDescription).text = dog.description
@@ -244,7 +252,7 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
 
     private fun shareResult(state: ResultUiState.Content) {
         val text =
-            "DogLens nhận diện: ${state.dog.name} – ${state.recognition.confidence}% độ giống 🐶"
+            "DogLens nhận diện: ${state.dog.name} – ${state.recognition.confidence}% độ tin cậy 🐶"
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)

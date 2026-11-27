@@ -1,0 +1,49 @@
+package com.example.doglens.data.remote
+
+import com.example.doglens.BuildConfig
+import com.example.doglens.data.repository.RecognitionFailedException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+
+internal class DogRecognitionApi {
+    val isConfigured: Boolean
+        get() = BuildConfig.DOG_RECOGNITION_API_URL.isNotBlank()
+
+    fun requireConfigured() {
+        check(BuildConfig.DOG_RECOGNITION_API_URL.startsWith("https://")) {
+            "Dịch vụ nhận diện ảnh chưa được cấu hình."
+        }
+    }
+
+    suspend fun recognize(bytes: ByteArray, mimeType: String, token: String): Pair<String, Int> =
+        withContext(Dispatchers.IO) {
+            requireConfigured()
+            val connection = URL(BuildConfig.DOG_RECOGNITION_API_URL).openConnection() as HttpURLConnection
+            try {
+                connection.instanceFollowRedirects = false
+                connection.requestMethod = "POST"
+                connection.connectTimeout = 12_000
+                connection.readTimeout = 40_000
+                connection.doOutput = true
+                connection.setFixedLengthStreamingMode(bytes.size)
+                connection.setRequestProperty("Content-Type", mimeType)
+                connection.setRequestProperty("Authorization", "Bearer $token")
+                connection.setRequestProperty("Accept", "application/json")
+                connection.outputStream.use { it.write(bytes) }
+                if (connection.responseCode == 422) throw RecognitionFailedException()
+                check(connection.responseCode in 200..299) { "Không thể kết nối dịch vụ nhận diện." }
+                val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
+                val confidence = result.getInt("confidence")
+                require(confidence in 0..100) { "API trả về độ tin cậy không hợp lệ." }
+                val dogId = result.optString("dogId")
+                if (dogId.isBlank() || confidence < 60) throw RecognitionFailedException()
+                check(dogId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "API trả về mã giống chó không hợp lệ." }
+                dogId to confidence
+            } finally {
+                connection.disconnect()
+            }
+        }
+}

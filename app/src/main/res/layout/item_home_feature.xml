@@ -2,13 +2,15 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="95dp"
-    android:layout_height="170dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="170dp"
     android:padding="8dp"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:background="@drawable/bg_card"
-    android:layout_marginRight="6dp">
+    android:layout_marginEnd="6dp"
+    android:layout_marginBottom="6dp">
 
     <ImageView
         android:id="@+id/imgFeature"
@@ -27,7 +29,6 @@
         android:textColor="#102344"
         android:fontFamily="@font/nunitosans_bold"
         android:gravity="center"
-        android:maxLines="2"
         tools:text="Nhận diện giống chó" />
 
     <TextView
@@ -38,6 +39,5 @@
         android:textSize="12sp"
         android:textColor="#8B91AC"
         android:gravity="center"
-        android:maxLines="2"
         tools:text="Nhanh và chính xác" />
 </LinearLayout>

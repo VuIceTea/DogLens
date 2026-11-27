@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.repository.RecognitionRepository
+import com.example.doglens.data.repository.RecognitionFailedException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +17,7 @@ sealed interface RecognitionUiState {
     data class Running(val percent: Int) : RecognitionUiState
     data class Success(val recognitionId: String) : RecognitionUiState
     data object Failed : RecognitionUiState
+    data class Unavailable(val message: String) : RecognitionUiState
 }
 
 class RecognitionViewModel(
@@ -39,8 +41,12 @@ class RecognitionViewModel(
                 _state.value = RecognitionUiState.Success(result.id)
             } catch (e: CancellationException) {
                 throw e // bấm Back -> huỷ bình thường
-            } catch (e: Exception) {
+            } catch (e: RecognitionFailedException) {
                 _state.value = RecognitionUiState.Failed
+            } catch (e: IllegalStateException) {
+                _state.value = RecognitionUiState.Unavailable(e.message ?: "Không thể xử lý ảnh.")
+            } catch (_: Exception) {
+                _state.value = RecognitionUiState.Unavailable("Không thể kết nối hoặc lưu kết quả nhận diện.")
             }
         }
     }

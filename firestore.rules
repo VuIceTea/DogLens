@@ -1,6 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function owns(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /{catalog}/{document} {
+      allow read: if catalog in [
+        'dogs', 'dogSizeCategories', 'dogImages', 'traits', 'dogTraits', 'careTips',
+        'dogCareTips', 'articles', 'articleCategories', 'articleSections',
+        'explore', 'exploreCategories', 'featuredTopics', 'dogUseCases'
+      ];
+    }
+
     match /users/{uid} {
       allow get: if request.auth != null && request.auth.uid == uid;
       allow create: if request.auth != null && request.auth.uid == uid
@@ -10,6 +22,54 @@ service cloud.firestore {
       allow update: if request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
           .hasAny(['membership', 'premiumUntil', 'id']);
+
+      match /favorites/{dogId} {
+        allow read, delete: if owns(uid);
+        allow create, update: if owns(uid)
+          && request.resource.data.keys().hasOnly(['addedAt'])
+          && request.resource.data.addedAt == request.time
+          && exists(/databases/$(database)/documents/dogs/$(dogId));
+      }
+
+      match /{collection}/{articleId} {
+        allow read: if owns(uid) && collection in ['articleViews', 'articleBookmarks'];
+        allow delete: if owns(uid) && collection == 'articleBookmarks';
+        allow create, update: if owns(uid) && collection in ['articleViews', 'articleBookmarks']
+          && exists(/databases/$(database)/documents/articles/$(articleId))
+          && ((collection == 'articleViews'
+              && request.resource.data.keys().hasOnly(['viewedAt'])
+              && request.resource.data.viewedAt == request.time)
+            || (collection == 'articleBookmarks'
+              && request.resource.data.keys().hasOnly(['addedAt'])
+              && request.resource.data.addedAt == request.time));
+      }
+
+      match /recognitions/{id} {
+        allow read, delete: if owns(uid);
+        allow create: if owns(uid)
+          && request.resource.data.keys().hasOnly(['dogId', 'confidence', 'createdAt'])
+          && request.resource.data.dogId is string
+          && request.resource.data.confidence is int
+          && request.resource.data.confidence >= 60
+          && request.resource.data.confidence <= 100
+          && request.resource.data.createdAt == request.time
+          && exists(/databases/$(database)/documents/dogs/$(request.resource.data.dogId));
+      }
+
+      match /notifications/{id} {
+        allow read: if owns(uid);
+        allow create: if owns(uid)
+          && request.resource.data.keys().hasOnly(['type', 'title', 'message', 'createdAt', 'isRead'])
+          && request.resource.data.type == 'RECOGNITION'
+          && request.resource.data.title is string
+          && request.resource.data.message is string
+          && request.resource.data.isRead == false
+          && request.resource.data.createdAt == request.time
+          && existsAfter(/databases/$(database)/documents/users/$(uid)/recognitions/$(id));
+        allow update: if owns(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead'])
+          && request.resource.data.isRead == true;
+      }
     }
   }
 }

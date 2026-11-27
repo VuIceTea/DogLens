@@ -15,9 +15,14 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
+        val recognitionUrl = providers.gradleProperty("DOG_RECOGNITION_API_URL").orElse("").get()
+        val escapedUrl = recognitionUrl.replace("\\", "\\\\").replace("\"", "\\\"")
+        buildConfigField("String", "DOG_RECOGNITION_API_URL", "\"$escapedUrl\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    buildFeatures { buildConfig = true }
 
     buildTypes {
         release {
@@ -60,6 +65,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("androidx.exifinterface:exifinterface:1.4.2")
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
 
     implementation(libs.androidx.camera.core)

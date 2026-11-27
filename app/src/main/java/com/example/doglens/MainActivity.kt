@@ -190,6 +190,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Mở màn phụ (Đang nhận diện, Kết quả, Lỗi, Chi tiết...): ẩn bottom nav, có Back
+    fun selectFavoriteTab() {
+        bottomNavigation.selectedItemId = R.id.nav_favorite
+    }
+
     fun openScreen(fragment: Fragment, @ColorRes backgroundRes: Int = R.color.identify_background) {
         screenBackgroundRes = backgroundRes
         bottomNavigation.visibility = View.GONE

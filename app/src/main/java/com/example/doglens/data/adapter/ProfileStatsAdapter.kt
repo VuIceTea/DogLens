@@ -16,7 +16,7 @@ class ProfileStatsAdapter(
 ) : RecyclerView.Adapter<ProfileStatsAdapter.StatViewHolder>() {
     data class StatItem(
         val icon: Int,
-        val value: Int,
+        val value: Int?,
         val label: String,
         val iconBackgroundColor: String,
         val iconTintColor: String
@@ -42,7 +42,7 @@ class ProfileStatsAdapter(
         val item = stats[position]
 
         holder.imgIcon.setImageResource(item.icon)
-        holder.txtValue.text = item.value.toString()
+        holder.txtValue.text = item.value?.toString() ?: "—"
         holder.txtLabel.text = item.label.toString()
         holder.imgStatIcon.setImageResource(item.icon)
 

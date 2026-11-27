@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,12 +46,13 @@ class SuggestedDogsViewModel : ViewModel() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                sourceDog = sourceDogId?.let { repository.getDogById(it) }
                 val dogs = repository.getDogs()
-                val traits = repository.getTraits().associateBy { it.id }
-                traitIdsByDog = dogs.associate { dog ->
-                    dog.id to repository.getDogTraits(dog.id).map { it.traitId }.toSet()
+                sourceDog = dogs.firstOrNull { it.id == sourceDogId }
+                val (links, traits) = coroutineScope {
+                    val labels = async { repository.getTraits().associateBy { it.id } }
+                    repository.getDogTraitsByDog(dogs.map { it.id }.toSet()) to labels.await()
                 }
+                traitIdsByDog = links.mapValues { (_, dogTraits) -> dogTraits.map { it.traitId }.toSet() }
                 allRows = dogs.filterNot { it.id == sourceDog?.id }.map { dog ->
                     SuggestedDogRow(
                         dog = dog,

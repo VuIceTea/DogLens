@@ -1,0 +1,65 @@
+{
+  "care_coat": {
+    "title": "Cách chăm sóc lông chó tại nhà",
+    "summary": "Chọn dụng cụ theo loại lông và dùng lúc chải để kiểm tra da, tai và các vùng dễ rối.",
+    "sources": {
+      "MSD Veterinary Manual · Chăm sóc định kỳ": "https://www.msdvetmanual.com/dog-owners/routine-care-of-dogs/routine-health-care-of-dogs",
+      "RSPCA · Chăm sóc sức khỏe cho chó": "https://www.rspca.org.uk/adviceandwelfare/pets/dogs/health"
+    },
+    "sections": [
+      ["Chải theo loại lông", "Dùng bàn chải hoặc lược phù hợp với loại lông. Chải nhẹ và kiểm tra các vùng dễ rối sau tai, dưới chân và quanh cổ. Chó lông dài thường cần được chải thường xuyên hơn chó lông ngắn. Nếu lông bết sát da hoặc chó đau khi chạm, nhờ bác sĩ thú y hoặc người chăm sóc lông có kinh nghiệm xử lý."],
+      ["Tắm khi cần", "Dùng nước ấm và sản phẩm tắm dành cho chó. Xả kỹ và lau khô sau khi tắm. Nếu chó đang điều trị bệnh da, hỏi bác sĩ thú y về loại sản phẩm và lịch tắm phù hợp."],
+      ["Kiểm tra da khi chải", "Chú ý các vùng bị đỏ, đau, có mùi bất thường, rụng lông từng mảng hoặc có ký sinh trùng. Nếu dấu hiệu kéo dài hoặc chó gãi nhiều, liên hệ bác sĩ thú y để tìm nguyên nhân."]
+    ]
+  },
+  "puppy_food": {
+    "title": "Chọn thức ăn cho chó theo giai đoạn sống",
+    "summary": "Đọc nhãn dinh dưỡng theo giai đoạn sống và theo dõi thể trạng để điều chỉnh khẩu phần.",
+    "sources": {
+      "WSAVA · Hướng dẫn chọn thức ăn": "https://wsava.org/wp-content/uploads/2021/04/Selecting-a-pet-food-for-your-pet-updated-2021_WSAVA-Global-Nutrition-Toolkit.pdf",
+      "MSD Veterinary Manual · Chăm sóc và dinh dưỡng": "https://www.msdvetmanual.com/dog-owners/routine-care-of-dogs/routine-health-care-of-dogs"
+    },
+    "sections": [
+      ["Chó con đang lớn", "Chọn thức ăn hoàn chỉnh có ghi phù hợp giai đoạn tăng trưởng. Khi chó con dự kiến trưởng thành ở cỡ lớn, kiểm tra nhãn và hỏi bác sĩ thú y xem thức ăn có phù hợp với quá trình tăng trưởng của chó cỡ lớn hay không."],
+      ["Chó trưởng thành", "Dùng khẩu phần trên nhãn làm điểm bắt đầu. Theo dõi cân nặng, thể trạng và mức vận động để điều chỉnh. Nếu cần giảm cân hoặc chó có bệnh nền, trao đổi với bác sĩ thú y để chọn khẩu phần phù hợp."],
+      ["Chó lớn tuổi", "Kiểm tra định kỳ cân nặng, sức ăn và tình trạng răng miệng. Nhu cầu thay đổi theo sức khỏe và mức vận động của từng con. Bác sĩ thú y có thể giúp quyết định thời điểm đổi thức ăn hoặc dùng chế độ ăn điều trị."]
+    ]
+  },
+  "basic_training": {
+    "title": "Huấn luyện chó bằng phần thưởng",
+    "summary": "Dùng phần thưởng ngay khi chó làm đúng và tăng độ khó từ từ.",
+    "sources": {
+      "AVSAB · Tuyên bố về huấn luyện nhân đạo": "https://avsab.org/resources/position-statements/"
+    },
+    "sections": [
+      ["Bắt đầu nơi ít xao nhãng", "Chọn hành vi đơn giản để luyện, chẳng hạn nhìn người gọi tên hoặc chú ý khi nghe tín hiệu. Chọn phần thưởng mà chó thích, như một miếng thức ăn nhỏ hoặc đồ chơi."],
+      ["Thưởng ngay khi chó làm đúng", "Đưa phần thưởng ngay sau hành vi cần khuyến khích. Tập từng bước ngắn và tăng dần khoảng cách hoặc mức xao nhãng khi chó đã làm được ở điều kiện dễ hơn."],
+      ["Khi chó sợ hoặc phản ứng mạnh", "Giảm mức khó và tạo khoảng cách để chó có thể bình tĩnh. Với hành vi gây nguy hiểm như cắn hoặc sợ hãi nghiêm trọng, nhờ bác sĩ thú y hoặc chuyên gia hành vi có chuyên môn hỗ trợ."]
+    ]
+  },
+  "popular_breeds": {
+    "title": "10 giống chó đăng ký nhiều nhất tại Mỹ năm 2025",
+    "summary": "Xếp hạng theo lượt đăng ký chó thuần chủng của American Kennel Club trong năm 2025.",
+    "sources": {
+      "AKC · Bảng xếp hạng đăng ký năm 2025": "https://www.akc.org/expert-advice/news/most-popular-dog-breeds-2025/"
+    },
+    "sections": [
+      ["Bảng xếp hạng đo lường gì?", "American Kennel Club tổng hợp số đăng ký từng giống trong hệ thống của mình tại Mỹ. Dữ liệu phản ánh các lượt đăng ký thuộc phạm vi AKC trong năm 2025."],
+      ["Thứ hạng từ 1 đến 5", "1. French Bulldog\n2. Labrador Retriever\n3. Golden Retriever\n4. German Shepherd Dog\n5. Dachshund"],
+      ["Thứ hạng từ 6 đến 10", "6. Poodle\n7. Beagle\n8. Rottweiler\n9. German Shorthaired Pointer\n10. Bulldog"]
+    ]
+  },
+  "common_diseases": {
+    "title": "Tiêm phòng và phòng ký sinh trùng cho chó",
+    "summary": "Dùng lịch khám, tiêm phòng và phòng ký sinh trùng phù hợp với tuổi, sức khỏe và môi trường sống của chó.",
+    "sources": {
+      "AVMA · Tiêm phòng cho thú cưng": "https://avma.org/resources-tools/pet-owners/petcare/vaccinations",
+      "MSD Veterinary Manual · Chăm sóc sức khỏe định kỳ": "https://www.msdvetmanual.com/dog-owners/routine-care-of-dogs/routine-health-care-of-dogs"
+    },
+    "sections": [
+      ["Lên lịch tiêm phòng", "Trao đổi với bác sĩ thú y về các mũi tiêm và thời điểm nhắc lại. Những bệnh có thể giảm nguy cơ nhờ tiêm phòng gồm parvovirus, bệnh Care và bệnh dại. Lịch tiêm phụ thuộc vào tuổi, tiền sử tiêm và mức phơi nhiễm."],
+      ["Phòng ký sinh trùng", "Hỏi bác sĩ thú y về chương trình phòng bọ chét, ve và giun phù hợp với nơi sinh sống và sinh hoạt của chó. Giun tim có thể lây qua muỗi đốt. Bác sĩ thú y có thể tư vấn xét nghiệm và biện pháp dự phòng phù hợp."],
+      ["Khi nào liên hệ bác sĩ thú y?", "Nếu chó bỏ ăn kèm mệt nhiều, nôn hoặc tiêu chảy kéo dài, liên hệ phòng khám để được hướng dẫn. Khó thở, ngã quỵ hoặc phản ứng nghiêm trọng sau tiêm cần được đánh giá khẩn cấp."]
+    ]
+  }
+}

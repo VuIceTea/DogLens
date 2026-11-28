@@ -1,0 +1,15 @@
+**
+!recognition_backend/
+!recognition_backend/api.py
+!recognition_backend/inference.py
+!recognition_backend/fetch_detector.py
+!recognition_backend/requirements.txt
+!app/
+!app/src/
+!app/src/main/
+!app/src/main/assets/
+!app/src/main/assets/recognition/
+!app/src/main/assets/recognition/breed-catalog.json
+!app/src/main/assets/recognition/breed-classifier-int8.onnx
+!app/src/main/assets/recognition/model-metadata.json
+!app/src/main/assets/recognition/classifier-license.txt

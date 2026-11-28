@@ -4,123 +4,106 @@
 
 ### Discover dog breeds through images
 
-**An Android application concept for identifying dog breeds, exploring breed information, and saving favorites.**
-
-![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
-![Language](https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white)
-![UI](https://img.shields.io/badge/UI-XML%20Layouts-1688F0)
-![Status](https://img.shields.io/badge/Status-In%20Development-F5A623)
+An Android app for identifying dog breeds, exploring breed profiles and articles, and saving discoveries.
 
 </div>
 
-## 📖 Overview
+## Features
 
-**DogLens** is a native Android app project designed to make discovering dog breeds simple and approachable. Users will be able to select or capture a photo, view breed information, browse popular breeds, and collect their favorites.
+- **Photo recognition** uses CameraX or the Android photo picker. Users can crop and rotate an image before recognition, review confidence and breed information, and download or share the result.
+- **Breed discovery** includes search, size categories, featured topics, working roles, similar breeds, and saved favorites.
+- **Articles** include a searchable library, list and cover layouts, bookmarks, and reading history.
+- **Account and activity** include Firebase sign-in, account settings, recognition history, notifications, and a Premium checkout entry point.
 
-The project is **currently in development**. Its interface is being built with Kotlin and Android XML layouts; dog-breed recognition and live data integration are planned features, not yet claimed as working functionality.
+## App screenshots
 
-## ✨ Features
+Captured from a local DogLens build on an Android emulator. Account details and private images are obscured where they appear. Click a screenshot to open it at full size.
 
-### UI and navigation
-- 🏠 **Home:** DogLens banner, image-upload area, feature shortcuts, and popular-breed previews.
-- 🔎 **Explore:** Entry point for discovering breeds.
-- ❤️ **Favorites:** Entry point for saved breeds.
-- 👤 **Profile:** Entry point for personal settings and account-related screens.
-- 📱 **Bottom navigation:** Switch between the main sections using Android Fragments.
+### Home and breed discovery
 
-### Planned functionality
-- 📷 Capture a dog photo or select one from the gallery.
-- 🤖 Identify a dog's breed from an image using a recognition service/model.
-- 📚 Retrieve breed details and images from an API.
-- 💾 Save and manage favorite breeds.
-- 🕘 Review identification history.
+| Home | Explore | Breed search |
+| --- | --- | --- |
+| <a href="screenshots/home.webp"><img src="screenshots/home.webp" alt="Home" width="216"></a> | <a href="screenshots/explore.webp"><img src="screenshots/explore.webp" alt="Explore" width="216"></a> | <a href="screenshots/breed-search.webp"><img src="screenshots/breed-search.webp" alt="Breed search" width="216"></a> |
 
-> **Note:** These planned capabilities are a roadmap, not a statement that the backend or image-recognition functionality has already been implemented.
+| Categories | Featured topics | Working roles |
+| --- | --- | --- |
+| <a href="screenshots/explore-categories.webp"><img src="screenshots/explore-categories.webp" alt="Categories" width="216"></a> | <a href="screenshots/explore-topics.webp"><img src="screenshots/explore-topics.webp" alt="Featured topics" width="216"></a> | <a href="screenshots/explore-roles.webp"><img src="screenshots/explore-roles.webp" alt="Working roles" width="216"></a> |
 
-## 🛠️ Tech stack
+| Breed profile | Similar breeds | Favorites |
+| --- | --- | --- |
+| <a href="screenshots/breed-detail.webp"><img src="screenshots/breed-detail.webp" alt="Breed profile" width="216"></a> | <a href="screenshots/similar-breeds.webp"><img src="screenshots/similar-breeds.webp" alt="Similar breeds" width="216"></a> | <a href="screenshots/favorites.webp"><img src="screenshots/favorites.webp" alt="Favorites" width="216"></a> |
+
+### Photo recognition
+
+| Choose an image source | In-app camera | Crop and rotate |
+| --- | --- | --- |
+| <a href="screenshots/image-source.webp"><img src="screenshots/image-source.webp" alt="Choose an image source" width="216"></a> | <a href="screenshots/camera.webp"><img src="screenshots/camera.webp" alt="In-app camera" width="216"></a> | <a href="screenshots/image-preview.webp"><img src="screenshots/image-preview.webp" alt="Crop and rotate" width="216"></a> |
+
+| Recognition in progress | Breed result | Unrecognized camera photo |
+| --- | --- | --- |
+| <a href="screenshots/recognition-progress.webp"><img src="screenshots/recognition-progress.webp" alt="Recognition in progress" width="216"></a> | <a href="screenshots/recognition-result.webp"><img src="screenshots/recognition-result.webp" alt="Breed result" width="216"></a> | <a href="screenshots/recognition-no-dog.webp"><img src="screenshots/recognition-no-dog.webp" alt="Unrecognized camera photo" width="216"></a> |
+
+| Recognition history | Notifications |
+| --- | --- |
+| <a href="screenshots/recognition-history.webp"><img src="screenshots/recognition-history.webp" alt="Recognition history" width="216"></a> | <a href="screenshots/notifications.webp"><img src="screenshots/notifications.webp" alt="Notifications" width="216"></a> |
+
+### Article library
+
+| Article list | Cover layout | Article detail |
+| --- | --- | --- |
+| <a href="screenshots/articles-cards.webp"><img src="screenshots/articles-cards.webp" alt="Article list" width="216"></a> | <a href="screenshots/articles.webp"><img src="screenshots/articles.webp" alt="Cover layout" width="216"></a> | <a href="screenshots/article-detail.webp"><img src="screenshots/article-detail.webp" alt="Article detail" width="216"></a> |
+
+| Article sections | Reading history |
+| --- | --- |
+| <a href="screenshots/article-contents.webp"><img src="screenshots/article-contents.webp" alt="Article sections" width="216"></a> | <a href="screenshots/viewed-articles.webp"><img src="screenshots/viewed-articles.webp" alt="Reading history" width="216"></a> |
+
+### Accounts, settings and Premium
+
+| Guest profile | Sign in | Create account |
+| --- | --- | --- |
+| <a href="screenshots/guest-profile.webp"><img src="screenshots/guest-profile.webp" alt="Guest profile" width="216"></a> | <a href="screenshots/login.webp"><img src="screenshots/login.webp" alt="Sign in" width="216"></a> | <a href="screenshots/register.webp"><img src="screenshots/register.webp" alt="Create account" width="216"></a> |
+
+| Reset password | Signed-in profile | Edit profile |
+| --- | --- | --- |
+| <a href="screenshots/forgot-password.webp"><img src="screenshots/forgot-password.webp" alt="Reset password" width="216"></a> | <a href="screenshots/profile.webp"><img src="screenshots/profile.webp" alt="Signed-in profile" width="216"></a> | <a href="screenshots/edit-profile.webp"><img src="screenshots/edit-profile.webp" alt="Edit profile" width="216"></a> |
+
+| Settings | Change password | Premium plans |
+| --- | --- | --- |
+| <a href="screenshots/settings.webp"><img src="screenshots/settings.webp" alt="Settings" width="216"></a> | <a href="screenshots/change-password.webp"><img src="screenshots/change-password.webp" alt="Change password" width="216"></a> | <a href="screenshots/premium.webp"><img src="screenshots/premium.webp" alt="Premium plans" width="216"></a> |
+
+| Checkout confirmation |
+| --- |
+| <a href="screenshots/premium-confirmation.webp"><img src="screenshots/premium-confirmation.webp" alt="Checkout confirmation" width="216"></a> |
+
+The Dachshund demo photo is by Karo98765, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) and shown resized/cropped in the app. [Wikimedia Commons photo](https://commons.wikimedia.org/wiki/File:Dackel_Stanard_Rot.jpg)
+
+## Verification notes
+
+- The emulator demo recognized the sample gallery photo as Dachshund and showed the rejection screen for a camera image without a dog. These are examples of the flow.
+- Breed search, similar breeds, adding and removing a favorite, article browsing and bookmarks, reading history, notifications, profile and settings were exercised in the app.
+- Premium plan selection and checkout confirmation were visible. The emulator reported a payment-service connection error. Full VNPAY payment, email delivery, and external sign-in provider flows were not verified.
+- The community shortcut and legal pages are placeholders in this build.
+
+## Tech stack
 
 | Area | Technology |
 | --- | --- |
-| Language | Kotlin |
-| IDE | Android Studio |
-| Interface | Android XML layouts |
-| UI components | Fragments, RecyclerView, Material Components |
-| Layouts | ConstraintLayout, LinearLayout, FrameLayout, ScrollView |
-| Version control | Git & GitHub |
-| Future integration | REST API for breed data and image recognition |
+| Android | Kotlin, XML layouts, Fragments, RecyclerView, CameraX |
+| State and asynchronous work | ViewModel, StateFlow, Kotlin Coroutines |
+| Catalog and account data | Firebase Authentication, Cloud Firestore |
+| Recognition | ONNX Runtime on device, optional recognition backend |
+| Payments | Firebase Cloud Functions and VNPAY |
 
-## 📱 Screens
+## Run locally
 
-| Screen | Purpose |
-| --- | --- |
-| Home | Main banner, upload UI, shortcuts, popular breeds |
-| Explore | Browse and search breeds (under development) |
-| Favorites | View saved breeds (under development) |
-| Profile | User information and settings (under development) |
-
-### Screenshots
-
-Add screenshots captured from the Android emulator under `screenshots/` and then uncomment the examples below:
-
-<!--
-![DogLens Home](screenshots/home.png)
-![DogLens Explore](screenshots/explore.png)
--->
-
-## 🧱 Project organization
-
-```text
-app/src/main/
-├── java/.../
-│   ├── MainActivity.kt
-│   ├── ui/
-│   ├── adapter/
-│   └── model/
-└── res/
-    ├── drawable/
-    ├── font/
-    ├── layout/
-    ├── menu/
-    └── values/
-```
-
-*The directory layout is illustrative; package locations and files may vary as development continues.*
-
-## 🚀 Getting started
-
-1. Clone the repository:
+1. Clone the repository and open it in Android Studio.
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+   git clone https://github.com/VuIceTea/DogLens.git
    ```
 
-2. Open the cloned directory in **Android Studio**.
-3. Let **Gradle Sync** finish and install any Android SDK packages Android Studio requests.
-4. Select an emulator or connect an Android device.
-5. Click **Run ▶** to build and launch the application.
+2. Add the Firebase Android configuration at `app/google-services.json` for the `com.example.doglens` application ID. Enable the authentication providers you intend to test and configure Firestore. The Android configuration is project-specific.
+3. Sync Gradle and run the app on an emulator or an Android device. The minimum Android version is Android 7.0 (API 24).
+4. To connect the optional recognition service, follow the [recognition backend setup](recognition_backend/README.md) and set `DOG_RECOGNITION_API_URL` as a Gradle property.
 
-> Replace `YOUR_USERNAME/YOUR_REPOSITORY` with the actual GitHub repository path.
-
-## 🗺️ Roadmap
-
-- [x] Design the Home screen with XML.
-- [x] Create reusable feature and breed item layouts.
-- [x] Set up the main navigation UI.
-- [ ] Implement image picking and camera flow.
-- [ ] Integrate breed-recognition API/model.
-- [ ] Load breed lists and details from a REST API.
-- [ ] Implement favorites persistence.
-- [ ] Add identification history.
-- [ ] Improve responsive layouts, accessibility, and testing.
-
-## 🎯 Project goals
-
-DogLens is a hands-on Android development project focused on Kotlin, XML UI design, reusable RecyclerView components, Fragment navigation, and future API integration.
-
----
-
-<div align="center">
-
-**Made with Kotlin for dog lovers 🐶**
-
-</div>
+Premium checkout requires separate VNPAY sandbox and Firebase Functions configuration.

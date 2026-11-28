@@ -1,5 +1,7 @@
 package com.example.doglens.ui.home
 
+import com.example.doglens.utils.bindPullRefresh
+
 import android.net.Uri
 import android.os.Bundle
 import android.graphics.drawable.GradientDrawable
@@ -139,6 +141,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     // Hiển thị các giống chó phổ biến
     private fun setupPopularDogs(view: View) {
+        bindPullRefresh(view.findViewById(R.id.pullRefresh)) { viewModel.refreshPopularDogs().join() }
         val recyclerView = view.findViewById<RecyclerView>(
             R.id.rvHomePopular
         )
@@ -168,11 +171,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                             }
                             is PopularDogsState.Content -> {
                                 loadError.dismiss()
-                                if (recyclerView.adapter !is PopularDogAdapter) {
-                                    recyclerView.adapter = PopularDogAdapter(state.dogs) { dog ->
-                                        (requireActivity() as MainActivity)
-                                            .openScreen(DogDetailFragment.newInstance(dog.id))
-                                    }
+                                recyclerView.adapter = PopularDogAdapter(state.dogs) { dog ->
+                                    (requireActivity() as MainActivity)
+                                        .openScreen(DogDetailFragment.newInstance(dog.id))
                                 }
                             }
                         }

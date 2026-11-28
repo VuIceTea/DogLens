@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.LayoutRes
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -15,6 +16,7 @@ import com.example.doglens.data.model.Dog
 import kotlin.math.roundToInt
 
 class SuggestedDogsAdapter(
+    @LayoutRes private val itemLayout: Int = R.layout.item_suggested_dog,
     private val onDogClick: (Dog) -> Unit
 ) : RecyclerView.Adapter<SuggestedDogsAdapter.Holder>() {
 
@@ -28,7 +30,7 @@ class SuggestedDogsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_suggested_dog, parent, false)
+            .inflate(itemLayout, parent, false)
         return Holder(view)
     }
 
@@ -41,21 +43,28 @@ class SuggestedDogsAdapter(
     inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
         private val image: ImageView = view.findViewById(R.id.imgDog)
         private val name: TextView = view.findViewById(R.id.tvDogName)
-        private val description: TextView = view.findViewById(R.id.tvDescription)
-        private val weight: TextView = view.findViewById(R.id.tvWeight)
-        private val height: TextView = view.findViewById(R.id.tvHeight)
-        private val traits: LinearLayout = view.findViewById(R.id.traitContainer)
+        private val description: TextView? = view.findViewById(R.id.tvDescription)
+        private val origin: TextView? = view.findViewById(R.id.tvBreedOrigin)
+        private val weight: TextView? = view.findViewById(R.id.tvWeight)
+        private val height: TextView? = view.findViewById(R.id.tvHeight)
+        private val traits: LinearLayout? = view.findViewById(R.id.traitContainer)
 
         fun bind(row: SuggestedDogRow) {
             val dog = row.dog
             name.text = dog.name
-            description.text = dog.summary ?: dog.description
-            weight.text = range(dog.minWeightKg, dog.maxWeightKg, "kg")
-            height.text = range(dog.minHeightCm, dog.maxHeightCm, "cm")
+            description?.text = dog.summary ?: dog.description
+            origin?.apply {
+                text = dog.origin?.substringBefore(" (danh mục FCI)")?.trim().orEmpty()
+                visibility = if (text.isBlank()) View.GONE else View.VISIBLE
+            }
+            weight?.text = range(dog.minWeightKg, dog.maxWeightKg, "kg")
+            height?.text = range(dog.minHeightCm, dog.maxHeightCm, "cm")
 
             image.loadBreedPhoto(dog)
 
-            traits.removeAllViews()
+            itemView.setOnClickListener { onDogClick(dog) }
+            val traitRow = traits ?: return
+            traitRow.removeAllViews()
             val palette = listOf(
                 Pair("#E8F4FF", "#168FF2"),
                 Pair("#F2EAFE", "#8653E8"),
@@ -63,7 +72,7 @@ class SuggestedDogsAdapter(
             )
             row.traits.take(3).forEachIndexed { index, value ->
                 val colors = palette[index % palette.size]
-                traits.addView(TextView(itemView.context).apply {
+                traitRow.addView(TextView(itemView.context).apply {
                     text = value
                     textSize = 10f
                     setTextColor(Color.parseColor(colors.second))
@@ -79,7 +88,6 @@ class SuggestedDogsAdapter(
                 ).apply { marginEnd = dp(5) })
             }
 
-            itemView.setOnClickListener { onDogClick(dog) }
         }
 
         private fun range(min: Int?, max: Int?, unit: String): String =

@@ -9,10 +9,13 @@ interface RecognitionRepository {
     suspend fun recognize(imageUri: Uri, onProgress: (Int) -> Unit): RecognitionResult
     suspend fun getHistory(): List<RecognitionResult>
     suspend fun getById(id: String): RecognitionResult?
+    suspend fun getPreviews(ids: Set<String>): Map<String, RecognitionResult> =
+        getHistory().filter { it.id in ids }.associateBy { it.id }
     suspend fun delete(id: String)
     suspend fun clearHistory()
 }
 
 class RecognitionFailedException(
-    message: String = "Không nhận diện được giống chó"
+    message: String = "Không nhận diện được giống chó",
+    val dogDetected: Boolean = false
 ) : Exception(message)

@@ -17,6 +17,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.doglens.R
+import com.example.doglens.utils.bindPullRefresh
+import com.example.doglens.utils.wrapForPullRefresh
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.auth.ChangePasswordFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +30,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        bindPullRefresh(view.findViewById<View>(R.id.settingsScroll).wrapForPullRefresh()) { viewModel.refresh() }
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
 
         bindRow(view, R.id.rowLanguage, R.drawable.ic_globe, "Ngôn ngữ", "Tiếng Việt", "Tiếng Việt") {

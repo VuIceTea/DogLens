@@ -101,7 +101,7 @@ class RecognitionFragment : Fragment(R.layout.fragment_recognition) {
                             goToResult(state.recognitionId)
                         }
 
-                        RecognitionUiState.Failed -> goToError(imageUri)
+                        is RecognitionUiState.Failed -> goToError(imageUri, state.dogDetected)
                         is RecognitionUiState.Unavailable -> {
                             if (!navigated) {
                                 navigated = true
@@ -203,13 +203,11 @@ class RecognitionFragment : Fragment(R.layout.fragment_recognition) {
         (requireActivity() as MainActivity).replaceScreen(ResultFragment.newInstance(recognitionId))
     }
 
-    private fun goToError(imageUri: Uri) {
+    private fun goToError(imageUri: Uri, dogDetected: Boolean) {
         if (navigated) return
         navigated = true
         (requireActivity() as MainActivity).replaceScreen(
-            RecognitionErrorFragment.newInstance(
-                imageUri
-            )
+            RecognitionErrorFragment.newInstance(imageUri, dogDetected)
         )
     }
 

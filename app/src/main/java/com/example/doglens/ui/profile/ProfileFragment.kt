@@ -13,8 +13,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.R
+import com.example.doglens.utils.bindPullRefresh
 import com.example.doglens.data.adapter.ProfileStatsAdapter
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.tasks.await
+import com.google.firebase.firestore.Source
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Color
@@ -67,6 +72,18 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         setupProfileMenu(view)
         observeUser(view)
         observeStats(view)
+        bindPullRefresh(view.findViewById(R.id.pullRefresh)) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@bindPullRefresh
+            coroutineScope {
+                val profile = async { userViewModel.refresh() }
+                val counts = listOf("favorites", "recognitions", "articleViews").map { name ->
+                    async { accountData.db.collection("users").document(uid).collection(name).get(Source.SERVER).await().size() }
+                }
+                val refreshed = ProfileStats(counts[0].await(), counts[1].await(), counts[2].await())
+                profile.await()
+                if (FirebaseAuth.getInstance().currentUser?.uid == uid) setupStats(view, refreshed)
+            }
+        }
     }
 
 

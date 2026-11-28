@@ -2,6 +2,7 @@ package com.example.doglens.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.example.doglens.R
 import com.example.doglens.data.model.Dog
 import com.example.doglens.data.model.RecognitionResult
 import com.example.doglens.data.local.LocalDogRecognition
@@ -12,6 +13,7 @@ import com.example.doglens.utils.TimeUtils
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Source
 import kotlinx.coroutines.Dispatchers
@@ -93,6 +95,28 @@ internal class FirestoreRecognitionRepository(
         return record.toResult(dogs.getDogById(record.string("dogId")))
     }
 
+    override suspend fun getPreviews(ids: Set<String>): Map<String, RecognitionResult> {
+        val history = account.collection("recognitions") ?: return emptyMap()
+        if (ids.isEmpty()) return emptyMap()
+        val uid = checkNotNull(history.parent).id
+        val records = ids.chunked(30).flatMap { group ->
+            val query = history.whereIn(FieldPath.documentId(), group)
+            (withTimeoutOrNull(3_000) { query.get().await() } ?: query.get(Source.CACHE).await()).documents
+        }
+        val catalog = if (withContext(Dispatchers.IO) { records.any { !photoFile(uid, it.id).isFile } }) {
+            try {
+                withTimeoutOrNull(3_000) { dogs.getDogs().associateBy { it.id } }.orEmpty()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        } else emptyMap()
+        return withContext(Dispatchers.IO) {
+            records.associate { record -> record.id to record.toResult(catalog[record.string("dogId")]) }
+        }
+    }
+
     override suspend fun delete(id: String) {
         val history = account.requireCollection("recognitions")
         history.document(id).delete().await()
@@ -115,10 +139,15 @@ internal class FirestoreRecognitionRepository(
     private fun DocumentSnapshot.toResult(dog: Dog?): RecognitionResult {
         val uid = checkNotNull(reference.parent.parent).id
         val photo = photoFile(uid, id)
+        val breedId = string("dogId")
+        val bundledPhoto = if (photo.isFile) 0 else
+            context.resources.getIdentifier("breed_photo_$breedId", "drawable", context.packageName)
         val image = when {
             photo.isFile -> Uri.fromFile(photo).toString()
+            bundledPhoto != 0 -> "android.resource://${context.packageName}/$bundledPhoto"
             !dog?.imageUrl.isNullOrBlank() -> dog?.imageUrl.orEmpty()
-            dog?.localImageRes != null -> "android.resource://${context.packageName}/${dog.localImageRes}"
+            dog?.localImageRes != null && dog.localImageRes != R.drawable.ic_detail_paw ->
+                "android.resource://${context.packageName}/${dog.localImageRes}"
             else -> ""
         }
         val storedTime = get("createdAt", DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)
@@ -128,7 +157,7 @@ internal class FirestoreRecognitionRepository(
             else -> null
         }?.takeIf { it > 0 }
             ?: photo.lastModified().takeIf { it > 0 }
-        return RecognitionResult(id, uid, string("dogId"), int("confidence") ?: 0, image,
+        return RecognitionResult(id, uid, breedId, int("confidence") ?: 0, image,
             recordedAt?.let(TimeUtils::toIso).orEmpty())
     }
 

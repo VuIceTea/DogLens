@@ -6,6 +6,8 @@ import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Article
 import com.example.doglens.data.model.ArticleCategory
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,15 +29,16 @@ class ViewedArticlesViewModel : ViewModel() {
     private val _state = MutableStateFlow(ViewedArticlesUiState())
     val state: StateFlow<ViewedArticlesUiState> = _state.asStateFlow()
     private var allRows: List<ViewedArticleRow> = emptyList()
-    private var loaded = false
+    private var loadJob: Job? = null
 
-    fun load() {
-        if (loaded) return
-        loaded = true
-        viewModelScope.launch {
+    fun load(browse: Boolean, breedId: String?): Job {
+        loadJob?.takeIf { it.isActive }?.let { return it }
+        return viewModelScope.launch {
             try {
-                val categories = repository.getCategories().associateBy { it.id }
-                allRows = repository.getViewedArticles().mapNotNull { article ->
+                val categoryRequest = async { repository.getCategories().associateBy { it.id } }
+                val articles = if (browse) repository.getArticles() else repository.getViewedArticles()
+                val categories = categoryRequest.await()
+                allRows = articles.filter { breedId == null || it.breedId == breedId }.mapNotNull { article ->
                     categories[article.categoryId]?.let { ViewedArticleRow(article, it) }
                 }
                 publish(finished = true)
@@ -43,10 +46,8 @@ class ViewedArticlesViewModel : ViewModel() {
                 throw cancelled
             } catch (exception: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = exception.message)
-            } finally {
-                loaded = false
             }
-        }
+        }.also { loadJob = it }
     }
 
     fun setQuery(value: String) {
@@ -64,7 +65,8 @@ class ViewedArticlesViewModel : ViewModel() {
         val current = _state.value
         val rows = allRows.filter { row ->
             (current.selectedCategory == null || row.article.categoryId == current.selectedCategory) &&
-                (current.query.isBlank() || row.article.title.lowercase(Locale.getDefault()).contains(current.query))
+                (current.query.isBlank() || row.article.title.contains(current.query, ignoreCase = true) ||
+                    row.article.summary.contains(current.query, ignoreCase = true))
         }
         _state.value = current.copy(isLoading = false, rows = rows, error = null)
     }

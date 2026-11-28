@@ -16,9 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.doglens.MainActivity
 import com.example.doglens.R
+import com.example.doglens.utils.bindPullRefresh
+import com.example.doglens.utils.wrapForPullRefresh
 import com.example.doglens.ui.article.ViewedArticlesFragment
 import com.example.doglens.ui.favorite.FavoriteFragment
 import com.example.doglens.ui.history.HistoryFragment
+import com.example.doglens.ui.recognition.ResultFragment
 import kotlinx.coroutines.launch
 
 class NotificationFragment : Fragment(R.layout.fragment_notification) {
@@ -28,10 +31,11 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         notificationAdapter = NotificationAdapter(::openNotification)
-        view.findViewById<RecyclerView>(R.id.rvNotifications).apply {
+        val list = view.findViewById<RecyclerView>(R.id.rvNotifications).apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = notificationAdapter
         }
+        bindPullRefresh(list.wrapForPullRefresh()) { viewModel.refresh() }
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
         val readAll = view.findViewById<View>(R.id.btnReadAll)
         if (resources.configuration.run { screenWidthDp / fontScale < 300 }) {
@@ -83,7 +87,8 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
     private fun openNotification(item: DogLensNotification) {
         viewModel.markRead(item.id)
         val destination = when (item.type) {
-            NotificationType.RECOGNITION -> HistoryFragment()
+            NotificationType.RECOGNITION -> item.recognition?.let { ResultFragment.newInstance(it.id) }
+                ?: HistoryFragment()
             NotificationType.FAVORITE -> FavoriteFragment()
             NotificationType.ARTICLE -> ViewedArticlesFragment()
             NotificationType.UPDATE -> null

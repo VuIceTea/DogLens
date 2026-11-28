@@ -10,5 +10,6 @@ data class Article(
     val publishedAt: String,
     val readMinutes: Int = 0,
     val viewCount: Int = 0,
-    val sources: Map<String, String> = emptyMap()
+    val sources: Map<String, String> = emptyMap(),
+    val breedId: String? = null
 )

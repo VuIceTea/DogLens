@@ -1,6 +1,8 @@
 package com.example.doglens.ui.settings
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
@@ -21,12 +23,30 @@ data class SettingsUiState(
     val deletionMessage: String? = null
 )
 
-class SettingsViewModel : ViewModel() {
+class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+    private val preferences = application.getSharedPreferences("doglens_settings", Context.MODE_PRIVATE)
     private val _state = MutableStateFlow(SettingsUiState())
     val state: StateFlow<SettingsUiState> = _state.asStateFlow()
-    fun setDarkMode(value: Boolean) { _state.value = _state.value.copy(darkMode = value) }
-    fun setRecognitionNotifications(value: Boolean) { _state.value = _state.value.copy(recognitionNotifications = value) }
-    fun setArticleNotifications(value: Boolean) { _state.value = _state.value.copy(articleNotifications = value) }
+
+    init { refresh() }
+
+    fun refresh() {
+        _state.value = _state.value.copy(
+            darkMode = preferences.getBoolean("dark_mode", false),
+            recognitionNotifications = preferences.getBoolean("recognition_notifications", true),
+            articleNotifications = preferences.getBoolean("article_notifications", true)
+        )
+    }
+
+    fun setDarkMode(value: Boolean) = updatePreference("dark_mode", value)
+    fun setRecognitionNotifications(value: Boolean) = updatePreference("recognition_notifications", value)
+    fun setArticleNotifications(value: Boolean) = updatePreference("article_notifications", value)
+
+    private fun updatePreference(key: String, value: Boolean) {
+        if (preferences.contains(key) && preferences.getBoolean(key, value) == value) return
+        preferences.edit().putBoolean(key, value).apply()
+        refresh()
+    }
 
     fun deleteAccount(confirmedUid: String) {
         if (_state.value.deletingAccount || _state.value.accountDeleted) return

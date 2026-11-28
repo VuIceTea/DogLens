@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="126dp"
+    android:layout_height="wrap_content"
+    android:minHeight="126dp"
     android:layout_marginBottom="12dp"
     android:background="@drawable/bg_suggested_item"
     android:clickable="true"
@@ -11,17 +12,18 @@
     android:orientation="horizontal"
     android:padding="9dp">
 
-    <com.google.android.material.imageview.ShapeableImageView android:id="@+id/imgArticle" android:layout_width="125dp" android:layout_height="108dp" android:background="#E5EEF8" android:contentDescription="Ảnh bài viết" android:scaleType="centerCrop" app:shapeAppearanceOverlay="@style/ShapeAppearance.DogLens.Rounded16" />
-    <LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_marginStart="12dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="vertical">
+    <com.google.android.material.imageview.ShapeableImageView android:id="@+id/imgArticle" android:layout_width="96dp" android:layout_height="101dp" android:background="#E5EEF8" android:contentDescription="@null" android:scaleType="centerCrop" app:shapeAppearanceOverlay="@style/ShapeAppearance.DogLens.Rounded16" />
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:gravity="center_vertical" android:orientation="vertical">
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-            <TextView android:id="@+id/tvCategory" android:layout_width="wrap_content" android:layout_height="26dp" android:background="@drawable/bg_article_category" android:gravity="center" android:paddingHorizontal="10dp" android:textColor="#16884A" android:textSize="11sp" />
+            <TextView android:id="@+id/tvCategory" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="26dp" android:background="@drawable/bg_article_category" android:gravity="center" android:paddingHorizontal="10dp" android:textColor="#16884A" android:textSize="11sp" />
             <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
             <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#7885A6" android:textSize="11sp" />
         </LinearLayout>
         <TextView android:id="@+id/tvTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:ellipsize="end" android:fontFamily="@font/nunitosans_extrabold" android:maxLines="2" android:textColor="#10245E" android:textSize="15sp" />
+        <TextView android:id="@+id/articleListSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="3dp" android:ellipsize="end" android:maxLines="2" android:textColor="#667895" android:textSize="13sp" android:visibility="gone" />
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:gravity="center_vertical" android:orientation="horizontal">
-            <ImageView android:layout_width="17dp" android:layout_height="17dp" android:contentDescription="@null" android:src="@drawable/ic_visibility" app:tint="#7885A6" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="5dp" android:text="Đã xem" android:textColor="#7885A6" android:textSize="11sp" />
+            <ImageView android:id="@+id/articleViewedIcon" android:layout_width="17dp" android:layout_height="17dp" android:contentDescription="@null" android:src="@drawable/ic_visibility" app:tint="#7885A6" />
+            <TextView android:id="@+id/articleListMeta" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#7885A6" android:textSize="12sp" />
             <Space android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
             <ImageView android:layout_width="20dp" android:layout_height="20dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right" app:tint="#7885A6" />
         </LinearLayout>

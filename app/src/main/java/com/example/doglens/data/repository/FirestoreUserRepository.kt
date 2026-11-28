@@ -3,6 +3,7 @@ package com.example.doglens.data.repository
 import com.example.doglens.data.model.User
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -13,6 +14,9 @@ class FirestoreUserRepository(
 ) : UserRepository {
 
     private val usersCollection = firestore.collection("users")
+
+    override suspend fun refreshUser(uid: String): User? =
+        usersCollection.document(uid).get(Source.SERVER).await().toObject(User::class.java)
 
     override fun observeUser(uid: String): Flow<User?> = callbackFlow {
         val listener = usersCollection

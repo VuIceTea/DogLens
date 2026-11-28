@@ -16,7 +16,7 @@ import kotlin.coroutines.cancellation.CancellationException
 sealed interface RecognitionUiState {
     data class Running(val percent: Int) : RecognitionUiState
     data class Success(val recognitionId: String) : RecognitionUiState
-    data object Failed : RecognitionUiState
+    data class Failed(val dogDetected: Boolean) : RecognitionUiState
     data class Unavailable(val message: String) : RecognitionUiState
 }
 
@@ -42,7 +42,7 @@ class RecognitionViewModel(
             } catch (e: CancellationException) {
                 throw e // bấm Back -> huỷ bình thường
             } catch (e: RecognitionFailedException) {
-                _state.value = RecognitionUiState.Failed
+                _state.value = RecognitionUiState.Failed(e.dogDetected)
             } catch (e: IllegalStateException) {
                 _state.value = RecognitionUiState.Unavailable(e.message ?: "Không thể xử lý ảnh.")
             } catch (_: Exception) {

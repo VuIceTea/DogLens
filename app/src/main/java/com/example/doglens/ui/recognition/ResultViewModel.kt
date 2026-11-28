@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
+import com.example.doglens.data.model.CareTip
+import com.example.doglens.data.model.DogCareTip
 import com.example.doglens.data.model.hasComparableSize
 import com.example.doglens.data.model.sizeSimilarityTo
 import com.example.doglens.data.model.DogTrait
@@ -14,6 +16,7 @@ import com.example.doglens.data.repository.FavoriteRepository
 import com.example.doglens.data.repository.RecognitionRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +30,7 @@ sealed interface ResultUiState {
         val recognition: RecognitionResult,
         val dog: Dog,
         val traits: List<Pair<Trait, DogTrait>>,
+        val care: List<Pair<CareTip, DogCareTip>>,
         val relatedDogs: List<Dog>,
         val isFavorite: Boolean,
         val favoriteError: Boolean = false
@@ -62,22 +66,37 @@ class ResultViewModel(
                     return@launch
                 }
 
-                val traitsById = dogRepository.getTraits().associateBy { it.id }
-                val traits = dogRepository.getDogTraits(dog.id).mapNotNull { dogTrait ->
-                    traitsById[dogTrait.traitId]?.let { trait -> trait to dogTrait }
+                val traits = async {
+                    optionalDetails {
+                        val links = dogRepository.getDogTraits(dog.id)
+                        val labels = if (links.isEmpty()) emptyMap() else dogRepository.getTraits().associateBy { it.id }
+                        links.mapNotNull { link -> labels[link.traitId]?.let { it to link } }
+                    }
                 }
-                val relatedDogs = if (!dog.hasComparableSize()) emptyList() else dogRepository.getDogs()
-                    .filter { it.id != dog.id }
-                    .mapNotNull { candidate -> dog.sizeSimilarityTo(candidate)?.let { candidate to it } }
-                    .sortedByDescending { it.second }
-                    .take(4)
-                    .map { it.first }
+                val care = async {
+                    optionalDetails {
+                        val links = dogRepository.getDogCareTips(dog.id)
+                        val labels = if (links.isEmpty()) emptyMap() else dogRepository.getCareTips().associateBy { it.id }
+                        links.mapNotNull { link -> labels[link.careTipId]?.let { it to link } }
+                    }
+                }
+                val relatedDogs = async {
+                    optionalDetails {
+                        if (!dog.hasComparableSize()) emptyList() else dogRepository.getDogs()
+                            .filter { it.id != dog.id }
+                            .mapNotNull { candidate -> dog.sizeSimilarityTo(candidate)?.let { candidate to it } }
+                            .sortedByDescending { it.second }
+                            .take(4)
+                            .map { it.first }
+                    }
+                }
 
                 _state.value = ResultUiState.Content(
                     recognition = recognition,
                     dog = dog,
-                    traits = traits,
-                    relatedDogs = relatedDogs,
+                    traits = traits.await(),
+                    care = care.await(),
+                    relatedDogs = relatedDogs.await(),
                     isFavorite = false
                 )
                 favoriteObserver?.cancel()
@@ -99,6 +118,15 @@ class ResultViewModel(
             }
         }
     }
+
+    private suspend fun <T> optionalDetails(load: suspend () -> List<T>): List<T> =
+        try {
+            kotlinx.coroutines.withTimeoutOrNull(4_000) { load() }.orEmpty()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            emptyList()
+        }
 
     fun toggleFavorite() {
         val current = _state.value as? ResultUiState.Content ?: return

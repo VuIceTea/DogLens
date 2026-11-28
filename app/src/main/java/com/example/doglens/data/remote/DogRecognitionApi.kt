@@ -37,13 +37,18 @@ internal class DogRecognitionApi {
                 connection.setRequestProperty("Authorization", "Bearer $token")
                 connection.setRequestProperty("Accept", "application/json")
                 connection.outputStream.use { it.write(bytes) }
-                if (connection.responseCode == 422) throw RecognitionFailedException()
+                if (connection.responseCode == 422) {
+                    val detail = connection.errorStream?.bufferedReader()?.use { reader ->
+                        runCatching { JSONObject(reader.readText()).optString("detail") }.getOrNull()
+                    }
+                    throw RecognitionFailedException(dogDetected = detail == "uncertain_breed")
+                }
                 check(connection.responseCode in 200..299) { "Không thể kết nối dịch vụ nhận diện." }
                 val result = JSONObject(connection.inputStream.bufferedReader().use { it.readText() })
                 val confidence = result.getInt("confidence")
                 require(confidence in 0..100) { "API trả về độ tin cậy không hợp lệ." }
                 val dogId = result.optString("dogId")
-                if (dogId.isBlank() || confidence < 60) throw RecognitionFailedException()
+                if (dogId.isBlank() || confidence < 60) throw RecognitionFailedException(dogDetected = true)
                 check(dogId.matches(Regex("[A-Za-z0-9_-]{1,100}"))) { "API trả về mã giống chó không hợp lệ." }
                 dogId to confidence
             } finally {

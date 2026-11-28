@@ -16,9 +16,10 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.bumptech.glide.Glide
 import com.example.doglens.R
 import com.example.doglens.utils.addCatalogSources
+import com.example.doglens.utils.bindPullRefresh
+import com.example.doglens.utils.wrapForPullRefresh
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -30,6 +31,9 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
         view.findViewById<View>(R.id.btnBack).setOnClickListener { parentFragmentManager.popBackStack() }
         val bookmarkButton = view.findViewById<ImageButton>(R.id.btnBookmark)
         val articleId = requireArguments().getString(ARG_ARTICLE_ID).orEmpty()
+        val scroll = view.findViewById<View>(R.id.articleScroll)
+        val refresh = scroll.wrapForPullRefresh()
+        bindPullRefresh(refresh) { viewModel.load(articleId, retry = true)?.join() }
         val loadStatus = view.findViewById<TextView>(R.id.articleLoadStatus)
         loadStatus.setOnClickListener { viewModel.load(articleId, retry = true) }
         bookmarkButton.setOnClickListener { viewModel.toggleBookmark() }
@@ -52,10 +56,7 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
                     loadStatus.isClickable = !state.isLoading
                     if (article == null) return@collect
                     val image = view.findViewById<ImageView>(R.id.imgHero)
-                    when {
-                        article.localImageRes != null -> image.setImageResource(article.localImageRes)
-                        !article.imageUrl.isNullOrBlank() -> Glide.with(this@ArticleDetailFragment).load(article.imageUrl).centerCrop().into(image)
-                    }
+                    image.loadArticlePhoto(article)
                     view.findViewById<TextView>(R.id.tvCategory).apply {
                         text = state.category?.name.orEmpty()
                         state.category?.let { backgroundTintList = ColorStateList.valueOf(Color.parseColor(it.colorHex)) }

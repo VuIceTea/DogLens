@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="explore_categories_subtitle">Theo kích thước và bộ lông</string>
+    <string name="explore_topics_subtitle">Khám phá các bộ sưu tập giống chó</string>
+    <string name="explore_roles_subtitle">Tìm giống chó theo vai trò</string>
+    <string name="article_library_title">Bài viết</string>
+    <string name="article_library_subtitle">Tìm hiểu giống chó và cách chăm sóc</string>
+    <string name="article_breed_subtitle">Bài viết tham khảo về giống chó này</string>
+    <string name="related_articles">Bài viết liên quan</string>
+    <string name="article_show_compact_layout">Chuyển sang danh sách</string>
+    <string name="article_show_cover_layout">Chuyển sang thẻ lớn</string>
+    <string name="breed_basic_info">Thông tin cơ bản</string>
+    <string name="breed_read_more">Xem thêm…</string>
+    <string name="breed_read_less">Thu gọn</string>
+    <string name="recognition_uncertain_breed">Đã phát hiện chó trong ảnh nhưng chưa xác định được giống. Giống này có thể chưa được mô hình hỗ trợ.</string>
     <string name="popular_dogs_load_error">Chưa tải được danh mục giống chó.</string>
     <string name="popular_dogs_retry">Thử lại</string>
     <string name="favorite_sign_in_message">Đăng nhập để lưu giống chó vào danh sách yêu thích.</string>

@@ -4,13 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.doglens.data.AppContainer
 import com.example.doglens.data.model.Dog
+import com.example.doglens.data.model.DogTrait
+import com.example.doglens.data.model.Trait
+import com.example.doglens.data.repository.ExploreRepository
+import com.example.doglens.ui.explore.ExploreSection
+import com.example.doglens.ui.explore.getGroups
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Locale
 
 enum class SuggestedFilter { ALL, POPULAR, SIZE, TRAIT, ORIGIN }
@@ -38,20 +45,24 @@ class SuggestedDogsViewModel : ViewModel() {
     private var traitIdsByDog: Map<String, Set<String>> = emptyMap()
     private var loadedSourceId: String? = null
     private var hasLoaded = false
+    private var loadJob: Job? = null
 
-    fun load(sourceDogId: String?) {
-        if (hasLoaded && loadedSourceId == sourceDogId) return
-        hasLoaded = true
+    internal fun load(sourceDogId: String?, section: ExploreSection?, groupId: String?, refresh: Boolean = false) {
+        if (loadJob?.isActive == true || (!refresh && hasLoaded && loadedSourceId == sourceDogId)) return
         loadedSourceId = sourceDogId
-        viewModelScope.launch {
+        if (refresh) repository.invalidateCatalog()
+        loadJob = viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                val dogs = repository.getDogs()
+                val dogs = withTimeoutOrNull(8_000) {
+                    coroutineScope {
+                        val catalog = async { repository.getDogs() }
+                        val group = section?.let { selected -> ExploreRepository().getGroups(selected).find { it.id == groupId } }
+                        catalog.await().filter { section == null || group?.contains(it) == true }
+                    }
+                } ?: error("Tải danh sách quá lâu. Kéo xuống để thử lại.")
                 sourceDog = dogs.firstOrNull { it.id == sourceDogId }
-                val (links, traits) = coroutineScope {
-                    val labels = async { repository.getTraits().associateBy { it.id } }
-                    repository.getDogTraitsByDog(dogs.map { it.id }.toSet()) to labels.await()
-                }
+                val (links, traits) = loadTraits(dogs)
                 traitIdsByDog = links.mapValues { (_, dogTraits) -> dogTraits.map { it.traitId }.toSet() }
                 allRows = dogs.filterNot { it.id == sourceDog?.id }.map { dog ->
                     SuggestedDogRow(
@@ -61,7 +72,8 @@ class SuggestedDogsViewModel : ViewModel() {
                             .take(3)
                     )
                 }
-                publish()
+                hasLoaded = true
+                publish(finished = true)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (exception: Exception) {
@@ -71,6 +83,23 @@ class SuggestedDogsViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private suspend fun loadTraits(dogs: List<Dog>): Pair<Map<String, List<DogTrait>>, Map<String, Trait>> {
+        if (dogs.isEmpty()) return emptyMap<String, List<DogTrait>>() to emptyMap()
+        val loaded = try {
+            withTimeoutOrNull(3_000) {
+                coroutineScope {
+                    val labels = async { repository.getTraits().associateBy { it.id } }
+                    repository.getDogTraitsByDog(dogs.map { it.id }.toSet()) to labels.await()
+                }
+            }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            null
+        }
+        return loaded ?: (emptyMap<String, List<DogTrait>>() to emptyMap())
     }
 
     fun setQuery(value: String) {
@@ -85,8 +114,8 @@ class SuggestedDogsViewModel : ViewModel() {
         publish()
     }
 
-    private fun publish() {
-        if (allRows.isEmpty() && _state.value.isLoading) return
+    private fun publish(finished: Boolean = false) {
+        if (allRows.isEmpty() && _state.value.isLoading && !finished) return
         val current = _state.value
         val source = sourceDog
         val sourceTraits = source?.let { traitIdsByDog[it.id].orEmpty() }.orEmpty()
@@ -98,7 +127,7 @@ class SuggestedDogsViewModel : ViewModel() {
                 dog.summary.orEmpty(),
                 dog.origin.orEmpty(),
                 row.traits.joinToString(" ")
-            ).any { it.lowercase(Locale.getDefault()).contains(current.query) }
+            ).plus(dog.searchAliases).any { it.contains(current.query, ignoreCase = true) }
             val matchesFilter = when (current.selectedFilter) {
                 SuggestedFilter.ALL, SuggestedFilter.POPULAR -> true
                 SuggestedFilter.SIZE -> source == null || dog.sizeCategoryId == source.sizeCategoryId
@@ -112,7 +141,7 @@ class SuggestedDogsViewModel : ViewModel() {
         } else {
             rows.sortedBy { it.dog.sortOrder }
         }
-        _state.value = current.copy(isLoading = false, rows = rows, error = null)
+        _state.value = current.copy(isLoading = current.isLoading && !finished, rows = rows, error = null)
     }
 
     private fun normalizeOrigin(value: String?): String =

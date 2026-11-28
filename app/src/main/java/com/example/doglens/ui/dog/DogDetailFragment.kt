@@ -1,5 +1,7 @@
 package com.example.doglens.ui.dog
 
+import com.example.doglens.ui.article.bindRelatedArticles
+
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -244,6 +246,7 @@ class DogDetailFragment : Fragment() {
         }
         careScroll.addView(careBox)
         body.addView(careScroll)
+        layoutInflater.inflate(R.layout.section_related_articles, body, true)
         scroll.addView(body)
         refresh = SwipeRefreshLayout(requireContext()).apply {
             visibility = View.GONE
@@ -351,7 +354,8 @@ class DogDetailFragment : Fragment() {
         (rating.getChildAt(1) as TextView).text = "  |  " + (item.favoriteCount?.let {
             "Hơn " + NumberFormat.getInstance(Locale("vi", "VN")).format(it) + " người yêu thích"
         } ?: "")
-        body.findViewWithTag<TextView>("description").text = (item.summary ?: item.description).withoutFciLabel()
+        bindBreedDescription(body.findViewWithTag("description"), item)
+        bindRelatedArticles(body.findViewById(R.id.relatedArticlesSection), item.id)
 
         val credits = item.sources.filterKeys { it.startsWith("Ảnh") || it == "Giấy phép ảnh" }
         body.findViewWithTag<TextView>("photoCredit").apply {

@@ -13,14 +13,24 @@ import com.example.doglens.data.repository.RecognitionFailedException
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.FloatBuffer
+import java.nio.channels.FileChannel
 import kotlin.math.exp
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 internal class LocalDogRecognition(context: Context) {
     private val assets = context.applicationContext.assets
     private val environment by lazy { OrtEnvironment.getEnvironment() }
     private val detector by lazy { loadModel("yolox_s.onnx") }
     private val classifier by lazy { loadModel("breed-classifier-int8.onnx") }
+    private val dachshundVision by lazy { loadModel("clip-dachshund-vision.onnx") }
+    private val dachshundHead by lazy {
+        JSONObject(assets.open("recognition/dachshund-head.json").bufferedReader().use { it.readText() })
+    }
+    private val dachshundWeights by lazy {
+        val weights = dachshundHead.getJSONArray("weights")
+        DoubleArray(weights.length()) { weights.getDouble(it) }
+    }
     private val temperature by lazy {
         val metadata = JSONObject(assets.open("recognition/model-metadata.json").bufferedReader().use { it.readText() })
         metadata.getJSONObject("calibration").getDouble("temperature")
@@ -33,7 +43,11 @@ internal class LocalDogRecognition(context: Context) {
     fun recognize(photo: Bitmap, onProgress: (Int) -> Unit): Pair<String, Int> {
         val bounds = detectDog(photo) ?: throw RecognitionFailedException()
         onProgress(60)
-        val logits = classify(photo, bounds)
+        val pixels = classificationCrop(photo, bounds)
+        recognizeDachshund(pixels)?.let { return it }
+        val logits = runImageModel(
+            classifier, pixels, floatArrayOf(0.485f, 0.456f, 0.406f), floatArrayOf(0.229f, 0.224f, 0.225f)
+        )
         check(logits.size == breedIds.size && logits.all { it.isFinite() }) {
             "Không đọc được kết quả mô hình nhận diện."
         }
@@ -41,12 +55,12 @@ internal class LocalDogRecognition(context: Context) {
         val ranked = logits.indices.sortedByDescending { logits[it] }
         val first = ranked[0]
         val second = ranked[1]
-        val dogId = breedIds[first] ?: throw RecognitionFailedException()
+        val dogId = breedIds[first] ?: throw RecognitionFailedException(dogDetected = true)
         val peak = logits[first].toDouble()
         val total = logits.sumOf { exp((it - peak) / temperature) }
         val score = 1.0 / total
         val runnerUp = exp((logits[second] - peak) / temperature) / total
-        if (score < 0.65 || score - runnerUp < 0.15) throw RecognitionFailedException()
+        if (score < 0.65 || score - runnerUp < 0.15) throw RecognitionFailedException(dogDetected = true)
         return dogId to (score * 100).roundToInt().coerceAtMost(99)
     }
 
@@ -131,23 +145,44 @@ internal class LocalDogRecognition(context: Context) {
         return bestBox
     }
 
-    private fun classify(photo: Bitmap, bounds: RectF): FloatArray {
+    private fun classificationCrop(photo: Bitmap, bounds: RectF): IntArray {
         val size = 224
         val side = maxOf(bounds.width(), bounds.height()) * 1.18f
         val left = bounds.centerX() - side / 2
         val top = bounds.centerY() - side / 2
-        val pixels = modelPixels(photo, RectF(left, top, left + side, top + side), size, size, size)
+        return modelPixels(photo, RectF(left, top, left + side, top + side), size, size, size)
+    }
+
+    private fun recognizeDachshund(pixels: IntArray): Pair<String, Int>? {
+        val embedding = runImageModel(
+            dachshundVision, pixels,
+            floatArrayOf(0.48145466f, 0.4578275f, 0.40821073f),
+            floatArrayOf(0.26862954f, 0.26130258f, 0.27577711f)
+        )
+        check(embedding.size == dachshundWeights.size && embedding.all { it.isFinite() })
+        val norm = sqrt(embedding.sumOf { it.toDouble() * it })
+        if (norm <= 0) return null
+        val score = embedding.indices.sumOf { embedding[it] * dachshundWeights[it] } / norm
+        if (score < dachshundHead.getDouble("minimumScore")) return null
+        val logOdds = score * dachshundHead.getDouble("calibrationScale") +
+            dachshundHead.getDouble("calibrationBias")
+        return dachshundHead.getString("dogId") to (100.0 / (1 + exp(-logOdds))).roundToInt().coerceAtMost(99)
+    }
+
+    private fun runImageModel(
+        model: OrtSession, pixels: IntArray, mean: FloatArray, std: FloatArray
+    ): FloatArray {
         val plane = pixels.size
         val values = FloatArray(plane * 3)
         pixels.forEachIndexed { index, pixel ->
-            values[index] = (((pixel shr 16 and 255) / 255f) - 0.485f) / 0.229f
-            values[plane + index] = (((pixel shr 8 and 255) / 255f) - 0.456f) / 0.224f
-            values[plane * 2 + index] = (((pixel and 255) / 255f) - 0.406f) / 0.225f
+            values[index] = (((pixel shr 16 and 255) / 255f) - mean[0]) / std[0]
+            values[plane + index] = (((pixel shr 8 and 255) / 255f) - mean[1]) / std[1]
+            values[plane * 2 + index] = (((pixel and 255) / 255f) - mean[2]) / std[2]
         }
         return OnnxTensor.createTensor(
-            environment, FloatBuffer.wrap(values), longArrayOf(1, 3, size.toLong(), size.toLong())
+            environment, FloatBuffer.wrap(values), longArrayOf(1, 3, 224, 224)
         ).use { tensor ->
-            classifier.run(mapOf(classifier.inputNames.single() to tensor)).use { output ->
+            model.run(mapOf(model.inputNames.single() to tensor)).use { output ->
                 @Suppress("UNCHECKED_CAST")
                 (output[0].value as Array<FloatArray>)[0]
             }
@@ -174,7 +209,11 @@ internal class LocalDogRecognition(context: Context) {
     }
 
     private fun loadModel(name: String): OrtSession {
-        val model = assets.open("recognition/$name").use { it.readBytes() }
+        val model = assets.openFd("recognition/$name").use { asset ->
+            asset.createInputStream().use { stream ->
+                stream.channel.map(FileChannel.MapMode.READ_ONLY, asset.startOffset, asset.length)
+            }
+        }
         return OrtSession.SessionOptions().use { options ->
             options.setIntraOpNumThreads(2)
             environment.createSession(model, options)

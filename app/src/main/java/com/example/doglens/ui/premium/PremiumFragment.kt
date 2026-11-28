@@ -14,6 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.doglens.R
+import com.example.doglens.utils.wrapForPullRefresh
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.NumberFormat
@@ -29,6 +30,8 @@ class PremiumFragment : Fragment(R.layout.fragment_premium) {
         val yearly = view.findViewById<View>(R.id.premiumPlanYearly)
         val checkout = view.findViewById<TextView>(R.id.btnPremiumCheckout)
         val refresh = view.findViewById<View>(R.id.btnPremiumRefresh)
+        val pullRefresh = view.findViewById<View>(R.id.premiumScroll).wrapForPullRefresh()
+        pullRefresh.setOnRefreshListener { viewModel.refresh() }
         val status = view.findViewById<TextView>(R.id.tvPremiumStatus)
         view.findViewById<View>(R.id.btnPremiumBack).setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<TextView>(R.id.premiumPriceMonthly).text = planPrice(PremiumPlan.MONTH)
@@ -55,6 +58,7 @@ class PremiumFragment : Fragment(R.layout.fragment_premium) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
+                    if (!state.loading) pullRefresh.isRefreshing = false
                     monthly.isSelected = state.plan == PremiumPlan.MONTH
                     yearly.isSelected = state.plan == PremiumPlan.YEAR
                     view.findViewById<RadioButton>(R.id.premiumRadioMonthly).isChecked = monthly.isSelected

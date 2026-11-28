@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
@@ -30,18 +31,23 @@ class ArticleDetailViewModel : ViewModel() {
     private val _state = MutableStateFlow(ArticleDetailUiState())
     val state: StateFlow<ArticleDetailUiState> = _state.asStateFlow()
     private var loadedId: String? = null
+    private var loadJob: Job? = null
 
-    fun load(id: String, retry: Boolean = false) {
-        if (!retry && loadedId == id) return
-        if (retry) _state.value = ArticleDetailUiState()
+    fun load(id: String, retry: Boolean = false): Job? {
+        loadJob?.takeIf { it.isActive }?.let { return it }
+        if (!retry && loadedId == id) return null
+        if (retry) {
+            repository.invalidateArticleCache()
+            _state.value = _state.value.copy(isLoading = true, error = null)
+        }
         loadedId = id
-        viewModelScope.launch {
+        return viewModelScope.launch {
             try {
                 val article = repository.getArticleById(id) ?: error("Không tìm thấy bài viết")
                 _state.value = coroutineScope {
                     val category = async { repository.getCategories().firstOrNull { it.id == article.categoryId } }
                     val sections = async { repository.getSections(id) }
-                    ArticleDetailUiState(
+                    _state.value.copy(
                         isLoading = false,
                         article = article,
                         category = category.await(),
@@ -51,10 +57,10 @@ class ArticleDetailViewModel : ViewModel() {
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                _state.value = ArticleDetailUiState(isLoading = false, error = "Không thể tải bài viết.")
+                _state.value = _state.value.copy(isLoading = false, error = "Không thể tải bài viết.")
                 return@launch
             }
-            launch {
+            if (!retry) launch {
                 ignoreAccountFailure { repository.recordView(id) }
             }
             val bookmark = withTimeoutOrNull(3_000) {
@@ -63,7 +69,7 @@ class ArticleDetailViewModel : ViewModel() {
             if (bookmark != null && !_state.value.isSaving && !bookmarkChanged) {
                 _state.value = _state.value.copy(isBookmarked = bookmark)
             }
-        }
+        }.also { loadJob = it }
     }
 
     private var bookmarkChanged = false

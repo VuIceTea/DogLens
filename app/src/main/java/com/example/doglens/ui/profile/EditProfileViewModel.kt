@@ -29,6 +29,18 @@ class EditProfileViewModel : ViewModel() {
         loadUser()
     }
 
+    suspend fun refresh() {
+        if (_uiState.value.isSaving) return
+        val auth = FirebaseAuth.getInstance()
+        val uid = auth.currentUser?.uid ?: return
+        val user = userRepository.refreshUser(uid)
+        if (auth.currentUser?.uid == uid && !_uiState.value.isSaving) {
+            _uiState.value = _uiState.value.copy(
+                isLoading = false, user = user, error = if (user == null) "Không tìm thấy hồ sơ người dùng." else null
+            )
+        }
+    }
+
     // Lấy thông tin người dùng hiện tại
     private fun loadUser() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid

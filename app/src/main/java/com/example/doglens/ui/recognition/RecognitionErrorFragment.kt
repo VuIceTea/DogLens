@@ -105,7 +105,13 @@ class RecognitionErrorFragment : Fragment(R.layout.fragment_recognition_error) {
             .setOnClickListener { parentFragmentManager.popBackStack() }
         view.findViewById<View>(R.id.btnHelp).setOnClickListener { showHelpDialog() }
 
-        addRows(view.findViewById(R.id.reasonsContainer), reasons)
+        val reasonList = view.findViewById<LinearLayout>(R.id.reasonsContainer)
+        if (requireArguments().getBoolean(ARG_DOG_DETECTED)) {
+            view.findViewById<TextView>(R.id.recognitionErrorDescription).setText(R.string.recognition_uncertain_breed)
+            reasonList.visibility = View.GONE
+        } else {
+            addRows(reasonList, reasons)
+        }
         addRows(view.findViewById(R.id.tipsContainer), tips)
 
         view.findViewById<View>(R.id.btnRetake).setOnClickListener { launchCamera() }
@@ -178,10 +184,11 @@ class RecognitionErrorFragment : Fragment(R.layout.fragment_recognition_error) {
 
     companion object {
         private const val ARG_URI = "arg_uri"
+        private const val ARG_DOG_DETECTED = "arg_dog_detected"
         private const val STATE_CAMERA_URI = "state_camera_uri"
 
-        fun newInstance(uri: Uri) = RecognitionErrorFragment().apply {
-            arguments = bundleOf(ARG_URI to uri.toString())
+        fun newInstance(uri: Uri, dogDetected: Boolean) = RecognitionErrorFragment().apply {
+            arguments = bundleOf(ARG_URI to uri.toString(), ARG_DOG_DETECTED to dogDetected)
         }
     }
 }

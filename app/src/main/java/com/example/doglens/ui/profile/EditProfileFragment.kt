@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.bumptech.glide.Glide
 import com.example.doglens.R
+import com.example.doglens.utils.bindPullRefresh
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.auth.ChangePasswordFragment
 import com.example.doglens.data.model.User
@@ -38,6 +39,7 @@ class EditProfileFragment : Fragment(R.layout.fragment_edit_profile) {
 
         // 3. Lắng nghe dữ liệu từ Firestore
         observeUser(view)
+        bindPullRefresh(view.findViewById(R.id.pullRefresh)) { viewModel.refresh() }
 
         // 4. Nút quay lại
         view.findViewById<View>(R.id.btnBack)

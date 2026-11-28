@@ -4,6 +4,7 @@ import com.example.doglens.data.model.Article
 import com.example.doglens.data.model.ArticleCategory
 import com.example.doglens.data.model.ArticleSection
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.FirebaseApp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestoreException
@@ -25,6 +26,10 @@ internal class FirestoreArticleRepository(
     }
     @Volatile private var recentlyReadArticles = emptyMap<String, Article>()
 
+    override fun invalidateArticleCache() {
+        recentlyReadArticles = emptyMap()
+    }
+
     override suspend fun getArticles() =
         readPublished(catalog.db.collection("articles"), "articles", { it.toArticle() }, ::publishedArticle)
             .sortedByDescending {
@@ -40,7 +45,22 @@ internal class FirestoreArticleRepository(
     }
 
     override suspend fun getArticleById(id: String) =
-        recentlyReadArticles[id] ?: getArticles().firstOrNull { it.id == id }
+        recentlyReadArticles[id] ?: readPublished(
+            catalog.db.collection("articles").whereEqualTo(FieldPath.documentId(), id),
+            "articles", { it.toArticle() }, ::publishedArticle, include = { it.optString("id") == id }
+        ).firstOrNull()
+
+    override suspend fun getArticlesByIds(ids: List<String>): List<Article> {
+        if (ids.isEmpty()) return emptyList()
+        val cached = recentlyReadArticles
+        val fetched = ids.distinct().filterNot(cached::containsKey).chunked(30).flatMap { batch ->
+            readPublished(
+                catalog.db.collection("articles").whereIn(FieldPath.documentId(), batch),
+                "articles", { it.toArticle() }, ::publishedArticle, include = { it.optString("id") in batch }
+            )
+        }.associateBy { it.id }
+        return ids.mapNotNull { cached[it] ?: fetched[it] }
+    }
 
     override suspend fun getCategories() =
         readPublished(catalog.db.collection("articleCategories"), "articleCategories", {
@@ -87,7 +107,8 @@ internal class FirestoreArticleRepository(
             row.getString("id"), row.getString("categoryId"), row.getString("title"),
             row.getString("summary"), row.optString("imageUrl").ifBlank { null }, null,
             row.getString("publishedAt"), row.optInt("readMinutes"), row.optInt("viewCount"),
-            links.keys().asSequence().associateWith { links.getString(it) }
+            links.keys().asSequence().associateWith { links.getString(it) },
+            row.optString("breedId").ifBlank { null }
         )
     }
 
@@ -107,6 +128,7 @@ internal class FirestoreArticleRepository(
 
     private fun DocumentSnapshot.toArticle() = Article(
         id, string("categoryId"), string("title"), string("summary"), getString("imageUrl"),
-        imageResource(), string("publishedAt"), int("readMinutes") ?: 0, int("viewCount") ?: 0, sources()
+        imageResource(), string("publishedAt"), int("readMinutes") ?: 0, int("viewCount") ?: 0,
+        sources(), getString("breedId")
     )
 }

@@ -2,10 +2,15 @@ package com.example.doglens.ui.notification
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.doglens.data.AppContainer
+import com.example.doglens.data.model.RecognitionResult
 import com.example.doglens.data.repository.FirestoreAccountData
 import com.example.doglens.utils.TimeUtils
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +27,8 @@ data class DogLensNotification(
     val title: String,
     val message: String,
     val time: String,
-    val isRead: Boolean
+    val isRead: Boolean,
+    val recognition: RecognitionResult? = null
 )
 
 sealed interface NotificationRow {
@@ -40,16 +46,30 @@ class NotificationViewModel : ViewModel() {
     private val account = FirestoreAccountData()
     private val feed = account.collection("notifications")
     private var notifications = emptyList<DogLensNotification>()
+    private var recognitionIds = emptySet<String>()
+    private var previews = emptyMap<String, RecognitionResult>()
+    private var previewJob: Job? = null
     private val _state = MutableStateFlow(NotificationUiState())
     val state: StateFlow<NotificationUiState> = _state.asStateFlow()
 
-    private val listener = feed?.orderBy("createdAt", Query.Direction.DESCENDING)
-        ?.limit(100)?.addSnapshotListener { snapshot, error ->
+    private val feedQuery = feed?.orderBy("createdAt", Query.Direction.DESCENDING)?.limit(100)
+    private val listener = feedQuery?.addSnapshotListener { snapshot, error ->
             if (error != null) {
                 _state.value = _state.value.copy(error = "Không tải được thông báo.")
                 return@addSnapshotListener
             }
-            notifications = snapshot?.documents.orEmpty().mapNotNull { document ->
+            if (snapshot != null) updateFeed(snapshot)
+        }
+
+    suspend fun refresh() {
+        val query = feedQuery ?: return
+        val snapshot = query.get(Source.SERVER).await()
+        updateFeed(snapshot, forcePreviews = true)
+        previewJob?.join()
+    }
+
+    private fun updateFeed(snapshot: QuerySnapshot, forcePreviews: Boolean = false) {
+            notifications = snapshot.documents.mapNotNull { document ->
                 val type = NotificationType.entries.firstOrNull { it.name == document.getString("type") }
                     ?: return@mapNotNull null
                 val date = document.getTimestamp("createdAt")?.toDate()?.time ?: return@mapNotNull null
@@ -60,7 +80,21 @@ class NotificationViewModel : ViewModel() {
                     document.getBoolean("isRead") == true)
             }
             publish()
-        }
+            val ids = notifications.filter { it.type == NotificationType.RECOGNITION }.map { it.id }.toSet()
+            if (ids == recognitionIds && !forcePreviews) return
+            recognitionIds = ids
+            previewJob?.cancel()
+            previewJob = viewModelScope.launch {
+                try {
+                    previews = AppContainer.recognitionRepository.getPreviews(ids)
+                    publish()
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    recognitionIds = emptySet()
+                }
+            }
+    }
 
     fun setFilter(filter: NotificationFilter) {
         _state.value = _state.value.copy(selectedFilter = filter)
@@ -105,7 +139,9 @@ class NotificationViewModel : ViewModel() {
         val rows = buildList {
             filtered.groupBy { it.section }.forEach { (section, items) ->
                 add(NotificationRow.Header(section))
-                items.forEach { add(NotificationRow.Item(it)) }
+                items.forEach {
+                    add(NotificationRow.Item(it.copy(recognition = previews[it.id])))
+                }
             }
         }
         _state.value = _state.value.copy(rows = rows)

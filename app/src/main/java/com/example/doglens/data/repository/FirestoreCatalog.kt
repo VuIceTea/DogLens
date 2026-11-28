@@ -85,5 +85,7 @@ internal fun DocumentSnapshot.toDog() = Dog(
     weightMedianKg = getDouble("weightMedianKg"),
     weightReferenceKg = getDouble("weightReferenceKg"),
     lifespanReference = getString("lifespanReference"),
-    sources = sources()
+    sources = sources(),
+    searchAliases = stringList("searchAliases"),
+    longDescription = getString("longDescription")
 )

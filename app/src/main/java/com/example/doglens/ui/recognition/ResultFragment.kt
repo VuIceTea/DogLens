@@ -25,11 +25,11 @@ import com.example.doglens.utils.loadBreedPhoto
 import com.example.doglens.R
 import com.example.doglens.MainActivity
 import com.example.doglens.ui.dog.DogDetailFragment
+import com.example.doglens.ui.dog.bindBreedDescription
+import com.example.doglens.ui.article.bindRelatedArticles
 import com.example.doglens.ui.dog.SimilarDogsFragment
 import com.example.doglens.ui.favorite.whenSignedInForFavorite
 import com.example.doglens.data.model.Dog
-import com.example.doglens.data.model.DogTrait
-import com.example.doglens.data.model.Trait
 import com.example.doglens.utils.ImageUtils
 import com.example.doglens.utils.applyNavigationBarPadding
 import com.example.doglens.utils.catalogMedian
@@ -132,30 +132,47 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
             confidence >= 75 -> "Độ tin cậy khá"
             else -> "Độ tin cậy trung bình"
         }
-        view.findViewById<TextView>(R.id.tvSummary).text = dog.summary ?: dog.description
+        bindBreedDescription(view.findViewById(R.id.tvSummary), dog)
+        bindRelatedArticles(view.findViewById(R.id.relatedArticlesSection), dog.id)
 
         view.findViewById<View>(R.id.resultTraitsSection).visibility =
             if (state.traits.isEmpty()) View.GONE else View.VISIBLE
         view.findViewById<View>(R.id.resultRelatedSection).visibility =
             if (state.relatedDogs.isEmpty()) View.GONE else View.VISIBLE
-        bindTraits(view.findViewById(R.id.gridTraits), state.traits)
+        bindCards(view.findViewById(R.id.gridTraits), state.traits.map { (trait, link) ->
+            InfoCard(trait.name, link.description.orEmpty(), trait.colorHex, traitIcon(trait.iconKey))
+        })
+        view.findViewById<View>(R.id.resultCareSection).visibility =
+            if (state.care.isEmpty()) View.GONE else View.VISIBLE
+        bindCards(view.findViewById(R.id.gridCare), state.care.map { (tip, link) ->
+            val icon = when (tip.id) {
+                "grooming" -> R.drawable.ic_detail_brush
+                "exercise" -> R.drawable.ic_trait_run
+                "social" -> R.drawable.ic_trait_heart_outline
+                "training" -> R.drawable.ic_trait_brain
+                else -> R.drawable.ic_detail_paw
+            }
+            InfoCard(tip.name, link.description.orEmpty(), tip.colorHex, icon)
+        })
         bindInfo(view, dog)
         bindRelatedDogs(view.findViewById(R.id.relatedDogsList), state.relatedDogs)
     }
 
     // ---------- Đặc điểm nổi bật: lưới 2 cột ----------
 
-    private fun bindTraits(grid: GridLayout, traits: List<Pair<Trait, DogTrait>>) {
+    private data class InfoCard(val title: String, val description: String, val color: String, @DrawableRes val icon: Int)
+
+    private fun bindCards(grid: GridLayout, cards: List<InfoCard>) {
         grid.removeAllViews()
         val inflater = LayoutInflater.from(requireContext())
 
-        traits.forEach { (trait, dogTrait) ->
+        cards.forEach { card ->
             val cell = inflater.inflate(R.layout.item_result_trait, grid, false)
             cell.findViewById<View>(R.id.traitCircle).backgroundTintList =
-                ColorStateList.valueOf(Color.parseColor(trait.colorHex))
-            cell.findViewById<ImageView>(R.id.traitIcon).setImageResource(traitIcon(trait.iconKey))
-            cell.findViewById<TextView>(R.id.traitName).text = trait.name
-            cell.findViewById<TextView>(R.id.traitDesc).text = dogTrait.description.orEmpty()
+                ColorStateList.valueOf(Color.parseColor(card.color))
+            cell.findViewById<ImageView>(R.id.traitIcon).setImageResource(card.icon)
+            cell.findViewById<TextView>(R.id.traitName).text = card.title
+            cell.findViewById<TextView>(R.id.traitDesc).text = card.description
 
             // width 0 + weight 1 -> 2 cột chia đều
             cell.layoutParams = GridLayout.LayoutParams(

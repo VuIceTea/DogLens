@@ -4,6 +4,7 @@
 !recognition_backend/inference.py
 !recognition_backend/fetch_detector.py
 !recognition_backend/requirements.txt
+!recognition_backend/dachshund-training-sources.json
 !app/
 !app/src/
 !app/src/main/
@@ -13,3 +14,6 @@
 !app/src/main/assets/recognition/breed-classifier-int8.onnx
 !app/src/main/assets/recognition/model-metadata.json
 !app/src/main/assets/recognition/classifier-license.txt
+!app/src/main/assets/recognition/clip-dachshund-vision.onnx
+!app/src/main/assets/recognition/clip-license.txt
+!app/src/main/assets/recognition/dachshund-head.json

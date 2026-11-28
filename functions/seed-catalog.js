@@ -5,6 +5,8 @@ const { isDeepStrictEqual } = require("node:util");
 const catalog = require("./seed-catalog.json");
 const verifiedBreeds = require("./verified-breeds.json");
 const editorialArticles = require("./editorial-articles.json");
+const { worldwideBreedDocuments } = require("./worldwide-breeds");
+const { breedGuideDocuments, editorialBreedDocuments } = require("./breed-guides");
 const modelBreeds = require("../app/src/main/assets/recognition/breed-catalog.json");
 const modelMetadata = require("../app/src/main/assets/recognition/model-metadata.json");
 const fciGroups = "https://www.fci.be/en/nomenclature/";
@@ -211,10 +213,11 @@ async function fromFirebaseCli(projectId, rows, write, moduleRoot, legacyRows) {
 }
 
 async function fromApplicationDefaultCredentials(projectId, rows, write, legacyRows) {
-  const { initializeApp, applicationDefault } = require("firebase-admin/app");
+  const { initializeApp, applicationDefault, getApps } = require("firebase-admin/app");
   const { getFirestore } = require("firebase-admin/firestore");
-  initializeApp({ credential: applicationDefault(), projectId });
-  const db = getFirestore();
+  const app = getApps().find((candidate) => candidate.name === projectId)
+    ?? initializeApp({ credential: applicationDefault(), projectId }, projectId);
+  const db = getFirestore(app);
   const references = rows.map(([key]) => db.doc(key));
   const snapshots = await db.getAll(...references);
   const summary = { created: 0, updated: 0, conflicts: 0 };
@@ -239,15 +242,29 @@ async function fromApplicationDefaultCredentials(projectId, rows, write, legacyR
 async function main() {
   const [projectId, ...options] = process.argv.slice(2);
   if (!/^[a-z][a-z0-9-]+$/.test(projectId ?? "") ||
-      options.some((option) => !["--write", "--verified"].includes(option))) {
-    throw new Error("Usage: node functions/seed-catalog.js <project-id> [--verified] [--write]");
+      options.some((option) => !["--write", "--verified", "--worldwide", "--breed-guides"].includes(option)) ||
+      options.filter((option) => option !== "--write").length > 1) {
+    throw new Error("Usage: node functions/seed-catalog.js <project-id> [--verified|--worldwide|--breed-guides] [--write]");
   }
-  const rows = documents();
+  const base = documents();
+  const baseDogs = base.filter(([key]) => key.startsWith("dogs/"));
+  const worldwide = worldwideBreedDocuments(new Set(baseDogs.map(([key]) => key.slice(5))));
+  const guides = options.includes("--breed-guides");
+  const rows = options.includes("--worldwide") ? worldwide
+    : guides ? [...editorialBreedDocuments(), ...breedGuideDocuments([...baseDogs, ...worldwide])]
+    : base;
   const write = options.includes("--write");
-  const legacyRows = options.includes("--verified") ? new Map(documents(true)) : null;
-  const { created, updated, conflicts } = process.env.DOG_LENS_FIREBASE_CLI_PACKAGE
-    ? await fromFirebaseCli(projectId, rows, write, process.env.DOG_LENS_FIREBASE_CLI_PACKAGE, legacyRows)
-    : await fromApplicationDefaultCredentials(projectId, rows, write, legacyRows);
+  const legacyRows = options.includes("--verified") ? new Map(documents(true)) : guides ? new Map() : null;
+  const totals = { created: 0, updated: 0, conflicts: 0 };
+  const cli = process.env.DOG_LENS_FIREBASE_CLI_PACKAGE;
+  for (let offset = 0; offset < rows.length; offset += 300) {
+    const chunk = rows.slice(offset, offset + 300);
+    const summary = cli
+      ? await fromFirebaseCli(projectId, chunk, write, cli, legacyRows)
+      : await fromApplicationDefaultCredentials(projectId, chunk, write, legacyRows);
+    for (const key of Object.keys(totals)) totals[key] += summary[key];
+  }
+  const { created, updated, conflicts } = totals;
   console.log(`${projectId} (${write ? "committed" : "dry run"}): ${created} new, ${updated} updated, ${conflicts} edited fields preserved.`);
 }
 

@@ -1,4 +1,5 @@
 import json
+from math import exp
 from pathlib import Path
 
 import numpy as np
@@ -24,11 +25,17 @@ class DogRecognition:
         providers = ["CPUExecutionProvider"]
         self.detector = ort.InferenceSession(str(detector_path), options, providers=providers)
         self.classifier = ort.InferenceSession(str(catalog_dir / "breed-classifier-int8.onnx"), options, providers=providers)
+        self.dachshund_vision = ort.InferenceSession(
+            str(catalog_dir / "clip-dachshund-vision.onnx"), options, providers=providers
+        )
+        self.dachshund_head = json.loads((catalog_dir / "dachshund-head.json").read_text(encoding="utf-8"))
+        self.dachshund_weights = np.array(self.dachshund_head["weights"], np.float64)
         self.catalog = json.loads((catalog_dir / "breed-catalog.json").read_text(encoding="utf-8"))
         metadata = json.loads((catalog_dir / "model-metadata.json").read_text(encoding="utf-8"))
         self.temperature = float(metadata["calibration"]["temperature"])
         self.detector_input = self.detector.get_inputs()[0].name
         self.classifier_input = self.classifier.get_inputs()[0].name
+        self.dachshund_input = self.dachshund_vision.get_inputs()[0].name
         grids, strides = [], []
         for stride in (8, 16, 32):
             y, x = np.mgrid[:self.detector_size // stride, :self.detector_size // stride]
@@ -95,6 +102,9 @@ class DogRecognition:
             resample=Image.Resampling.BILINEAR, fillcolor=(114, 114, 114),
         )
         rgb = np.asarray(crop, dtype=np.float32) / 255
+        dachshund = self.classify_dachshund(rgb)
+        if dachshund is not None:
+            return dachshund
         rgb = (rgb - np.array([.485, .456, .406], np.float32)) / np.array([.229, .224, .225], np.float32)
         tensor = np.ascontiguousarray(rgb.transpose(2, 0, 1)[None])
         logits = self.classifier.run(None, {self.classifier_input: tensor})[0][0]
@@ -108,6 +118,24 @@ class DogRecognition:
         if match is None or confidence < self.breed_threshold or confidence - float(scores[second]) < self.breed_margin:
             raise NoMatch("uncertain_breed")
         return {"dogId": match["id"], "confidence": min(99, round(confidence * 100))}
+
+    def classify_dachshund(self, rgb: np.ndarray):
+        rgb = (rgb - np.array([.48145466, .4578275, .40821073], np.float32)) / np.array(
+            [.26862954, .26130258, .27577711], np.float32
+        )
+        tensor = np.ascontiguousarray(rgb.transpose(2, 0, 1)[None])
+        vector = self.dachshund_vision.run(None, {self.dachshund_input: tensor})[0][0].astype(np.float64)
+        if vector.shape != self.dachshund_weights.shape or not np.isfinite(vector).all():
+            raise RuntimeError("Invalid Dachshund embedding")
+        norm = np.linalg.norm(vector)
+        if norm <= 0:
+            return None
+        score = float(vector @ self.dachshund_weights / norm)
+        head = self.dachshund_head
+        if score < head["minimumScore"]:
+            return None
+        log_odds = score * head["calibrationScale"] + head["calibrationBias"]
+        return {"dogId": head["dogId"], "confidence": min(99, round(100 / (1 + exp(-log_odds))))}
 
     def recognize(self, image: Image.Image):
         return self.classify(image, self.detect_dog(image))

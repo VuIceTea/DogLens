@@ -32,6 +32,18 @@ class UserViewModel : ViewModel() {
         auth.addAuthStateListener(authListener)
     }
 
+    suspend fun refresh() {
+        val uid = auth.currentUser?.uid ?: return
+        val current = userRepository.refreshUser(uid)
+        if (auth.currentUser?.uid == uid) {
+            if (current != null) _uiState.value = UserUiState(user = current)
+            if (profileJob?.isActive != true) {
+                observedUid = null
+                loadUser()
+            }
+        }
+    }
+
     private fun loadUser() {
         val account = auth.currentUser
         if (observedUid == account?.uid) return

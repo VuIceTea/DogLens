@@ -36,5 +36,7 @@ data class Dog (
     val weightMedianKg: Double? = null,
     val weightReferenceKg: Double? = null,
     val lifespanReference: String? = null,
-    val sources: Map<String, String> = emptyMap()
+    val sources: Map<String, String> = emptyMap(),
+    val searchAliases: List<String> = emptyList(),
+    val longDescription: String? = null
 )

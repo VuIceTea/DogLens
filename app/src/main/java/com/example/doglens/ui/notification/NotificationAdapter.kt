@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.core.view.updateLayoutParams
 import com.example.doglens.R
+import com.bumptech.glide.Glide
 
 class NotificationAdapter(
     private val onClick: (DogLensNotification) -> Unit
@@ -63,7 +64,6 @@ class NotificationAdapter(
             val icon = itemView.findViewById<ImageView>(R.id.imgNotificationIcon)
             when (item.type) {
                 NotificationType.RECOGNITION -> {
-                    icon.setImageResource(R.drawable.topic_kid_friendly_golden)
                     icon.imageTintList = null
                     icon.setBackgroundResource(R.drawable.bg_notification_avatar_clip)
                     icon.scaleType = ImageView.ScaleType.CENTER_CROP
@@ -72,6 +72,12 @@ class NotificationAdapter(
                         height = itemView.resources.getDimensionPixelSize(R.dimen.notification_avatar_size)
                     }
                     iconContainer.setBackgroundResource(R.drawable.bg_notification_icon_blue)
+                    Glide.with(icon).load(item.recognition?.imageUrl?.takeIf { it.isNotBlank() })
+                        .centerCrop()
+                        .placeholder(R.drawable.ic_detail_paw)
+                        .fallback(R.drawable.ic_detail_paw)
+                        .error(R.drawable.ic_detail_paw)
+                        .into(icon)
                 }
                 NotificationType.FAVORITE -> bindIcon(iconContainer, icon, R.drawable.ic_heart_favorite, R.drawable.bg_notification_icon_pink, "#FF4564")
                 NotificationType.ARTICLE -> bindIcon(iconContainer, icon, R.drawable.ic_article_bookmark_outline, R.drawable.bg_notification_icon_blue, "#168BFF")
@@ -81,6 +87,7 @@ class NotificationAdapter(
         }
 
         private fun bindIcon(container: View, icon: ImageView, iconRes: Int, backgroundRes: Int, color: String) {
+            Glide.with(icon).clear(icon)
             container.setBackgroundResource(backgroundRes)
             icon.setImageResource(iconRes)
             icon.background = null

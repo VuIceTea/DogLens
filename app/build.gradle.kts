@@ -23,6 +23,7 @@ android {
     }
 
     buildFeatures { buildConfig = true }
+    androidResources { noCompress += "onnx" }
 
     buildTypes {
         release {

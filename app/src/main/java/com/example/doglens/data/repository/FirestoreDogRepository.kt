@@ -26,6 +26,12 @@ internal class FirestoreDogRepository(
 
     override fun cachedDog(id: String): Dog? = dogsById[id]
 
+    override fun invalidateCatalog() {
+        dogCatalog = null
+        traitCatalog = null
+        traitLabels = null
+    }
+
     private fun DocumentSnapshot.readDog() = toDog().also { dogsById[it.id] = it }
 
     override suspend fun getDogs(): List<Dog> =

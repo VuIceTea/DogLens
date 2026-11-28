@@ -8,7 +8,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -16,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.adapter.HistoryAdapter
@@ -46,7 +46,10 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         setupSearch(view)
         setupFilters(view)
 
-        viewModel.refresh()
+        view.findViewById<SwipeRefreshLayout>(R.id.historyRefresh).apply {
+            setOnChildScrollUpCallback { _, _ -> view.findViewById<RecyclerView>(R.id.rvHistory).canScrollVertically(-1) }
+            setOnRefreshListener { viewModel.refresh() }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -55,17 +58,17 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.refresh()
+    }
+
     private fun setupList(view: View) {
         adapter = HistoryAdapter(
             onItemClick = { item ->
                 (requireActivity() as MainActivity).openScreen(ResultFragment.newInstance(item.result.id))
             },
-            onFavoriteClick = { item ->
-                viewModel.toggleFavorite(item)
-                val msg = if (item.isFavorite) "Đã bỏ ${item.dog.name} khỏi yêu thích"
-                else "Đã lưu ${item.dog.name} vào yêu thích"
-                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-            },
+            onFavoriteClick = viewModel::toggleFavorite,
             onDeleteClick = { item -> confirmDelete(item) }
         )
 
@@ -103,6 +106,7 @@ class HistoryFragment : Fragment(R.layout.fragment_history) {
             android.widget.Toast.makeText(requireContext(), it, android.widget.Toast.LENGTH_SHORT).show()
         }
         adapter.submitList(state.rows)
+        if (!state.loading) view.findViewById<SwipeRefreshLayout>(R.id.historyRefresh).isRefreshing = false
 
         // Nút lọc đang chọn: nền xanh chữ trắng; còn lại nền xám chữ xám
         filterButtons.forEach { (filter, button) ->

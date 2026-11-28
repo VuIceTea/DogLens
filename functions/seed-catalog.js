@@ -73,7 +73,8 @@ function documents(legacy = false) {
       ["corgi", "friendly", "FCI mô tả giống cởi mở và thân thiện."],
       ["french_bulldog", "active", "FCI mô tả giống hoạt bát và thích chơi."],
       ["poodle", "loyal", "Lòng trung thành được ghi trong tiêu chuẩn FCI."],
-      ["labrador_retriever", "smart", "FCI mô tả giống thông minh và dễ tiếp thu."]
+      ["labrador_retriever", "smart", "FCI mô tả giống thông minh và dễ tiếp thu."],
+      ["flat_coated_retriever", "friendly", "Giống chó thân thiện, vui vẻ và tự tin theo tiêu chuẩn giống."]
     ];
     for (const [index, [dogId, traitId, description]] of temperaments.entries()) {
       completeCatalog.dogTraits.push({

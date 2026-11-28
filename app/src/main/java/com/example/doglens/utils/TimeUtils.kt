@@ -48,6 +48,7 @@ object TimeUtils {
 
     // Thời gian: Hôm nay -> "14:23", ngày khác -> "08/10/2026 16:30"
     fun timeLabel(millis: Long): String {
+        if (millis <= 0) return "Chưa rõ giờ"
         val isToday = startOfDay(millis) == startOfDay(System.currentTimeMillis())
         val pattern = if (isToday) "HH:mm" else "dd/MM/yyyy HH:mm"
         return SimpleDateFormat(pattern, Locale.getDefault()).format(Date(millis))

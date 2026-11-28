@@ -113,7 +113,7 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:lineSpacingExtra="2dp"
-                android:text="Ảnh có thể chưa đủ rõ nét hoặc không thấy rõ toàn bộ khuôn mặt/thân chó, nên AI chưa thể xác định giống chó trong ảnh này."
+                android:text="Mô hình chưa xác định được vùng chó hoặc giống chó với độ tin cậy đủ cao. Hãy thử điều chỉnh khung ảnh hoặc chọn ảnh khác."
                 android:textColor="#7B8195"
                 android:textSize="14sp" />
 

@@ -162,10 +162,15 @@
     </HorizontalScrollView>
 
     <!-- Danh sách + trạng thái trống -->
-    <FrameLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/historyRefresh"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvHistory"
@@ -222,4 +227,5 @@
                 app:icon="@drawable/ic_camera_white" />
         </LinearLayout>
     </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

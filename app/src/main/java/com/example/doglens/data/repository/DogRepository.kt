@@ -9,6 +9,7 @@ import com.example.doglens.data.model.DogTrait
 import com.example.doglens.data.model.Trait
 
 interface DogRepository {
+    fun invalidateCatalog() = Unit
     suspend fun getDogs(): List<Dog>
     suspend fun getPopularDogs(): List<Dog> = getDogs().take(5)
     suspend fun getDogById(id: String): Dog?

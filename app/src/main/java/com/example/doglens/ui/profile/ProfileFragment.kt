@@ -402,6 +402,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             "#FF4564"
         )
 
+        view.findViewById<View>(R.id.menuFavorite).setOnClickListener {
+            (requireActivity() as MainActivity).selectFavoriteTab()
+        }
+
         // Mở màn Lịch sử nhận diện
         view.findViewById<View>(R.id.menuHistory).setOnClickListener {
             (requireActivity() as MainActivity).openScreen(

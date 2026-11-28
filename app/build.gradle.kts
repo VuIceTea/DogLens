@@ -68,6 +68,7 @@ dependencies {
     implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.23.2")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.0.0")
 
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

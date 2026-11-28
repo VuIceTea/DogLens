@@ -127,7 +127,7 @@ class PremiumViewModel(private val saved: SavedStateHandle) : ViewModel() {
                     "401" -> "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."
                     "ORDER_PENDING" -> "Bạn có giao dịch đang chờ. Bấm Kiểm tra giao dịch để tiếp tục."
                     "ORDER_CLOSED" -> "Đơn đã được xử lý hoặc hết hạn. Hãy kiểm tra giao dịch."
-                    else -> "Chưa kết nối được dịch vụ thanh toán Sandbox. Vui lòng thử lại."
+                    else -> "Chưa kết nối được dịch vụ thanh toán. Vui lòng thử lại."
                 }
                 mutableState.value = state.value.copy(error = message)
             } finally {

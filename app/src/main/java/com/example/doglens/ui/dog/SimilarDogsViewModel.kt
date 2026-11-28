@@ -29,8 +29,9 @@ class SimilarDogsViewModel : ViewModel() {
     val state: StateFlow<SimilarDogsUiState> = _state.asStateFlow()
     private var loadedDogId: String? = null
 
-    fun load(dogId: String) {
-        if (loadedDogId == dogId) return
+    fun load(dogId: String, refresh: Boolean = false) {
+        if (_state.value.sourceDog != null && !refresh && loadedDogId == dogId) return
+        if (refresh) repository.invalidateCatalog()
         loadedDogId = dogId
         viewModelScope.launch {
             _state.value = SimilarDogsUiState(isLoading = true)

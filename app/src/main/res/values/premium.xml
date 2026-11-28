@@ -2,14 +2,14 @@
 <resources>
     <string name="premium_title">DogLens Premium</string>
     <string name="premium_brand">DogLens Premium</string>
-    <string name="premium_hero_subtitle">Dùng thử thanh toán Premium trên VNPAY Sandbox</string>
+    <string name="premium_hero_subtitle">Dùng thử thanh toán Premium trên VNPAY</string>
     <string name="premium_plans">Chọn gói Premium</string>
     <string name="premium_monthly">Gói tháng</string>
     <string name="premium_yearly">Gói năm</string>
     <string name="premium_price_period">%1$s / %2$d ngày</string>
     <string name="premium_sandbox_note">Giá kiểm thử. Thanh toán một lần, không tự động gia hạn.</string>
-    <string name="premium_checkout">Tiếp tục với VNPAY Sandbox</string>
-    <string name="premium_checkout_continue">Mở lại VNPAY Sandbox</string>
+    <string name="premium_checkout">Tiếp tục với VNPAY</string>
+    <string name="premium_checkout_continue">Mở lại VNPAY</string>
     <string name="premium_refresh">Kiểm tra giao dịch</string>
     <string name="premium_loading">Đang kết nối dịch vụ thanh toán…</string>
     <string name="premium_active_until">Premium có hiệu lực đến %1$s.</string>
@@ -17,11 +17,11 @@
     <string name="premium_status_paid">VNPAY đã xác nhận thanh toán.</string>
     <string name="premium_status_failed">Giao dịch không thành công hoặc đã bị hủy. Bạn có thể thử lại.</string>
     <string name="premium_status_expired">Đơn đã hết hạn thanh toán. Bạn có thể tạo đơn mới.</string>
-    <string name="premium_status_review">Giao dịch đang cần đối soát. Vui lòng kiểm tra trên cổng quản trị Sandbox.</string>
+    <string name="premium_status_review">Giao dịch đang cần đối soát. Vui lòng kiểm tra trên cổng quản trị.</string>
     <string name="premium_status_none">Bạn chưa có giao dịch Premium.</string>
-    <string name="premium_browser_unavailable">Không tìm thấy trình duyệt để mở VNPAY Sandbox.</string>
+    <string name="premium_browser_unavailable">Không tìm thấy trình duyệt để mở VNPAY.</string>
     <string name="premium_confirm">Xác nhận gói kiểm thử</string>
-    <string name="premium_confirm_detail">%1$s · %2$s\nBạn sẽ được chuyển sang trang VNPAY Sandbox.</string>
+    <string name="premium_confirm_detail">%1$s · %2$s\nBạn sẽ được chuyển sang trang VNPAY.</string>
     <string name="premium_back">Quay lại</string>
 
     <style name="PremiumHeading">

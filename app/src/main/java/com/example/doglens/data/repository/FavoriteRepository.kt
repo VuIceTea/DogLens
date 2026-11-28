@@ -7,6 +7,7 @@ data class FavoriteStatus(val saved: Boolean, val pending: Boolean = false)
 
 interface FavoriteRepository {
     suspend fun getFavoriteItems(): List<FavoriteDogItem>
+    suspend fun getFavoriteDogIds(): Set<String> = getFavoriteItems().map { it.dog.id }.toSet()
     suspend fun isFavorite(dogId: String): Boolean
     fun observeFavorite(dogId: String) = flow { emit(FavoriteStatus(isFavorite(dogId))) }
     suspend fun addFavorite(dogId: String)

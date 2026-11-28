@@ -20,7 +20,7 @@ import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.adapter.PopularDogAdapter
 import com.example.doglens.data.model.HomeFeature
-import com.example.doglens.ui.recognition.RecognitionFragment
+import com.example.doglens.ui.camera.ImagePreviewFragment
 import com.example.doglens.ui.dog.DogDetailFragment
 import com.example.doglens.ui.camera.CameraFragment
 import com.example.doglens.ui.article.openArticleCatalog
@@ -67,7 +67,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun onImagePicked(uri: Uri) {
-        (requireActivity() as MainActivity).openScreen(RecognitionFragment.newInstance(uri))
+        (requireActivity() as MainActivity).openScreen(
+            ImagePreviewFragment.newInstance(uri), R.color.recognition_background
+        )
     }
 
     // Hiển thị các tính năng trên trang chủ

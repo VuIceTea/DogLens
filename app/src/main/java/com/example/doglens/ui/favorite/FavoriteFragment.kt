@@ -22,6 +22,8 @@ import androidx.lifecycle.lifecycleScope
 import com.example.doglens.data.AppContainer
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 
 class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
 
@@ -38,6 +40,9 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
     private var selectedSort = 0
 
     private var allFavorites: List<FavoriteDogItem> = emptyList()
+    private val pendingRemovals = mutableSetOf<String>()
+    private var refreshJob: Job? = null
+    private var removalRevision = 0
 
     override fun onViewCreated(
         view: View,
@@ -55,6 +60,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
         setupSortSpinner()
         setupFilters(view)
         setupSearch()
+        view.findViewById<SwipeRefreshLayout>(R.id.favoriteRefresh).setOnRefreshListener { refreshFavorites() }
 
     }
 
@@ -63,16 +69,43 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
         refreshFavorites()
     }
 
-    private fun refreshFavorites(removeDogId: String? = null) {
-        viewLifecycleOwner.lifecycleScope.launch {
+    private fun refreshFavorites() {
+        if (refreshJob?.isActive == true) return
+        val revision = removalRevision
+        refreshJob = viewLifecycleOwner.lifecycleScope.launch {
             try {
-                if (removeDogId != null) repository.removeFavorite(removeDogId)
-                allFavorites = repository.getFavoriteItems()
-                renderFavorites()
+                val loaded = repository.getFavoriteItems()
+                if (revision == removalRevision) {
+                    allFavorites = loaded
+                    renderFavorites()
+                }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 Toast.makeText(requireContext(), "Chưa cập nhật được danh sách yêu thích.", Toast.LENGTH_SHORT).show()
+            } finally {
+                view?.findViewById<SwipeRefreshLayout>(R.id.favoriteRefresh)?.isRefreshing = false
+            }
+        }
+    }
+
+    private fun removeFavorite(item: FavoriteDogItem) {
+        val dogId = item.dog.id
+        if (!pendingRemovals.add(dogId)) return
+        renderFavorites()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                repository.removeFavorite(dogId)
+                removalRevision++
+                allFavorites = allFavorites.filterNot { it.dog.id == dogId }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (allFavorites.none { it.dog.id == dogId }) allFavorites = allFavorites + item
+                Toast.makeText(requireContext(), "Chưa bỏ được giống chó yêu thích.", Toast.LENGTH_SHORT).show()
+            } finally {
+                pendingRemovals.remove(dogId)
+                if (view != null) renderFavorites()
             }
         }
     }
@@ -83,7 +116,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
                 (requireActivity() as MainActivity).openScreen(DogDetailFragment.newInstance(item.dog.id))
             },
             onFavoriteClick = { item ->
-                refreshFavorites(item.dog.id)
+                removeFavorite(item)
             },
         )
 
@@ -222,7 +255,8 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
     private fun renderFavorites() {
         val keyword = searchInput.text.toString().trim().lowercase(Locale.getDefault())
 
-        var result = allFavorites.filter { item ->
+        val favorites = allFavorites.filterNot { it.dog.id in pendingRemovals }
+        var result = favorites.filter { item ->
             val matchesKeyword = item.dog.name.lowercase(Locale.getDefault())
                 .contains(keyword) || item.dog.description.lowercase(Locale.getDefault())
                 .contains(keyword)
@@ -244,7 +278,7 @@ class FavoriteFragment : Fragment(R.layout.fragment_favorite) {
 
         favoriteAdapter.submitLists(result)
 
-        countText.text = "${allFavorites.size} giống chó"
+        countText.text = "${favorites.size} giống chó"
         emptyText.visibility = if (result.isEmpty()) View.VISIBLE else View.GONE
 
         recyclerView.visibility = if (result.isEmpty()) View.GONE else View.VISIBLE

@@ -12,16 +12,20 @@ internal class DogRecognitionApi {
     val isConfigured: Boolean
         get() = BuildConfig.DOG_RECOGNITION_API_URL.isNotBlank()
 
-    fun requireConfigured() {
-        check(BuildConfig.DOG_RECOGNITION_API_URL.startsWith("https://")) {
+    private fun endpoint(): URL {
+        check(isConfigured) { "Dịch vụ nhận diện ảnh chưa được cấu hình." }
+        val url = URL(BuildConfig.DOG_RECOGNITION_API_URL)
+        val debugLoopback = BuildConfig.DEBUG && url.protocol == "http" &&
+            (url.host == "127.0.0.1" || url.host == "localhost")
+        check((url.protocol == "https" || debugLoopback) && url.userInfo == null) {
             "Dịch vụ nhận diện ảnh chưa được cấu hình."
         }
+        return url
     }
 
     suspend fun recognize(bytes: ByteArray, mimeType: String, token: String): Pair<String, Int> =
         withContext(Dispatchers.IO) {
-            requireConfigured()
-            val connection = URL(BuildConfig.DOG_RECOGNITION_API_URL).openConnection() as HttpURLConnection
+            val connection = endpoint().openConnection() as HttpURLConnection
             try {
                 connection.instanceFollowRedirects = false
                 connection.requestMethod = "POST"

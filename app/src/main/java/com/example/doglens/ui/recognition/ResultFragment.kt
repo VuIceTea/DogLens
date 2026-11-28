@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.GridLayout
@@ -76,11 +77,18 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
             (viewModel.state.value as? ResultUiState.Content)?.let { saveImage(it.recognition.imageUrl) }
         }
 
-        viewModel.load(requireArguments().getString(ARG_RECOGNITION_ID).orEmpty())
+        val id = requireArguments().getString(ARG_RECOGNITION_ID).orEmpty()
+        val refresh = view.findViewById<SwipeRefreshLayout>(R.id.resultRefresh)
+        refresh.setOnRefreshListener {
+            boundRecognitionId = null
+            viewModel.load(id, refresh = true)
+        }
+        viewModel.load(id)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
+                    if (state != ResultUiState.Loading) refresh.isRefreshing = false
                     when (state) {
                         ResultUiState.Loading -> Unit
                         ResultUiState.NotFound -> {
@@ -242,11 +250,13 @@ class ResultFragment : Fragment(R.layout.fragment_result) {
             button.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#E6F1FD"))
             button.setTextColor(blue)
             button.setIconResource(R.drawable.ic_heart_favorite)
+            button.iconTint = ColorStateList.valueOf(Color.parseColor("#FF3B5C"))
         } else {
             button.text = "Lưu vào yêu thích"
             button.backgroundTintList = ColorStateList.valueOf(blue)
             button.setTextColor(Color.WHITE)
-            button.setIconResource(R.drawable.ic_heart_white)
+            button.setIconResource(R.drawable.ic_heart_outline)
+            button.iconTint = ColorStateList.valueOf(Color.WHITE)
         }
     }
 

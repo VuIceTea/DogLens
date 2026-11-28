@@ -147,6 +147,13 @@ class ImagePreviewFragment : Fragment(R.layout.fragment_image_preview) {
 
     private fun exportAdjustedImage(sourceUri: Uri) {
         if (isProcessing) return
+        if (cropMode == CropMode.FREE && rotationDegrees == 0) {
+            (requireActivity() as MainActivity).replaceScreen(
+                RecognitionFragment.newInstance(sourceUri),
+                R.color.recognition_background
+            )
+            return
+        }
         isProcessing = true
         continueButton.isEnabled = false
         continueButton.alpha = 0.65f

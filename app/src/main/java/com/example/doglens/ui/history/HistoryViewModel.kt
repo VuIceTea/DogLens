@@ -9,6 +9,9 @@ import com.example.doglens.data.repository.FavoriteRepository
 import com.example.doglens.data.repository.RecognitionRepository
 import com.example.doglens.utils.TimeUtils
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,27 +47,48 @@ class HistoryViewModel(
 
     // Toàn bộ lịch sử đã ghép với Dog + trạng thái yêu thích
     private var allItems: List<RecognitionHistoryItem> = emptyList()
+    private var refreshJob: Job? = null
+    private val pendingFavorites = mutableMapOf<String, FavoriteChange>()
+    private data class FavoriteChange(val saved: Boolean)
+    private val pendingDeletes = mutableSetOf<String>()
+    private var mutationRevision = 0
+    private var clearingHistory = false
 
     // Gọi mỗi lần vào màn (kể cả quay lại từ màn Kết quả) để cập nhật tim yêu thích
     fun refresh() {
-        viewModelScope.launch {
+        if (refreshJob?.isActive == true) return
+        val revision = mutationRevision
+        _state.update { it.copy(loading = true) }
+        refreshJob = viewModelScope.launch {
             try {
-                allItems = loadItems()
+                val loaded = loadItems()
+                if (revision == mutationRevision) allItems = loaded
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 _state.update { it.copy(error = "Không tải được lịch sử nhận diện.") }
             }
+            _state.update { it.copy(loading = false) }
             publish()
         }
     }
 
     // Ghép RecognitionResult -> Dog (dogId) và FavoriteDog (dogId)
-    private suspend fun loadItems(): List<RecognitionHistoryItem> {
-        val dogsById = dogRepository.getDogs().associateBy { it.id }
-        val favoriteDogIds = favoriteRepository.getFavoriteItems().map { it.dog.id }.toSet()
-
-        return recognitionRepository.getHistory()
+    private suspend fun loadItems(): List<RecognitionHistoryItem> = coroutineScope {
+        val dogs = async { dogRepository.getDogs().associateBy { it.id } }
+        val favorites = async {
+            try {
+                favoriteRepository.getFavoriteDogIds()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                allItems.filter { it.isFavorite }.map { it.dog.id }.toSet()
+            }
+        }
+        val history = recognitionRepository.getHistory()
+        val dogsById = dogs.await()
+        val favoriteDogIds = favorites.await()
+        history
             .sortedByDescending { TimeUtils.parseIso(it.recognizedAt) }
             .mapNotNull { result ->
                 val dog = dogsById[result.dogId] ?: return@mapNotNull null
@@ -86,31 +110,62 @@ class HistoryViewModel(
     }
 
     fun toggleFavorite(item: RecognitionHistoryItem) {
-        updateHistory("Không lưu được giống chó yêu thích.") {
-            if (item.isFavorite) favoriteRepository.removeFavorite(item.dog.id)
-            else favoriteRepository.addFavorite(item.dog.id)
-
-            // 1 giống có thể xuất hiện nhiều lần trong lịch sử -> cập nhật hết
-            allItems = allItems.map {
-                if (it.dog.id == item.dog.id) it.copy(isFavorite = !item.isFavorite) else it
+        val id = item.dog.id
+        val saved = !item.isFavorite
+        val change = FavoriteChange(saved)
+        pendingFavorites[id] = change
+        publish()
+        viewModelScope.launch {
+            try {
+                if (saved) favoriteRepository.addFavorite(id) else favoriteRepository.removeFavorite(id)
+                mutationRevision++
+                allItems = allItems.map { if (it.dog.id == id) it.copy(isFavorite = saved) else it }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                if (pendingFavorites[id] === change) {
+                    _state.update { it.copy(error = "Không cập nhật được giống chó yêu thích.") }
+                }
+            } finally {
+                if (pendingFavorites[id] === change) pendingFavorites.remove(id)
+                publish()
             }
-            publish()
         }
     }
 
     fun delete(item: RecognitionHistoryItem) {
-        updateHistory("Không xóa được kết quả nhận diện.") {
-            recognitionRepository.delete(item.result.id)
-            allItems = allItems.filterNot { it.result.id == item.result.id }
-            publish()
+        val id = item.result.id
+        if (!pendingDeletes.add(id)) return
+        publish()
+        viewModelScope.launch {
+            try {
+                recognitionRepository.delete(id)
+                mutationRevision++
+                allItems = allItems.filterNot { it.result.id == id }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.update { it.copy(error = "Không xóa được kết quả nhận diện.") }
+            } finally {
+                pendingDeletes.remove(id)
+                publish()
+            }
         }
     }
 
     fun clearAll() {
+        if (clearingHistory) return
+        clearingHistory = true
+        publish()
         updateHistory("Không xóa được toàn bộ lịch sử. Hãy kiểm tra và thử lại.") {
-            recognitionRepository.clearHistory()
-            allItems = emptyList()
-            publish()
+            try {
+                recognitionRepository.clearHistory()
+                mutationRevision++
+                allItems = emptyList()
+            } finally {
+                clearingHistory = false
+                publish()
+            }
         }
     }
 
@@ -141,16 +196,18 @@ class HistoryViewModel(
         }
         val keyword = current.query.lowercase()
 
-        val filtered = allItems.filter { item ->
+        val visibleItems = (if (clearingHistory) emptyList() else allItems).asSequence().filterNot { it.result.id in pendingDeletes }
+            .map { item -> pendingFavorites[item.dog.id]?.let { item.copy(isFavorite = it.saved) } ?: item }.toList()
+        val filtered = visibleItems.filter { item ->
             val time = TimeUtils.parseIso(item.result.recognizedAt)
             time >= minTime && (keyword.isEmpty() || item.dog.name.lowercase().contains(keyword))
         }
 
         val rows = mutableListOf<HistoryRow>()
         filtered
-            .groupBy { TimeUtils.startOfDay(TimeUtils.parseIso(it.result.recognizedAt)) } // giữ thứ tự mới -> cũ
+            .groupBy { TimeUtils.parseIso(it.result.recognizedAt).takeIf { time -> time > 0 }?.let(TimeUtils::startOfDay) }
             .forEach { (dayStart, items) ->
-                rows += HistoryRow.Header(TimeUtils.dayLabel(dayStart), items.size)
+                rows += HistoryRow.Header(dayStart?.let(TimeUtils::dayLabel) ?: "Chưa rõ ngày", items.size)
                 items.forEach { item ->
                     rows += HistoryRow.Entry(
                         item = item,
@@ -159,7 +216,7 @@ class HistoryViewModel(
                 }
             }
 
-        _state.value = current.copy(loading = false, rows = rows, totalCount = allItems.size)
+        _state.value = current.copy(rows = rows, totalCount = visibleItems.size)
     }
 
     companion object {

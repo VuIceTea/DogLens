@@ -13,10 +13,11 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.File
 
 internal class FirestoreRecognitionRepository(
@@ -77,7 +78,8 @@ internal class FirestoreRecognitionRepository(
 
     override suspend fun getHistory(): List<RecognitionResult> {
         val history = account.collection("recognitions") ?: return emptyList()
-        val documents = history.orderBy("createdAt", Query.Direction.DESCENDING).get().await().documents
+        val snapshot = withTimeoutOrNull(3_000) { history.get().await() } ?: history.get(Source.CACHE).await()
+        val documents = snapshot.documents
         if (documents.isEmpty()) return emptyList()
         val byId = dogs.getDogs().associateBy { it.id }
         return documents.map { it.toResult(byId[it.string("dogId")]) }
@@ -119,8 +121,15 @@ internal class FirestoreRecognitionRepository(
             dog?.localImageRes != null -> "android.resource://${context.packageName}/${dog.localImageRes}"
             else -> ""
         }
+        val storedTime = get("createdAt", DocumentSnapshot.ServerTimestampBehavior.ESTIMATE)
+        val recordedAt = when (storedTime) {
+            is com.google.firebase.Timestamp -> storedTime.toDate().time
+            is String -> TimeUtils.parseIso(storedTime)
+            else -> null
+        }?.takeIf { it > 0 }
+            ?: photo.lastModified().takeIf { it > 0 }
         return RecognitionResult(id, uid, string("dogId"), int("confidence") ?: 0, image,
-            TimeUtils.toIso(getTimestamp("createdAt")?.toDate()?.time ?: 0L))
+            recordedAt?.let(TimeUtils::toIso).orEmpty())
     }
 
     private fun photoFile(uid: String, id: String): File {

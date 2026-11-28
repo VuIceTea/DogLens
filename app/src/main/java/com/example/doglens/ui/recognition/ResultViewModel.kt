@@ -13,6 +13,8 @@ import com.example.doglens.data.repository.DogRepository
 import com.example.doglens.data.repository.FavoriteRepository
 import com.example.doglens.data.repository.RecognitionRepository
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,12 +44,16 @@ class ResultViewModel(
 
     private var loadedId: String? = null
     private var favoriteUpdating = false
+    private var favoriteVersion = 0
+    private var favoriteObserver: Job? = null
+    private var loadJob: Job? = null
 
-    fun load(recognitionId: String) {
-        if (loadedId == recognitionId) return
+    fun load(recognitionId: String, refresh: Boolean = false) {
+        if (loadJob?.isActive == true || (!refresh && loadedId == recognitionId)) return
         loadedId = recognitionId
+        _state.value = ResultUiState.Loading
 
-        viewModelScope.launch {
+        loadJob = viewModelScope.launch {
             try {
                 val recognition = recognitionRepository.getById(recognitionId)
                 val dog = recognition?.let { dogRepository.getDogById(it.dogId) }
@@ -72,8 +78,20 @@ class ResultViewModel(
                     dog = dog,
                     traits = traits,
                     relatedDogs = relatedDogs,
-                    isFavorite = favoriteRepository.isFavorite(dog.id)
+                    isFavorite = false
                 )
+                favoriteObserver?.cancel()
+                favoriteObserver = viewModelScope.launch {
+                    favoriteRepository.observeFavorite(dog.id)
+                        .catch { if (it is CancellationException) throw it }
+                        .collect { favorite ->
+                            val current = _state.value as? ResultUiState.Content ?: return@collect
+                            if (current.dog.id == dog.id && (!favoriteUpdating || current.isFavorite == favorite.saved)) {
+                                favoriteUpdating = false
+                                _state.value = current.copy(isFavorite = favorite.saved)
+                            }
+                        }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -86,17 +104,21 @@ class ResultViewModel(
         val current = _state.value as? ResultUiState.Content ?: return
         if (favoriteUpdating) return
         favoriteUpdating = true
+        val version = ++favoriteVersion
+        _state.value = current.copy(isFavorite = !current.isFavorite, favoriteError = false)
         viewModelScope.launch {
             try {
                 if (current.isFavorite) favoriteRepository.removeFavorite(current.dog.id)
                 else favoriteRepository.addFavorite(current.dog.id)
-                _state.value = current.copy(isFavorite = !current.isFavorite, favoriteError = false)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                _state.value = current.copy(favoriteError = true)
+                val latest = _state.value as? ResultUiState.Content
+                if (version == favoriteVersion && latest?.recognition?.id == current.recognition.id) {
+                    _state.value = latest.copy(isFavorite = current.isFavorite, favoriteError = true)
+                }
             } finally {
-                favoriteUpdating = false
+                if (version == favoriteVersion) favoriteUpdating = false
             }
         }
     }

@@ -14,6 +14,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.content.FileProvider
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import com.example.doglens.ui.camera.ImagePreviewFragment
 import com.bumptech.glide.Glide
 import com.example.doglens.MainActivity
 import com.example.doglens.R
@@ -169,9 +170,10 @@ class RecognitionErrorFragment : Fragment(R.layout.fragment_recognition_error) {
         }
     }
 
-    // Có ảnh mới -> thay màn Lỗi bằng màn Đang nhận diện
     private fun retry(uri: Uri) {
-        (requireActivity() as MainActivity).replaceScreen(RecognitionFragment.newInstance(uri))
+        (requireActivity() as MainActivity).replaceScreen(
+            ImagePreviewFragment.newInstance(uri), R.color.recognition_background
+        )
     }
 
     companion object {

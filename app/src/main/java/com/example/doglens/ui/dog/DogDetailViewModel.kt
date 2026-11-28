@@ -58,6 +58,7 @@ class DogDetailViewModel(
 
     fun load(dogId: String, retry: Boolean = false) {
         if (!retry && loadedDogId == dogId) return
+        if (retry) dogRepository.invalidateCatalog()
         loadJob?.cancel()
         loadedDogId = dogId
         val cached = dogRepository.cachedDog(dogId)

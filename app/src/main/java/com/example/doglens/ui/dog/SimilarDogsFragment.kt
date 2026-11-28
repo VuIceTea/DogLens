@@ -18,6 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.doglens.utils.loadBreedPhoto
 import com.example.doglens.MainActivity
 import com.example.doglens.R
@@ -63,9 +64,12 @@ class SimilarDogsFragment : Fragment(R.layout.fragment_similar_dogs) {
 
     private fun loadData(view: View) {
         val dogId = requireArguments().getString(ARG_DOG_ID).orEmpty()
+        val refresh = view.findViewById<SwipeRefreshLayout>(R.id.similarRefresh)
+        refresh.setOnRefreshListener { viewModel.load(dogId, refresh = true) }
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collect { state ->
+                    if (!state.isLoading) refresh.isRefreshing = false
                     view.findViewById<ProgressBar>(R.id.progressLoading).visibility =
                         if (state.isLoading) View.VISIBLE else View.GONE
                     state.sourceDog?.let { source ->

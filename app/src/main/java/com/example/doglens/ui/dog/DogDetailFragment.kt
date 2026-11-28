@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.doOnLayout
+import androidx.core.widget.NestedScrollView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.doglens.MainActivity
 import com.example.doglens.R
 import com.example.doglens.data.model.*
@@ -42,7 +44,8 @@ class DogDetailFragment : Fragment() {
     private lateinit var favoriteBottom: TextView
     private lateinit var similarButton: LinearLayout
     private lateinit var body: LinearLayout
-    private lateinit var scroll: ScrollView
+    private lateinit var scroll: NestedScrollView
+    private lateinit var refresh: SwipeRefreshLayout
     private lateinit var footer: LinearLayout
     private lateinit var loadingIndicator: ProgressBar
     private lateinit var loadStatus: TextView
@@ -69,7 +72,11 @@ class DogDetailFragment : Fragment() {
                 viewModel.state.collect { state ->
                     val hasContent = state is DogDetailUiState.Content
                     scroll.visibility = if (hasContent) View.VISIBLE else View.GONE
+                    refresh.visibility = scroll.visibility
                     footer.visibility = scroll.visibility
+                    if (state != DogDetailUiState.Loading && (state as? DogDetailUiState.Content)?.detailsLoading != true) {
+                        refresh.isRefreshing = false
+                    }
                     loadingIndicator.visibility = if (state == DogDetailUiState.Loading) View.VISIBLE else View.GONE
                     loadStatus.visibility = if (hasContent) View.GONE else View.VISIBLE
                     loadStatus.isClickable = state == DogDetailUiState.Error
@@ -92,20 +99,17 @@ class DogDetailFragment : Fragment() {
                                 renderScores(state.dog)
                             }
                             if (previous?.dog != state.dog || previous?.images != state.images) renderGallery(state.dog)
-                            if (previous?.dogTraits != state.dogTraits || previous?.traits != state.traits) {
-                                renderTraits(state.traits, state.dogTraits)
+                            if (previous?.dog != state.dog || previous?.dogTraits != state.dogTraits || previous?.traits != state.traits) {
+                                renderTraits(state.dog, state.traits, state.dogTraits)
                             }
                             if (previous?.dogCareTips != state.dogCareTips || previous?.careTips != state.careTips) {
-                                renderCare(state.careTips, state.dogCareTips)
+                                renderCare(state.dog, state.careTips, state.dogCareTips)
                             }
                             renderedContent = state
                             detailsStatus.visibility = if (state.detailsLoading || state.detailsError) View.VISIBLE else View.GONE
                             detailsStatus.isClickable = !state.detailsLoading && state.detailsError
                             detailsStatus.text = if (state.detailsLoading) "Đang tải thêm thông tin…" else "Một số thông tin chưa tải được. Thử lại"
                             updateFavorite()
-                            if (state.favoritePending) {
-                                favoriteBottom.text = if (state.isFavorite) "Đã lưu · Chờ đồng bộ" else "Đã bỏ lưu · Chờ đồng bộ"
-                            }
                         }
                     }
                 }
@@ -155,7 +159,7 @@ class DogDetailFragment : Fragment() {
         })
         loadStatus = loadStatusView()
         root.addView(loadStatus)
-        scroll = ScrollView(requireContext()).apply {
+        scroll = NestedScrollView(requireContext()).apply {
             overScrollMode = View.OVER_SCROLL_NEVER
             visibility = View.GONE
         }
@@ -241,7 +245,12 @@ class DogDetailFragment : Fragment() {
         careScroll.addView(careBox)
         body.addView(careScroll)
         scroll.addView(body)
-        root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
+        refresh = SwipeRefreshLayout(requireContext()).apply {
+            visibility = View.GONE
+            addView(scroll, ViewGroup.LayoutParams(-1, -1))
+            setOnRefreshListener { viewModel.load(dogId, retry = true) }
+        }
+        root.addView(refresh, LinearLayout.LayoutParams(-1, 0, 1f))
 
         footer = LinearLayout(requireContext()).apply {
             visibility = View.GONE
@@ -401,17 +410,27 @@ class DogDetailFragment : Fragment() {
         }
     }
 
-    private fun renderTraits(all: List<Trait>, links: List<DogTrait>) {
+    private fun renderTraits(dog: Dog, all: List<Trait>, links: List<DogTrait>) {
         val box = body.findViewWithTag<LinearLayout>("traits")
         box.removeAllViews()
-        val visibility = if (links.isEmpty()) View.GONE else View.VISIBLE
+        val matched = links.mapNotNull { link -> all.firstOrNull { it.id == link.traitId }?.let { it to link } }
+        val facts = matched.ifEmpty {
+            buildList {
+                if (dog.id == "flat_coated_retriever") {
+                    add(Trait("friendly", "Thân thiện", "smile") to DogTrait(
+                        dog.id, "friendly", "Giống chó thân thiện, vui vẻ và tự tin theo tiêu chuẩn giống."
+                    ))
+                }
+                dog.coatColors?.takeIf { it.isNotBlank() }?.let { coat ->
+                    add(Trait("coat", "Màu lông", "leaf") to DogTrait(dog.id, "coat", coat))
+                }
+            }
+        }
+        val visibility = if (facts.isEmpty()) View.GONE else View.VISIBLE
         body.findViewWithTag<View>("traitsHeading").visibility = visibility
         body.findViewWithTag<View>("traitsScroll").visibility = visibility
         val colors = listOf("#EAF4FF", "#F4EEFF", "#FFF0F3", "#EAF9F1")
-        links.mapNotNull { link ->
-            all.firstOrNull { it.id == link.traitId }?.let { Pair(it, link) }
-        }
-            .forEachIndexed { i, pair ->
+        facts.forEachIndexed { i, pair ->
                 val trait = pair.first;
                 val link = pair.second
                 val tile = LinearLayout(requireContext()).apply {
@@ -501,16 +520,26 @@ class DogDetailFragment : Fragment() {
         })
     }
 
-    private fun renderCare(all: List<CareTip>, links: List<DogCareTip>) {
+    private fun renderCare(dog: Dog, all: List<CareTip>, links: List<DogCareTip>) {
         val box = body.findViewWithTag<LinearLayout>("care")
         box.removeAllViews()
-        val visibility = if (links.isEmpty()) View.GONE else View.VISIBLE
-        body.findViewWithTag<View>("careHeading").visibility = visibility
-        body.findViewWithTag<View>("careScroll").visibility = visibility
-        links.mapNotNull { link ->
+        val matched = links.mapNotNull { link ->
             all.firstOrNull { it.id == link.careTipId }?.let { Pair(it, link) }
         }
-            .forEach { pair ->
+        body.findViewWithTag<TextView>("careHeading").apply {
+            visibility = View.VISIBLE
+            text = if (matched.isEmpty()) "Chăm sóc chung" else "Chăm sóc"
+        }
+        body.findViewWithTag<View>("careScroll").visibility = View.VISIBLE
+        val tips = matched.ifEmpty {
+            listOf(
+                CareTip("grooming", "Chải lông", "brush", "#EAF4FF") to
+                    DogCareTip(dog.id, "grooming", "Chọn lịch chải và dụng cụ phù hợp với bộ lông."),
+                CareTip("exercise", "Vận động", "run", "#FFF2DB") to
+                    DogCareTip(dog.id, "exercise", "Điều chỉnh vận động theo tuổi, sức khỏe và nhu cầu của từng con.")
+            )
+        }
+        tips.forEach { pair ->
                 val tip = pair.first;
                 val link = pair.second
                 val tile = LinearLayout(requireContext()).apply {
@@ -629,7 +658,7 @@ class DogDetailFragment : Fragment() {
         )
         val button = favoriteBottom as com.google.android.material.button.MaterialButton
         if (favorite) {
-            button.text = "Đã lưu yêu thích"
+            button.text = "Đã lưu vào yêu thích"
             button.backgroundTintList =
                 android.content.res.ColorStateList.valueOf(Color.parseColor("#1684F8"))
             button.setTextColor(Color.WHITE)

@@ -208,4 +208,8 @@ DogLens/
 
 ## 👨‍💻 Author
 
-**Nguyen Phi Vu** · [GitHub @VuIceTea](https://github.com/VuIceTea) · [LinkedIn](https://www.linkedin.com/in/phi-vu-nguyen-8a18a5371/)
+**Nguyen Phi Vu** - *Fullstack Developer*
+
+- 🐙 GitHub: [@VuIceTea](https://github.com/VuIceTea)
+- 💼 LinkedIn: [Nguyen Phi Vu](https://www.linkedin.com/in/phi-vu-nguyen-8a18a5371/)
+- 🌐 Portfolio: [**https://vuicetea.github.io/**](https://vuicetea.github.io/)

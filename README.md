@@ -17,7 +17,7 @@ An Android app for identifying dog breeds, exploring breed profiles and articles
 
 ## App screenshots
 
-Captured from a local DogLens build on an Android emulator. Account details and private images are obscured where they appear. Click a screenshot to open it at full size.
+Captured from a local DogLens build on an Android emulator. Click a screenshot to open it at full size.
 
 ### Home and breed discovery
 
@@ -74,15 +74,6 @@ Captured from a local DogLens build on an Android emulator. Account details and 
 | Checkout confirmation |
 | --- |
 | <a href="screenshots/premium-confirmation.webp"><img src="screenshots/premium-confirmation.webp" alt="Checkout confirmation" width="216"></a> |
-
-The Dachshund demo photo is by Karo98765, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) and shown resized/cropped in the app. [Wikimedia Commons photo](https://commons.wikimedia.org/wiki/File:Dackel_Stanard_Rot.jpg)
-
-## Verification notes
-
-- The emulator demo recognized the sample gallery photo as Dachshund and showed the rejection screen for a camera image without a dog. These are examples of the flow.
-- Breed search, similar breeds, adding and removing a favorite, article browsing and bookmarks, reading history, notifications, profile and settings were exercised in the app.
-- Premium plan selection and checkout confirmation were visible. The emulator reported a payment-service connection error. Full VNPAY payment, email delivery, and external sign-in provider flows were not verified.
-- The community shortcut and legal pages are placeholders in this build.
 
 ## Tech stack
 

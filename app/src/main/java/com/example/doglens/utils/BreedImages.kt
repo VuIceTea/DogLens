@@ -3,6 +3,7 @@ package com.example.doglens.utils
 import android.graphics.BitmapFactory
 import android.widget.ImageView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.doglens.R
 import com.example.doglens.data.model.Dog
 import java.util.concurrent.ConcurrentHashMap
@@ -33,7 +34,10 @@ internal fun ImageView.loadBreedPhoto(url: String?, local: Int?, bundled: Int = 
     }
     val glide = Glide.with(this)
     val request = glide.load(model).centerCrop().placeholder(placeholder).error(fallback)
-    if (model is String && commonsThumbnail.matches(model)) {
+    if (hasBundledPhoto) {
+        // Bundled photos can change in an app update while keeping the same resource ID.
+        request.diskCacheStrategy(DiskCacheStrategy.NONE)
+    } else if (model is String && commonsThumbnail.matches(model)) {
         val smallerPhoto = model.replace(thumbnailWidth, "/500px-")
         if (smallerPhoto != model) {
             request.error(glide.load(smallerPhoto).centerCrop().error(fallback))

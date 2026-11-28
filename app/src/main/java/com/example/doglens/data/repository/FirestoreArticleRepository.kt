@@ -72,7 +72,8 @@ internal class FirestoreArticleRepository(
     override suspend fun getSections(articleId: String) =
         readPublished(catalog.db.collection("articleSections").whereEqualTo("articleId", articleId), "articleSections", {
             ArticleSection(it.id, articleId, it.int("sortIndex") ?: 0, it.string("heading"),
-                it.string("body"), it.getString("imageUrl"))
+                it.string("body").let { body -> if (articleId.startsWith("breed_")) body.cleanBreedCopy() else body },
+                it.getString("imageUrl"))
         }, { row ->
             ArticleSection(row.getString("id"), articleId, row.optInt("sortIndex"),
                 row.getString("heading"), row.getString("body"), row.optString("imageUrl").ifBlank { null })
@@ -126,9 +127,13 @@ internal class FirestoreArticleRepository(
         else reference.delete().await()
     }
 
-    private fun DocumentSnapshot.toArticle() = Article(
-        id, string("categoryId"), string("title"), string("summary"), getString("imageUrl"),
-        imageResource(), string("publishedAt"), int("readMinutes") ?: 0, int("viewCount") ?: 0,
-        sources(), getString("breedId")
-    )
+    private fun DocumentSnapshot.toArticle(): Article {
+        val breedId = getString("breedId")
+        val summary = string("summary")
+        return Article(
+            id, string("categoryId"), string("title"), if (breedId != null) summary.cleanBreedCopy() else summary,
+            getString("imageUrl"), imageResource(), string("publishedAt"),
+            int("readMinutes") ?: 0, int("viewCount") ?: 0, sources(), breedId
+        )
+    }
 }

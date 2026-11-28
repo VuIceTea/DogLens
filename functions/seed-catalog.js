@@ -6,7 +6,7 @@ const catalog = require("./seed-catalog.json");
 const verifiedBreeds = require("./verified-breeds.json");
 const editorialArticles = require("./editorial-articles.json");
 const { worldwideBreedDocuments } = require("./worldwide-breeds");
-const { breedGuideDocuments, editorialBreedDocuments } = require("./breed-guides");
+const { breedGuideDocuments, editorialBreedDocuments, legacyBreedGuideDocuments } = require("./breed-guides");
 const modelBreeds = require("../app/src/main/assets/recognition/breed-catalog.json");
 const modelMetadata = require("../app/src/main/assets/recognition/model-metadata.json");
 const fciGroups = "https://www.fci.be/en/nomenclature/";
@@ -250,11 +250,14 @@ async function main() {
   const baseDogs = base.filter(([key]) => key.startsWith("dogs/"));
   const worldwide = worldwideBreedDocuments(new Set(baseDogs.map(([key]) => key.slice(5))));
   const guides = options.includes("--breed-guides");
+  const allDogs = [...baseDogs, ...worldwide];
   const rows = options.includes("--worldwide") ? worldwide
-    : guides ? [...editorialBreedDocuments(), ...breedGuideDocuments([...baseDogs, ...worldwide])]
+    : guides ? [...editorialBreedDocuments(allDogs), ...breedGuideDocuments(allDogs)]
     : base;
   const write = options.includes("--write");
-  const legacyRows = options.includes("--verified") ? new Map(documents(true)) : guides ? new Map() : null;
+  const legacyRows = options.includes("--verified") ? new Map(documents(true)) : guides
+    ? new Map([...editorialBreedDocuments(allDogs, true), ...legacyBreedGuideDocuments(allDogs)])
+    : null;
   const totals = { created: 0, updated: 0, conflicts: 0 };
   const cli = process.env.DOG_LENS_FIREBASE_CLI_PACKAGE;
   for (let offset = 0; offset < rows.length; offset += 300) {
@@ -267,6 +270,8 @@ async function main() {
   const { created, updated, conflicts } = totals;
   console.log(`${projectId} (${write ? "committed" : "dry run"}): ${created} new, ${updated} updated, ${conflicts} edited fields preserved.`);
 }
+
+module.exports = { documents };
 
 if (require.main === module) {
   main().catch((error) => {

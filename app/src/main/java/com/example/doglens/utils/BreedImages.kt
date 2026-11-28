@@ -8,6 +8,10 @@ import com.example.doglens.data.model.Dog
 import java.util.concurrent.ConcurrentHashMap
 
 private val usablePhotoResources = ConcurrentHashMap<Int, Boolean>()
+private val commonsThumbnail = Regex(
+    "^https://(?:thumb|upload)\\.wikimedia\\.org/wikipedia/commons/thumb/[^?#]+/\\d+px-[^/?#]+$"
+)
+private val thumbnailWidth = Regex("/\\d+px-")
 
 internal fun ImageView.loadBreedPhoto(dog: Dog) {
     val bundled = resources.getIdentifier("breed_photo_${dog.id}", "drawable", context.packageName)
@@ -27,8 +31,13 @@ internal fun ImageView.loadBreedPhoto(url: String?, local: Int?, bundled: Int = 
         !url.isNullOrBlank() -> url
         else -> fallback
     }
-    Glide.with(this).load(model).centerCrop()
-        .placeholder(placeholder)
-        .error(fallback)
-        .into(this)
+    val glide = Glide.with(this)
+    val request = glide.load(model).centerCrop().placeholder(placeholder).error(fallback)
+    if (model is String && commonsThumbnail.matches(model)) {
+        val smallerPhoto = model.replace(thumbnailWidth, "/500px-")
+        if (smallerPhoto != model) {
+            request.error(glide.load(smallerPhoto).centerCrop().error(fallback))
+        }
+    }
+    request.into(this)
 }

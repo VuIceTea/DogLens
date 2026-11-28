@@ -121,8 +121,10 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
             tocRow.addView(TextView(requireContext()).apply {
                 text = "${index + 1}.  ${section.heading}"
                 textSize = 14f
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                minHeight = dp(38)
                 setTextColor(Color.parseColor("#667895"))
-            }, LinearLayout.LayoutParams(0, dp(38), 1f).apply {
+            }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 gravity = android.view.Gravity.CENTER_VERTICAL
             })
             tocRow.addView(ImageView(requireContext()).apply {
@@ -132,7 +134,7 @@ class ArticleDetailFragment : Fragment(R.layout.fragment_article_detail) {
             }, LinearLayout.LayoutParams(dp(30), dp(30)))
             toc.addView(tocRow, LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                dp(48)
+                LinearLayout.LayoutParams.WRAP_CONTENT
             ))
         }
     }

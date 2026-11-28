@@ -52,10 +52,16 @@ internal fun DocumentSnapshot.sources(): Map<String, String> =
         if (label is String && url is String && url.startsWith("https://")) label to url else null
     }.toMap()
 
+internal fun String.cleanBreedCopy(): String = replace(" (danh mục FCI)", "")
+    .replace(" trong danh mục FCI", "")
+    .replace("Xuất xứ theo nguồn tham khảo: ", "Xuất xứ: ")
+    .replace("FCI phân loại ba cỡ và ba kiểu lông.", "Giống này có ba cỡ và ba kiểu lông.")
+    .trim()
+
 internal fun DocumentSnapshot.toDog() = Dog(
     id = id,
     name = string("name"),
-    description = getString("catalogNote") ?: string("description"),
+    description = (getString("catalogNote") ?: string("description")).cleanBreedCopy(),
     imageUrl = getString("imageUrl"),
     localImageRes = imageResource() ?: R.drawable.ic_detail_paw.takeIf {
         reference.parent.id == "dogs" && getString("imageUrl").isNullOrBlank()
@@ -67,7 +73,7 @@ internal fun DocumentSnapshot.toDog() = Dog(
     maxWeightKg = int("maxWeightKg"),
     minHeightCm = int("minHeightCm"),
     maxHeightCm = int("maxHeightCm"),
-    origin = getString("origin"),
+    origin = getString("origin")?.cleanBreedCopy(),
     minLifespanYears = int("minLifespanYears"),
     maxLifespanYears = int("maxLifespanYears"),
     coatColors = getString("coatColors"),
@@ -75,7 +81,7 @@ internal fun DocumentSnapshot.toDog() = Dog(
     kidsScore = int("kidsScore"),
     trainingScore = int("trainingScore"),
     apartmentScore = int("apartmentScore"),
-    summary = getString("catalogNote") ?: getString("summary"),
+    summary = (getString("catalogNote") ?: getString("summary"))?.cleanBreedCopy(),
     rating = (get("rating") as? Number)?.toDouble(),
     favoriteCount = int("favoriteCount"),
     exploreDogIds = stringList("dogIds"),
@@ -87,5 +93,5 @@ internal fun DocumentSnapshot.toDog() = Dog(
     lifespanReference = getString("lifespanReference"),
     sources = sources(),
     searchAliases = stringList("searchAliases"),
-    longDescription = getString("longDescription")
+    longDescription = getString("longDescription")?.cleanBreedCopy()
 )
